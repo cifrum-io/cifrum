@@ -1,0 +1,25 @@
+*.pyc
+__pycache__
+target
+.DS_Store
+.coverage
+user
+.project
+.pydevproject
+ve*
+*~
+.*~
+*.iml
+.idea
+out
+
+# generated pdoc documentation
+api-doc
+
+# Ignoring cram test error
+src/cmdlinetest/test_help.t.err
+
+# sphinx doc artefacts
+docs/_build/
+docs/_static/
+docs/_templates/
