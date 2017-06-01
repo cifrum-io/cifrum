@@ -1,17 +1,19 @@
 import pandas as pd
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
+import os
+import quandl
 from yapo import Settings
 
 
 class Asset:
-    def __init__(self, namespace, name, url):
+    def __init__(self, namespace, name, values):
         self.namespace = namespace
         self.name = name
-        self.url = url
+        self.values = values
 
     def values(self):
-        return pd.read_csv(self.url, sep='\t')
+        return self.values()
 
 
 class AssetsSource:
@@ -30,7 +32,11 @@ class SingleItemAssetsSource(AssetsSource):
         self._name = name
 
     def get_assets(self):
-        return [Asset(self.namespace, self._name, self._rostsber_url + self._path)]
+        url = self._rostsber_url + self._path
+        return [Asset(namespace=self.namespace,
+                      name=self._name,
+                      values=lambda: pd.read_csv(url, sep='\t'))
+                ]
 
 
 class MicexStocksAssetsSource(AssetsSource):
@@ -45,7 +51,7 @@ class MicexStocksAssetsSource(AssetsSource):
             secid = row['SECID']
             asset = Asset(namespace=self.namespace,
                           name=secid,
-                          url=self.url_base + secid + '.csv')
+                          values=lambda: pd.read_csv(self.url_base + secid + '.csv', sep='\t'))
             assets.append(asset)
         return assets
 
@@ -59,28 +65,42 @@ class NluAssetsSource(AssetsSource):
     def get_assets(self):
         assets = []
         for (idx, row) in self.index.iterrows():
+            url = '{}/{}'.format(self.url_base, row['id'])
             asset = Asset(namespace=self.namespace,
-                          name=row['id'],
-                          url=self.url_base)
+                          name=str(row['id']),
+                          values=lambda: pd.read_csv(url, sep='\t'))
             assets.append(asset)
         return assets
 
 
 class AssetsRegistry(object):
+    quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
+
     def __init__(self, asset_sources):
         self.assets = []
         for asset_source in asset_sources:
             self.assets += asset_source.get_assets()
 
     def get(self, namespace, name):
-        result = list(filter(
-            lambda asset: asset.namespace == namespace and asset.name == name,
-            self.assets
-        ))
-        if len(result) != 1:
-            raise Exception('ticker {}/{} is not found'.format(namespace, name))
+        if namespace == 'quandl':
+            def extract_values():
+                df = quandl.get('EOD/{}'.format(name), collapse='monthly')
+                df_res = pd.DataFrame()
+                df_res['close'] = df['Adj_Close']
+                df_res['date'] = df_res.index
+                return df_res
 
-        return result[0]
+            asset = Asset(namespace=namespace, name=name, values=extract_values)
+            return asset
+        else:
+            result = list(filter(
+                lambda ast: ast.namespace == namespace and ast.name == name,
+                self.assets
+            ))
+            if len(result) != 1:
+                raise Exception('ticker {}/{} is not found'.format(namespace, name))
+
+            return result[0]
 
 
 class AssetSourceContainer(containers.DeclarativeContainer):
