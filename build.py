@@ -10,6 +10,7 @@ use_plugin("python.pycharm")
 
 
 name = "yapo"
+version = "0.1.0.dev"
 default_task = "publish"
 
 
