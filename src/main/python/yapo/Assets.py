@@ -151,5 +151,6 @@ def info(tickers: str):
     tickers_info = []
     for ticker in tickers_arr:
         ticker_namespace, ticker_name = ticker.split('/')
-        tickers_info.append(AssetSourceContainer.assets_registry().get(ticker_namespace, ticker_name))
+        asset = AssetSourceContainer.assets_registry().get(ticker_namespace, ticker_name)
+        tickers_info.append(asset)
     return tickers_info
