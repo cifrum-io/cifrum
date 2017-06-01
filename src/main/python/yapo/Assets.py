@@ -1,8 +1,8 @@
 import pandas as pd
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
+from yapo import Settings
 
-rostsber_url = 'http://rostsber.ru/api/data/'
 
 class Asset:
     def __init__(self, namespace, name, url):
@@ -25,7 +25,7 @@ class AssetsSource:
 class SingleItemAssetsSource(AssetsSource):
     def __init__(self, path, namespace, name):
         super().__init__(namespace)
-        self._rostsber_url = rostsber_url
+        self._rostsber_url = Settings.rostsber_url
         self._path = path
         self._name = name
 
@@ -36,7 +36,7 @@ class SingleItemAssetsSource(AssetsSource):
 class MicexStocksAssetsSource(AssetsSource):
     def __init__(self):
         super().__init__('micex')
-        self.url_base = rostsber_url + 'moex/stock_etf/'
+        self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
         self.index = pd.read_csv(self.url_base + 'stocks_list.csv', sep='\t')
 
     def get_assets(self):
@@ -53,7 +53,7 @@ class MicexStocksAssetsSource(AssetsSource):
 class NluAssetsSource(AssetsSource):
     def __init__(self):
         super().__init__('nlu')
-        self.url_base = rostsber_url + 'mut_rus/'
+        self.url_base = Settings.rostsber_url + 'mut_rus/'
         self.index = pd.read_csv(self.url_base + 'mut_rus.csv', sep='\t')
 
     def get_assets(self):
