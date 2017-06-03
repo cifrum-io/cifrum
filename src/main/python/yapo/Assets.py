@@ -3,14 +3,31 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 import os
 import quandl
+from yapo.Enums import Currency, SecurityType, Period
 from yapo import Settings
 
 
 class Asset:
-    def __init__(self, namespace, ticker, values):
+    def __init__(self, namespace, ticker, values,
+                 isin=None,
+                 short_name=None,
+                 long_name=None,
+                 exchange=None,
+                 currency=None,
+                 security_type=None,
+                 period=None,
+                 adjusted_close=None):
         self.namespace = namespace
         self.ticker = ticker
         self.values = values
+        self.isin = isin
+        self.short_name = short_name
+        self.long_name = long_name
+        self.exchange = exchange
+        self.currency = currency
+        self.security_type = security_type
+        self.period = period
+        self.adjusted_close = adjusted_close
 
     def values(self):
         return self.values()
@@ -50,7 +67,15 @@ class MicexStocksAssetsSource(AssetsSource):
             secid = row['SECID']
             asset = Asset(namespace=self.namespace,
                           ticker=secid,
-                          values=lambda: pd.read_csv(self.url_base + secid + '.csv', sep='\t'))
+                          values=lambda: pd.read_csv(self.url_base + secid + '.csv', sep='\t'),
+                          exchange='MICEX',
+                          short_name=row['SHORTNAME'],
+                          long_name=row['NAME'],
+                          isin=row['ISIN'],
+                          currency=Currency.RUB,
+                          security_type=SecurityType.STOCK_ETF,
+                          period=Period.DAY,
+                          adjusted_close=True)
             assets.append(asset)
         return assets
 

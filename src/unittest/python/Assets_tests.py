@@ -1,9 +1,23 @@
 import unittest
 
 import yapo.Assets
+from yapo.Enums import Currency, SecurityType, Period
 
 
 class AssetsTest(unittest.TestCase):
+
+    def test_micex_stocks_should_have_correct_fields(self):
+        info = yapo.Assets.info('micex/SBER')
+        self.assertEqual(info.namespace, 'micex')
+        self.assertEqual(info.ticker, 'SBER')
+        self.assertEqual(info.isin, 'RU0009029540')
+        self.assertEqual(info.short_name, 'Сбербанк')
+        self.assertEqual(info.long_name, 'Сбербанк России ПАО ао')
+        self.assertEqual(info.exchange, 'MICEX')
+        self.assertEqual(info.currency, Currency.RUB)
+        self.assertEqual(info.security_type, SecurityType.STOCK_ETF)
+        self.assertEqual(info.period, Period.DAY)
+        self.assertEqual(info.adjusted_close, True)
 
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
