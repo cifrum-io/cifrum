@@ -7,9 +7,9 @@ from yapo import Settings
 
 
 class Asset:
-    def __init__(self, namespace, name, values):
+    def __init__(self, namespace, ticker, values):
         self.namespace = namespace
-        self.name = name
+        self.ticker = ticker
         self.values = values
 
     def values(self):
@@ -25,16 +25,15 @@ class AssetsSource:
 
 
 class SingleItemAssetsSource(AssetsSource):
-    def __init__(self, path, namespace, name):
+    def __init__(self, path, namespace, ticker):
         super().__init__(namespace)
-        self._rostsber_url = Settings.rostsber_url
-        self._path = path
-        self._name = name
+        self.path = path
+        self.ticker = ticker
 
     def get_assets(self):
-        url = self._rostsber_url + self._path
+        url = Settings.rostsber_url + self.path
         return [Asset(namespace=self.namespace,
-                      name=self._name,
+                      ticker=self.ticker,
                       values=lambda: pd.read_csv(url, sep='\t'))
                 ]
 
@@ -50,7 +49,7 @@ class MicexStocksAssetsSource(AssetsSource):
         for (idx, row) in self.index.iterrows():
             secid = row['SECID']
             asset = Asset(namespace=self.namespace,
-                          name=secid,
+                          ticker=secid,
                           values=lambda: pd.read_csv(self.url_base + secid + '.csv', sep='\t'))
             assets.append(asset)
         return assets
@@ -67,7 +66,7 @@ class NluAssetsSource(AssetsSource):
         for (idx, row) in self.index.iterrows():
             url = '{}/{}'.format(self.url_base, row['id'])
             asset = Asset(namespace=self.namespace,
-                          name=str(row['id']),
+                          ticker=str(row['id']),
                           values=lambda: pd.read_csv(url, sep='\t'))
             assets.append(asset)
         return assets
@@ -81,24 +80,24 @@ class AssetsRegistry(object):
         for asset_source in asset_sources:
             self.assets += asset_source.get_assets()
 
-    def get(self, namespace, name):
+    def get(self, namespace, ticker):
         if namespace == 'quandl':
             def extract_values():
-                df = quandl.get('EOD/{}'.format(name), collapse='monthly')
+                df = quandl.get('EOD/{}'.format(ticker), collapse='monthly')
                 df_res = pd.DataFrame()
                 df_res['close'] = df['Adj_Close']
                 df_res['date'] = df_res.index
                 return df_res
 
-            asset = Asset(namespace=namespace, name=name, values=extract_values)
+            asset = Asset(namespace=namespace, ticker=ticker, values=extract_values)
             return asset
         else:
             result = list(filter(
-                lambda ast: ast.namespace == namespace and ast.name == name,
+                lambda ast: ast.namespace == namespace and ast.ticker == ticker,
                 self.assets
             ))
             if len(result) != 1:
-                raise Exception('ticker {}/{} is not found'.format(namespace, name))
+                raise Exception('ticker {}/{} is not found'.format(namespace, ticker))
 
             return result[0]
 
@@ -107,22 +106,22 @@ class AssetSourceContainer(containers.DeclarativeContainer):
     currency_usd_rub_source = providers.Singleton(SingleItemAssetsSource,
                                                   path='currency/USD-RUB.csv',
                                                   namespace='cbr',
-                                                  name='USD')
+                                                  ticker='USD')
 
     inflation_ru_source = providers.Singleton(SingleItemAssetsSource,
                                               path='inflation_ru/data.csv',
                                               namespace='infl',
-                                              name='RU')
+                                              ticker='RU')
 
     inflation_eu_source = providers.Singleton(SingleItemAssetsSource,
                                               path='inflation_eu/data.csv',
                                               namespace='infl',
-                                              name='EU')
+                                              ticker='EU')
 
     micex_mcftr_source = providers.Singleton(SingleItemAssetsSource,
                                              path='moex/mcftr/data.csv',
                                              namespace='micex',
-                                             name='MCFTR')
+                                             ticker='MCFTR')
 
     micex_stocks_source = providers.Singleton(MicexStocksAssetsSource)
 
@@ -139,18 +138,18 @@ class AssetSourceContainer(containers.DeclarativeContainer):
                                           ])
 
 
-def info(tickers: str):
+def info(ids: str):
     """
     Fetches ticker info based on internal ID. The info includes ISIN, short and long names,
     exchange, currency, etc.
 
-    :param tickers: a string that contains list of tickers separated by comma
+    :param ids: a string that contains list of RostSber IDs separated by comma
     :returns: list of tickers info
     """
-    tickers_arr = [s.strip() for s in tickers.split(',')]
+    ids_arr = [s.strip() for s in ids.split(',')]
     tickers_info = []
-    for ticker in tickers_arr:
-        ticker_namespace, ticker_name = ticker.split('/')
-        asset = AssetSourceContainer.assets_registry().get(ticker_namespace, ticker_name)
+    for id_str in ids_arr:
+        ticker_namespace, ticker = id_str.split('/')
+        asset = AssetSourceContainer.assets_registry().get(ticker_namespace, ticker)
         tickers_info.append(asset)
     return tickers_info
