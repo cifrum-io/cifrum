@@ -144,7 +144,8 @@ def info(ids: str):
     exchange, currency, etc.
 
     :param ids: a string that contains list of RostSber IDs separated by comma
-    :returns: list of tickers info
+    :returns: - list of tickers info if 2 or more IDs are provided
+              - ticker info if single ID is provided
     """
     ids_arr = [s.strip() for s in ids.split(',')]
     tickers_info = []
@@ -152,4 +153,5 @@ def info(ids: str):
         ticker_namespace, ticker = id_str.split('/')
         asset = AssetSourceContainer.assets_registry().get(ticker_namespace, ticker)
         tickers_info.append(asset)
+    tickers_info = tickers_info[0] if len(tickers_info) == 1 else tickers_info
     return tickers_info
