@@ -42,17 +42,34 @@ class AssetsSource:
 
 
 class SingleItemAssetsSource(AssetsSource):
-    def __init__(self, path, namespace, ticker):
+    def __init__(self, path, namespace, ticker,
+                 isin=None,
+                 short_name=None,
+                 long_name=None,
+                 exchange=None,
+                 currency=None,
+                 security_type=None,
+                 period=None,
+                 adjusted_close=None):
         super().__init__(namespace)
         self.path = path
         self.ticker = ticker
 
-    def get_assets(self):
         url = Settings.rostsber_url + self.path
-        return [Asset(namespace=self.namespace,
-                      ticker=self.ticker,
-                      values=lambda: pd.read_csv(url, sep='\t'))
-                ]
+        self.asset = Asset(namespace=self.namespace,
+                           ticker=self.ticker,
+                           values=lambda: pd.read_csv(url, sep='\t'),
+                           isin=isin,
+                           short_name=short_name,
+                           long_name=long_name,
+                           exchange=exchange,
+                           currency=currency,
+                           security_type=security_type,
+                           period=period,
+                           adjusted_close=adjusted_close)
+
+    def get_assets(self):
+        return [self.asset]
 
 
 class MicexStocksAssetsSource(AssetsSource):
@@ -128,15 +145,29 @@ class AssetsRegistry(object):
 
 
 class AssetSourceContainer(containers.DeclarativeContainer):
-    currency_usd_rub_source = providers.Singleton(SingleItemAssetsSource,
-                                                  path='currency/USD-RUB.csv',
-                                                  namespace='cbr',
-                                                  ticker='USD')
+    currency_usd_rub_source = providers.Singleton(
+        SingleItemAssetsSource,
+        namespace='cbr',
+        ticker='USD',
+        path='currency/USD-RUB.csv',
+        short_name='Доллар США',
+        currency=Currency.USD,
+        security_type=SecurityType.CURRENCY,
+        period=Period.DAY,
+        adjusted_close=True
+    )
 
-    inflation_ru_source = providers.Singleton(SingleItemAssetsSource,
-                                              path='inflation_ru/data.csv',
-                                              namespace='infl',
-                                              ticker='RU')
+    inflation_ru_source = providers.Singleton(
+        SingleItemAssetsSource,
+        namespace='infl',
+        ticker='RU',
+        path='inflation_ru/data.csv',
+        short_name='Инфляция РФ',
+        currency=Currency.RUB,
+        security_type=SecurityType.INFLATION,
+        period=Period.MONTH,
+        adjusted_close=False
+    )
 
     inflation_eu_source = providers.Singleton(SingleItemAssetsSource,
                                               path='inflation_eu/data.csv',

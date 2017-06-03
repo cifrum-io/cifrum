@@ -19,6 +19,32 @@ class AssetsTest(unittest.TestCase):
         self.assertEqual(info.period, Period.DAY)
         self.assertEqual(info.adjusted_close, True)
 
+    def test_currency_usd__should_have_correct_fields(self):
+        info = yapo.Assets.info('cbr/USD')
+        self.assertEqual(info.namespace, 'cbr')
+        self.assertEqual(info.ticker, 'USD')
+        self.assertIsNone(info.isin)
+        self.assertEqual(info.short_name, 'Доллар США')
+        self.assertIsNone(info.long_name)
+        self.assertIsNone(info.exchange)
+        self.assertEqual(info.currency, Currency.USD)
+        self.assertEqual(info.security_type, SecurityType.CURRENCY)
+        self.assertEqual(info.period, Period.DAY)
+        self.assertEqual(info.adjusted_close, True)
+
+    def test_inflation_ru__should_have_correct_fields(self):
+        info = yapo.Assets.info('infl/RU')
+        self.assertEqual(info.namespace, 'infl')
+        self.assertEqual(info.ticker, 'RU')
+        self.assertIsNone(info.isin)
+        self.assertEqual(info.short_name, 'Инфляция РФ')
+        self.assertIsNone(info.long_name)
+        self.assertIsNone(info.exchange)
+        self.assertEqual(info.currency, Currency.RUB)
+        self.assertEqual(info.security_type, SecurityType.INFLATION)
+        self.assertEqual(info.period, Period.MONTH)
+        self.assertEqual(info.adjusted_close, False)
+
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
         infos = yapo.Assets.info(', '.join(ids_arr))
