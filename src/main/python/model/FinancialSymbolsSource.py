@@ -131,7 +131,7 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
-        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])
         self.index['date_end'] = pd.to_datetime(self.index['date_end'])
 
@@ -143,32 +143,33 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         return df_new
 
     def fetch_financial_symbol(self, name: str):
-        for _, row in self.index.iterrows():
-            if row['name'] == name:
-                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                         values=lambda start_period, end_period:
-                                             self.__extract_values(name, start_period, end_period),
-                                         exchange='MICEX',
-                                         start_period=row['date_start'],
-                                         end_period=row['date_end'],
-                                         short_name=row['short_name'],
-                                         long_name=row['long_name'],
-                                         isin=row['isin'],
-                                         currency=Currency.RUB,
-                                         security_type=SecurityType.STOCK_ETF,
-                                         period=Period.DAY,
-                                         adjusted_close=True)
-                return symbol
-        return None
+        if name not in self.index.index:
+            return None
+        row = self.index.loc[name]
+        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
+                                 values=lambda start_period, end_period:
+                                     self.__extract_values(name, start_period, end_period),
+                                 exchange='MICEX',
+                                 start_period=row['date_start'],
+                                 end_period=row['date_end'],
+                                 short_name=row['short_name'],
+                                 long_name=row['long_name'],
+                                 isin=row['isin'],
+                                 currency=Currency.RUB,
+                                 security_type=SecurityType.STOCK_ETF,
+                                 period=Period.DAY,
+                                 adjusted_close=True)
+        return symbol
 
     def get_all_infos(self):
-        def finsym_format(row):
+        infos = []
+        for idx, row in self.index.iterrows():
             fin_sym_info = FinancialSymbolInfo(
-                fin_sym_id=FinancialSymbolId(self.namespace, row['name']),
+                fin_sym_id=FinancialSymbolId(self.namespace, idx),
                 short_name=row['short_name']
             )
-            return fin_sym_info
-        return list(self.index.apply(finsym_format, axis=1).values)
+            infos.append(fin_sym_info)
+        return infos
 
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
