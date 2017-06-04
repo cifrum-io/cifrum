@@ -7,7 +7,7 @@ from yapo.Enums import Currency, SecurityType, Period
 class AssetsTest(unittest.TestCase):
 
     def test_micex_stocks_should_have_correct_fields(self):
-        info = FSym.info('micex/SBER')
+        info = FSym.information('micex/SBER')
         self.assertEqual(info.namespace, 'micex')
         self.assertEqual(info.ticker, 'SBER')
         self.assertEqual(info.isin, 'RU0009029540')
@@ -20,7 +20,7 @@ class AssetsTest(unittest.TestCase):
         self.assertEqual(info.adjusted_close, True)
 
     def test_currency_usd__should_have_correct_fields(self):
-        info = FSym.info('cbr/USD')
+        info = FSym.information('cbr/USD')
         self.assertEqual(info.namespace, 'cbr')
         self.assertEqual(info.ticker, 'USD')
         self.assertIsNone(info.isin)
@@ -33,7 +33,7 @@ class AssetsTest(unittest.TestCase):
         self.assertEqual(info.adjusted_close, True)
 
     def test_inflation_ru__should_have_correct_fields(self):
-        info = FSym.info('infl/RU')
+        info = FSym.information('infl/RU')
         self.assertEqual(info.namespace, 'infl')
         self.assertEqual(info.ticker, 'RU')
         self.assertIsNone(info.isin)
@@ -47,15 +47,15 @@ class AssetsTest(unittest.TestCase):
 
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
-        infos = FSym.info(', '.join(ids_arr))
+        infos = FSym.information(', '.join(ids_arr))
         self.assertEqual(len(infos), len(ids_arr))
 
     def test_be_invariant_in_respect_to_space_separators(self):
-        infos1 = FSym.info('infl/RU, infl/EU')
-        infos2 = FSym.info('    infl/RU    ,      infl/EU      ')
+        infos1 = FSym.information('infl/RU, infl/EU')
+        infos2 = FSym.information('    infl/RU    ,      infl/EU      ')
         self.assertCountEqual(infos1, infos2)
 
     def test_be_invariant_in_respect_to_order(self):
-        infos1 = FSym.info('infl/RU, infl/EU')
-        infos2 = FSym.info('infl/EU, infl/RU')
+        infos1 = FSym.information('infl/RU, infl/EU')
+        infos2 = FSym.information('infl/EU, infl/RU')
         self.assertCountEqual(infos1, infos2)
