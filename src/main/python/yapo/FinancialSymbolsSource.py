@@ -112,10 +112,9 @@ class FinancialSymbolsRegistry(object):
             symbol = FSim.FinancialSymbol(namespace=namespace, ticker=ticker, values=extract_values)
             return symbol
         else:
-            result = list(filter(
-                lambda ast: ast.namespace == namespace and ast.ticker == ticker,
-                self.symbols
-            ))
+            result = [
+                ast for ast in self.symbols if ast.namespace == namespace and ast.ticker == ticker
+            ]
             if len(result) != 1:
                 raise Exception('ticker {}/{} is not found'.format(namespace, ticker))
 
