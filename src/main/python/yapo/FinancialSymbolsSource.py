@@ -82,7 +82,12 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
             url = '{}/{}'.format(self.url_base, row['id'])
             symbol = FSim.FinancialSymbol(namespace=self.namespace,
                                           ticker=str(row['id']),
-                                          values=lambda: pd.read_csv(url, sep='\t'))
+                                          values=lambda: pd.read_csv(url, sep='\t'),
+                                          short_name=row['ПИФ'],
+                                          currency=Currency.RUB,
+                                          security_type=SecurityType.MUT,
+                                          period=Period.DAY,
+                                          adjusted_close=True)
             symbols.append(symbol)
         return symbols
 
