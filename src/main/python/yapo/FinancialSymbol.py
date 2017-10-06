@@ -43,6 +43,18 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         adjusted_close=True
     )
 
+    currency_eur_rub_source = providers.Singleton(
+        SingleFinancialSymbolSource,
+        namespace='cbr',
+        ticker='EUR',
+        path='currency/EUR-RUB.csv',
+        short_name='Евро',
+        currency=Currency.EUR,
+        security_type=SecurityType.CURRENCY,
+        period=Period.DAY,
+        adjusted_close=True
+    )
+
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
@@ -55,10 +67,41 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         adjusted_close=False
     )
 
-    inflation_eu_source = providers.Singleton(SingleFinancialSymbolSource,
-                                              path='inflation_eu/data.csv',
-                                              namespace='infl',
-                                              ticker='EU')
+    inflation_eu_source = providers.Singleton(
+        SingleFinancialSymbolSource,
+        namespace='infl',
+        ticker='EU',
+        path='inflation_eu/data.csv',
+        short_name='Инфляция ЕС',
+        currency=Currency.EUR,
+        security_type=SecurityType.INFLATION,
+        period=Period.MONTH,
+        adjusted_close=False
+    )
+
+    inflation_us_source = providers.Singleton(
+        SingleFinancialSymbolSource,
+        namespace='infl',
+        ticker='US',
+        path='inflation_us/data.csv',
+        short_name='Инфляция США',
+        currency=Currency.USD,
+        security_type=SecurityType.INFLATION,
+        period=Period.MONTH,
+        adjusted_close=False
+    )
+
+    cbr_top_rates_source = providers.Singleton(
+        SingleFinancialSymbolSource,
+        namespace='cbr',
+        ticker='TOP_rates',
+        path='cbr_deposit_rate/data.csv',
+        long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях) ',
+        currency=Currency.RUB,
+        security_type=SecurityType.RATES,
+        period=Period.DECADE,
+        adjusted_close=False
+    )
 
     micex_mcftr_source = providers.Singleton(SingleFinancialSymbolSource,
                                              path='moex/mcftr/data.csv',
@@ -72,8 +115,11 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     financial_symbols_registry = providers.Singleton(FinancialSymbolsRegistry,
                                                      symbol_sources=[
                                                          currency_usd_rub_source(),
+                                                         currency_eur_rub_source(),
+                                                         cbr_top_rates_source(),
                                                          inflation_ru_source(),
                                                          inflation_eu_source(),
+                                                         inflation_us_source(),
                                                          micex_mcftr_source(),
                                                          micex_stocks_source(),
                                                          nlu_muts_source(),

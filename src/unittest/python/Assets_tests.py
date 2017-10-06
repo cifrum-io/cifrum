@@ -45,6 +45,19 @@ class AssetsTest(unittest.TestCase):
         self.assertEqual(info.period, Period.MONTH)
         self.assertEqual(info.adjusted_close, False)
 
+    def test_all_data_should_be_available(self):
+        self.assertIsNotNone(FSym.information('quandl/MSFT'))
+        self.assertIsNotNone(FSym.information('micex/SBER'))
+        self.assertIsNotNone(FSym.information('micex/SBERP'))
+        self.assertIsNotNone(FSym.information('micex/MCFTR'))
+        self.assertIsNotNone(FSym.information('nlu/419'))
+        self.assertIsNotNone(FSym.information('cbr/USD'))
+        self.assertIsNotNone(FSym.information('cbr/EUR'))
+        self.assertIsNotNone(FSym.information('infl/RU'))
+        self.assertIsNotNone(FSym.information('infl/US'))
+        self.assertIsNotNone(FSym.information('infl/EU'))
+        self.assertIsNotNone(FSym.information('cbr/TOP_rates'))
+
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
         infos = FSym.information(', '.join(ids_arr))

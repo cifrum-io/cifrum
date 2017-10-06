@@ -4,6 +4,7 @@ from enum import Enum, auto
 class Currency(Enum):
     RUB = auto()
     USD = auto()
+    EUR = auto()
 
 
 class SecurityType(Enum):
