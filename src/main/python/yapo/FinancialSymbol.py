@@ -104,9 +104,15 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     )
 
     micex_mcftr_source = providers.Singleton(SingleFinancialSymbolSource,
-                                             path='moex/mcftr/data.csv',
                                              namespace='micex',
-                                             ticker='MCFTR')
+                                             ticker='MCFTR',
+                                             path='moex/mcftr/data.csv',
+                                             short_name='MICEX Total Return',
+                                             currency=Currency.RUB,
+                                             security_type=SecurityType.INDEX,
+                                             period=Period.DAY,
+                                             adjusted_close=False
+                                             )
 
     micex_stocks_source = providers.Singleton(MicexStocksFinancialSymbolsSource)
 
