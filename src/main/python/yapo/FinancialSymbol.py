@@ -2,6 +2,7 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
 from yapo.FinancialSymbolsSource import *
+from pprint import pformat
 
 
 class FinancialSymbol:
@@ -28,6 +29,9 @@ class FinancialSymbol:
 
     def values(self):
         return self.values()
+
+    def __repr__(self):
+        return pformat(vars(self))
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
