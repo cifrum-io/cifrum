@@ -100,17 +100,28 @@ class FinancialSymbolsRegistry(object):
         for symbol_source in symbol_sources:
             self.symbols += symbol_source.get_financial_symbols()
 
+    @staticmethod
+    def _handle_quandl(namespace, ticker):
+        def extract_values():
+            df = quandl.get('EOD/{}'.format(ticker), collapse='monthly')
+            df_res = pd.DataFrame()
+            df_res['close'] = df['Adj_Close']
+            df_res['date'] = df_res.index
+            return df_res
+
+        symbol = FSim.FinancialSymbol(namespace=namespace,
+                                      ticker=ticker,
+                                      values=extract_values,
+                                      exchange='NASDAQ',
+                                      currency=Currency.USD,
+                                      security_type=SecurityType.STOCK_ETF,
+                                      period=Period.DAY,
+                                      adjusted_close=True)
+        return symbol
+
     def get(self, namespace, ticker):
         if namespace == 'quandl':
-            def extract_values():
-                df = quandl.get('EOD/{}'.format(ticker), collapse='monthly')
-                df_res = pd.DataFrame()
-                df_res['close'] = df['Adj_Close']
-                df_res['date'] = df_res.index
-                return df_res
-
-            symbol = FSim.FinancialSymbol(namespace=namespace, ticker=ticker, values=extract_values)
-            return symbol
+            return self._handle_quandl(namespace=namespace, ticker=ticker)
         else:
             result = [
                 ast for ast in self.symbols if ast.namespace == namespace and ast.ticker == ticker
