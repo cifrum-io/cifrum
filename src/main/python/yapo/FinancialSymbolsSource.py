@@ -126,7 +126,11 @@ class FinancialSymbolsRegistry(object):
             result = [
                 ast for ast in self.symbols if ast.namespace == namespace and ast.ticker == ticker
             ]
-            if len(result) != 1:
-                raise Exception('ticker {}/{} is not found'.format(namespace, ticker))
-
-            return result[0]
+            result_count = len(result)
+            if result_count == 1:
+                return result[0]
+            elif len(result) == 0:
+                return None
+            else:
+                raise Exception('Something went wrong. Two or more tickers are found for {}/{}. '
+                                'Please, submit the issue'.format(namespace, ticker))

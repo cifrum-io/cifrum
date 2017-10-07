@@ -58,6 +58,15 @@ class AssetsTest(unittest.TestCase):
         self.assertIsNotNone(FSym.information('infl/EU'))
         self.assertIsNotNone(FSym.information('cbr/TOP_rates'))
 
+    def test_return_none_if_no_ticker_is_found(self):
+        not_existing_id = 'micex/MCFTR_doesntexist'
+
+        self.assertIsNone(FSym.information(not_existing_id))
+
+        infos = FSym.information('infl/RU, {}'.format(not_existing_id))
+        self.assertIsNotNone(infos[0])
+        self.assertIsNone(infos[1])
+
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
         infos = FSym.information(', '.join(ids_arr))
