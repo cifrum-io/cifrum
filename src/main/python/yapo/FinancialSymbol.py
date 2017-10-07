@@ -123,18 +123,20 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
 
     nlu_muts_source = providers.Singleton(NluFinancialSymbolsSource)
 
-    financial_symbols_registry = providers.Singleton(FinancialSymbolsRegistry,
-                                                     symbol_sources=[
-                                                         currency_usd_rub_source(),
-                                                         currency_eur_rub_source(),
-                                                         cbr_top_rates_source(),
-                                                         inflation_ru_source(),
-                                                         inflation_eu_source(),
-                                                         inflation_us_source(),
-                                                         micex_mcftr_source(),
-                                                         micex_stocks_source(),
-                                                         nlu_muts_source(),
-                                                     ])
+    financial_symbols_registry = providers.Singleton(
+        FinancialSymbolsRegistry,
+        symbol_sources=[
+            currency_usd_rub_source(),
+            currency_eur_rub_source(),
+            cbr_top_rates_source(),
+            inflation_ru_source(),
+            inflation_eu_source(),
+            inflation_us_source(),
+            micex_mcftr_source(),
+            micex_stocks_source(),
+            nlu_muts_source(),
+        ]
+    )
 
 
 def information(ids: str):
