@@ -3,6 +3,7 @@ import os
 import quandl
 from yapo.Enums import Currency, SecurityType, Period
 from yapo import Settings, FinancialSymbol as FSim
+from pprint import pformat
 
 
 class FinancialSymbolsSource:
@@ -11,6 +12,9 @@ class FinancialSymbolsSource:
 
     def get_financial_symbols(self):
         raise Exception('should not be called')
+
+    def __repr__(self):
+        return pformat(vars(self))
 
 
 class SingleFinancialSymbolSource(FinancialSymbolsSource):
