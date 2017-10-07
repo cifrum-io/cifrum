@@ -3,6 +3,7 @@ import os
 import quandl
 from yapo.Enums import Currency, SecurityType, Period
 from yapo import Settings, FinancialSymbol as FSim
+from itertools import groupby
 from pprint import pformat
 
 
@@ -100,9 +101,11 @@ class FinancialSymbolsRegistry(object):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
     def __init__(self, symbol_sources):
-        self.symbols = []
-        for symbol_source in symbol_sources:
-            self.symbols += symbol_source.get_financial_symbols()
+        def symbol_source_key(x): return x.namespace
+        symbol_sources = sorted(symbol_sources, key=symbol_source_key)
+        self.symbol_sources = {}
+        for k, v in groupby(symbol_sources, key=symbol_source_key):
+            self.symbol_sources.update({k: list(v)})
 
     @staticmethod
     def _handle_quandl(namespace, ticker):
@@ -127,14 +130,21 @@ class FinancialSymbolsRegistry(object):
         if namespace == 'quandl':
             return self._handle_quandl(namespace=namespace, ticker=ticker)
         else:
-            result = [
-                ast for ast in self.symbols if ast.namespace == namespace and ast.ticker == ticker
-            ]
-            result_count = len(result)
-            if result_count == 1:
-                return result[0]
-            elif len(result) == 0:
-                return None
+            if namespace in self.symbol_sources.keys():
+                result = []
+                for symbol_source in self.symbol_sources.get(namespace):
+                    for sym in symbol_source.get_financial_symbols():
+                        if sym.ticker == ticker:
+                            result.append(sym)
+                            break
+                result_count = len(result)
+                if result_count == 1:
+                    return result[0]
+                elif result_count == 0:
+                    return None
+                else:
+                    raise Exception('Something went wrong. {} tickers are found for {}/{}. '
+                                    'Please, submit the issue'
+                                    .format(result_count, namespace, ticker))
             else:
-                raise Exception('Something went wrong. Two or more tickers are found for {}/{}. '
-                                'Please, submit the issue'.format(namespace, ticker))
+                return None
