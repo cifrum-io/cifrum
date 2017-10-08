@@ -1,8 +1,8 @@
 import pandas as pd
 import os
 import quandl
-from yapo.Enums import Currency, SecurityType, Period
-from yapo import Settings, FinancialSymbol as FSim
+from .Enums import Currency, SecurityType, Period
+from . import Settings, FinancialSymbol as FSim
 from itertools import groupby
 from pprint import pformat
 
