@@ -1,4 +1,4 @@
-from model.FinancialSymbol import FinancialSymbolsSourceContainer
+from model.FinancialSymbolsSourceContainer import *
 
 
 def information(ids: str):
