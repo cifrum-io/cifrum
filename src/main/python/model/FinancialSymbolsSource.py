@@ -14,7 +14,7 @@ class FinancialSymbolsSource:
     def __init__(self, namespace):
         self.namespace = namespace
 
-    def get_financial_symbols(self):
+    def fetch_financial_symbol(self, ticker: str):
         raise Exception('should not be called')
 
     def __repr__(self):
@@ -48,8 +48,8 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                                                 period=period,
                                                 adjusted_close=adjusted_close)
 
-    def get_financial_symbols(self):
-        return [self.financial_symbol]
+    def fetch_financial_symbol(self, ticker: str):
+        return self.financial_symbol if ticker == self.ticker else None
 
 
 class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
@@ -58,24 +58,24 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
         self.index = pd.read_csv(self.url_base + 'stocks_list.csv', sep='\t')
 
-    def get_financial_symbols(self):
-        symbols = []
-        for (idx, row) in self.index.iterrows():
+    def fetch_financial_symbol(self, ticker: str):
+        for _, row in self.index.iterrows():
             secid = row['SECID']
-            symbol = FinancialSymbol(namespace=self.namespace,
-                                     ticker=secid,
-                                     values=lambda: pd.read_csv(self.url_base + secid + '.csv',
-                                                                sep='\t'),
-                                     exchange='MICEX',
-                                     short_name=row['SHORTNAME'],
-                                     long_name=row['NAME'],
-                                     isin=row['ISIN'],
-                                     currency=Currency.RUB,
-                                     security_type=SecurityType.STOCK_ETF,
-                                     period=Period.DAY,
-                                     adjusted_close=True)
-            symbols.append(symbol)
-        return symbols
+            if secid == ticker:
+                symbol = FinancialSymbol(namespace=self.namespace,
+                                         ticker=secid,
+                                         values=lambda: pd.read_csv(self.url_base + secid + '.csv',
+                                                                    sep='\t'),
+                                         exchange='MICEX',
+                                         short_name=row['SHORTNAME'],
+                                         long_name=row['NAME'],
+                                         isin=row['ISIN'],
+                                         currency=Currency.RUB,
+                                         security_type=SecurityType.STOCK_ETF,
+                                         period=Period.DAY,
+                                         adjusted_close=True)
+                return symbol
+        return None
 
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
@@ -84,20 +84,21 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         self.url_base = Settings.rostsber_url + 'mut_rus/'
         self.index = pd.read_csv(self.url_base + 'mut_rus.csv', sep='\t')
 
-    def get_financial_symbols(self):
-        symbols = []
-        for (idx, row) in self.index.iterrows():
-            url = '{}/{}'.format(self.url_base, row['id'])
-            symbol = FinancialSymbol(namespace=self.namespace,
-                                     ticker=str(row['id']),
-                                     values=lambda: pd.read_csv(url, sep='\t'),
-                                     short_name=row['ПИФ'],
-                                     currency=Currency.RUB,
-                                     security_type=SecurityType.MUT,
-                                     period=Period.DAY,
-                                     adjusted_close=True)
-            symbols.append(symbol)
-        return symbols
+    def fetch_financial_symbol(self, ticker: str):
+        for _, row in self.index.iterrows():
+            row_id = str(row['id'])
+            if row_id == ticker:
+                url = '{}/{}'.format(self.url_base, row_id)
+                symbol = FinancialSymbol(namespace=self.namespace,
+                                         ticker=row_id,
+                                         values=lambda: pd.read_csv(url, sep='\t'),
+                                         short_name=row['ПИФ'],
+                                         currency=Currency.RUB,
+                                         security_type=SecurityType.MUT,
+                                         period=Period.DAY,
+                                         adjusted_close=True)
+                return symbol
+        return None
 
 
 class FinancialSymbolsRegistry(object):
@@ -136,10 +137,9 @@ class FinancialSymbolsRegistry(object):
             if namespace in self.symbol_sources.keys():
                 result = []
                 for symbol_source in self.symbol_sources.get(namespace):
-                    for sym in symbol_source.get_financial_symbols():
-                        if sym.ticker == ticker:
-                            result.append(sym)
-                            break
+                    fin_symbol = symbol_source.fetch_financial_symbol(ticker)
+                    if fin_symbol:
+                        result.append(fin_symbol)
                 result_count = len(result)
                 if result_count == 1:
                     return result[0]
