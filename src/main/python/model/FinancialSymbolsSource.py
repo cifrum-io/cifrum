@@ -1,10 +1,13 @@
-import pandas as pd
 import os
-import quandl
-from .Enums import Currency, SecurityType, Period
-from . import Settings, FinancialSymbol as FSim
 from itertools import groupby
 from pprint import pformat
+
+import pandas as pd
+import quandl
+
+from . import Settings
+from .Enums import Currency, SecurityType, Period
+from .FinancialSymbol import FinancialSymbol
 
 
 class FinancialSymbolsSource:
@@ -33,17 +36,17 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
         self.ticker = ticker
 
         url = Settings.rostsber_url + self.path
-        self.financial_symbol = FSim.FinancialSymbol(namespace=self.namespace,
-                                                     ticker=self.ticker,
-                                                     values=lambda: pd.read_csv(url, sep='\t'),
-                                                     isin=isin,
-                                                     short_name=short_name,
-                                                     long_name=long_name,
-                                                     exchange=exchange,
-                                                     currency=currency,
-                                                     security_type=security_type,
-                                                     period=period,
-                                                     adjusted_close=adjusted_close)
+        self.financial_symbol = FinancialSymbol(namespace=self.namespace,
+                                                ticker=self.ticker,
+                                                values=lambda: pd.read_csv(url, sep='\t'),
+                                                isin=isin,
+                                                short_name=short_name,
+                                                long_name=long_name,
+                                                exchange=exchange,
+                                                currency=currency,
+                                                security_type=security_type,
+                                                period=period,
+                                                adjusted_close=adjusted_close)
 
     def get_financial_symbols(self):
         return [self.financial_symbol]
@@ -59,18 +62,18 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         symbols = []
         for (idx, row) in self.index.iterrows():
             secid = row['SECID']
-            symbol = FSim.FinancialSymbol(namespace=self.namespace,
-                                          ticker=secid,
-                                          values=lambda: pd.read_csv(self.url_base + secid + '.csv',
-                                                                     sep='\t'),
-                                          exchange='MICEX',
-                                          short_name=row['SHORTNAME'],
-                                          long_name=row['NAME'],
-                                          isin=row['ISIN'],
-                                          currency=Currency.RUB,
-                                          security_type=SecurityType.STOCK_ETF,
-                                          period=Period.DAY,
-                                          adjusted_close=True)
+            symbol = FinancialSymbol(namespace=self.namespace,
+                                     ticker=secid,
+                                     values=lambda: pd.read_csv(self.url_base + secid + '.csv',
+                                                                sep='\t'),
+                                     exchange='MICEX',
+                                     short_name=row['SHORTNAME'],
+                                     long_name=row['NAME'],
+                                     isin=row['ISIN'],
+                                     currency=Currency.RUB,
+                                     security_type=SecurityType.STOCK_ETF,
+                                     period=Period.DAY,
+                                     adjusted_close=True)
             symbols.append(symbol)
         return symbols
 
@@ -85,14 +88,14 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         symbols = []
         for (idx, row) in self.index.iterrows():
             url = '{}/{}'.format(self.url_base, row['id'])
-            symbol = FSim.FinancialSymbol(namespace=self.namespace,
-                                          ticker=str(row['id']),
-                                          values=lambda: pd.read_csv(url, sep='\t'),
-                                          short_name=row['ПИФ'],
-                                          currency=Currency.RUB,
-                                          security_type=SecurityType.MUT,
-                                          period=Period.DAY,
-                                          adjusted_close=True)
+            symbol = FinancialSymbol(namespace=self.namespace,
+                                     ticker=str(row['id']),
+                                     values=lambda: pd.read_csv(url, sep='\t'),
+                                     short_name=row['ПИФ'],
+                                     currency=Currency.RUB,
+                                     security_type=SecurityType.MUT,
+                                     period=Period.DAY,
+                                     adjusted_close=True)
             symbols.append(symbol)
         return symbols
 
@@ -116,14 +119,14 @@ class FinancialSymbolsRegistry(object):
             df_res['date'] = df_res.index
             return df_res
 
-        symbol = FSim.FinancialSymbol(namespace=namespace,
-                                      ticker=ticker,
-                                      values=extract_values,
-                                      exchange='NASDAQ',
-                                      currency=Currency.USD,
-                                      security_type=SecurityType.STOCK_ETF,
-                                      period=Period.DAY,
-                                      adjusted_close=True)
+        symbol = FinancialSymbol(namespace=namespace,
+                                 ticker=ticker,
+                                 values=extract_values,
+                                 exchange='NASDAQ',
+                                 currency=Currency.USD,
+                                 security_type=SecurityType.STOCK_ETF,
+                                 period=Period.DAY,
+                                 adjusted_close=True)
         return symbol
 
     def get(self, namespace, ticker):
