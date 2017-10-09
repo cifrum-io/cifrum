@@ -92,6 +92,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
 
     nlu_muts_source = providers.Singleton(NluFinancialSymbolsSource)
 
+    quandl_source = providers.Singleton(QuandlFinancialSymbolsSource)
+
     financial_symbols_registry = providers.Singleton(
         FinancialSymbolsRegistry,
         symbol_sources=[
@@ -104,5 +106,6 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
             micex_mcftr_source(),
             micex_stocks_source(),
             nlu_muts_source(),
+            quandl_source()
         ]
     )

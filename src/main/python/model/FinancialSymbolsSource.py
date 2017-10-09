@@ -101,28 +101,24 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         return None
 
 
-class FinancialSymbolsRegistry(object):
+class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
-    def __init__(self, symbol_sources):
-        def symbol_source_key(x): return x.namespace
-        symbol_sources = sorted(symbol_sources, key=symbol_source_key)
-        self.symbol_sources = {}
-        for k, v in groupby(symbol_sources, key=symbol_source_key):
-            self.symbol_sources.update({k: list(v)})
+    def __init__(self):
+        super().__init__('quandl')
 
     @staticmethod
-    def _handle_quandl(namespace, ticker):
-        def extract_values():
-            df = quandl.get('EOD/{}'.format(ticker), collapse='monthly')
-            df_res = pd.DataFrame()
-            df_res['close'] = df['Adj_Close']
-            df_res['date'] = df_res.index
-            return df_res
+    def _extract_values(ticker):
+        df = quandl.get('EOD/{}'.format(ticker), collapse='monthly')
+        df_res = pd.DataFrame()
+        df_res['close'] = df['Adj_Close']
+        df_res['date'] = df_res.index
+        return df_res
 
-        symbol = FinancialSymbol(namespace=namespace,
+    def fetch_financial_symbol(self, ticker: str):
+        symbol = FinancialSymbol(namespace=self.namespace,
                                  ticker=ticker,
-                                 values=extract_values,
+                                 values=lambda: self._extract_values(ticker),
                                  exchange='NASDAQ',
                                  currency=Currency.USD,
                                  security_type=SecurityType.STOCK_ETF,
@@ -130,24 +126,30 @@ class FinancialSymbolsRegistry(object):
                                  adjusted_close=True)
         return symbol
 
+
+class FinancialSymbolsRegistry(object):
+    def __init__(self, symbol_sources):
+        def symbol_source_key(x): return x.namespace
+        symbol_sources = sorted(symbol_sources, key=symbol_source_key)
+        self.symbol_sources = {}
+        for k, v in groupby(symbol_sources, key=symbol_source_key):
+            self.symbol_sources.update({k: list(v)})
+
     def get(self, namespace, ticker):
-        if namespace == 'quandl':
-            return self._handle_quandl(namespace=namespace, ticker=ticker)
-        else:
-            if namespace in self.symbol_sources.keys():
-                result = []
-                for symbol_source in self.symbol_sources.get(namespace):
-                    fin_symbol = symbol_source.fetch_financial_symbol(ticker)
-                    if fin_symbol:
-                        result.append(fin_symbol)
-                result_count = len(result)
-                if result_count == 1:
-                    return result[0]
-                elif result_count == 0:
-                    return None
-                else:
-                    raise Exception('Something went wrong. {} tickers are found for {}/{}. '
-                                    'Please, submit the issue'
-                                    .format(result_count, namespace, ticker))
-            else:
+        if namespace in self.symbol_sources.keys():
+            result = []
+            for symbol_source in self.symbol_sources.get(namespace):
+                fin_symbol = symbol_source.fetch_financial_symbol(ticker)
+                if fin_symbol:
+                    result.append(fin_symbol)
+            result_count = len(result)
+            if result_count == 1:
+                return result[0]
+            elif result_count == 0:
                 return None
+            else:
+                raise Exception('Something went wrong. {} tickers are found for {}/{}. '
+                                'Please, submit the issue'
+                                .format(result_count, namespace, ticker))
+        else:
+            return None
