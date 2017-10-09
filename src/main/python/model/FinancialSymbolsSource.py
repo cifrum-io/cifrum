@@ -54,7 +54,7 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
 
 class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
-        super().__init__('micex')
+        super().__init__(namespace='micex')
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
         self.index = pd.read_csv(self.url_base + 'stocks_list.csv', sep='\t')
 
@@ -80,7 +80,7 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
-        super().__init__('nlu')
+        super().__init__(namespace='nlu')
         self.url_base = Settings.rostsber_url + 'mut_rus/'
         self.index = pd.read_csv(self.url_base + 'mut_rus.csv', sep='\t')
 
@@ -105,7 +105,7 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
     def __init__(self):
-        super().__init__('quandl')
+        super().__init__(namespace='quandl')
 
     @staticmethod
     def _extract_values(ticker):

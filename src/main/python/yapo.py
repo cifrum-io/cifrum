@@ -1,4 +1,4 @@
-from model.FinancialSymbolsSourceContainer import *
+from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer as Container
 
 
 def information(ids: str):
@@ -14,7 +14,7 @@ def information(ids: str):
     tickers_info = []
     for id_str in ids_arr:
         ticker_namespace, ticker = id_str.split('/')
-        registry = FinancialSymbolsSourceContainer.financial_symbols_registry()
+        registry = Container.financial_symbols_registry()
         ticker_info = registry.get(ticker_namespace, ticker)
         tickers_info.append(ticker_info)
     tickers_info = tickers_info[0] if len(tickers_info) == 1 else tickers_info
