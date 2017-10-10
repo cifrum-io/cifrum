@@ -2,9 +2,26 @@ import unittest
 
 import yapo
 from model.Enums import Currency, SecurityType, Period
+from model.FinancialSymbol import FinancialSymbol
 
 
 class FinancialSymbolInformationTest(unittest.TestCase):
+
+    def test_different_usages_of_ids(self):
+        info = yapo.information(ids='micex/SBER')
+        self.assertIsInstance(info, FinancialSymbol)
+
+        info = yapo.information(ids=[])
+        self.assertIsInstance(info, list)
+        self.assertEqual(len(info), 0)
+
+        info = yapo.information(ids=['infl/RU'])
+        self.assertIsInstance(info, list)
+        self.assertEqual(len(info), 1)
+
+        info = yapo.information(ids=['micex/SBER', 'infl/RU'])
+        self.assertIsInstance(info, list)
+        self.assertEqual(len(info), 2)
 
     def test_micex_stocks_should_have_correct_fields(self):
         info = yapo.information('micex/SBER')

@@ -16,7 +16,6 @@ def information(ids):
         ticker_info = registry.get(ticker_namespace, ticker)
         return ticker_info
     elif isinstance(ids, list):
-        tickers_info = [information(id_str) for id_str in ids]
-        return tickers_info[0] if len(tickers_info) == 1 else tickers_info
+        return [information(id_str) for id_str in ids]
     else:
         raise Exception('Unexpected type of `ids`')
