@@ -1,4 +1,6 @@
 from pprint import pformat
+from .DataTable import DataTable
+import pandas as pd
 
 
 class FinancialSymbol:
@@ -23,8 +25,22 @@ class FinancialSymbol:
         self.period = period
         self.adjusted_close = adjusted_close
 
-    def values(self):
-        return self.values()
+    def get_table(self, start_month, end_month):
+        start_period = pd.Period(start_month, freq='M')
+        end_period = pd.Period(end_month, freq='M')
+
+        vals = self.values()
+        vals['date'] = pd.to_datetime(vals['date'])
+        vals['period'] = vals['date'].dt.to_period('M')
+        vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
+        vals = vals[vals_lastdate_indices]
+        del vals['date']
+        vals.rename(columns={'period': 'date'}, inplace=True)
+
+        vals = vals[(vals['date'] >= start_period) & (vals['date'] < end_period)]
+
+        dt = DataTable(values=vals)
+        return dt
 
     def __repr__(self):
         return pformat(vars(self))
