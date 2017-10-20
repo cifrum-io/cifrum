@@ -88,7 +88,7 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         for _, row in self.index.iterrows():
             row_id = str(row['id'])
             if row_id == ticker:
-                url = '{}/{}'.format(self.url_base, row_id)
+                url = '{}{}.csv'.format(self.url_base, row_id)
                 symbol = FinancialSymbol(namespace=self.namespace,
                                          ticker=row_id,
                                          values=lambda: pd.read_csv(url, sep='\t'),
