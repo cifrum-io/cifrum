@@ -25,9 +25,9 @@ class FinancialSymbol:
         self.period = period
         self.adjusted_close = adjusted_close
 
-    def get_table(self, start_month, end_month):
-        start_period = pd.Period(start_month, freq='M')
-        end_period = pd.Period(end_month, freq='M')
+    def get_table(self, start_period, end_period):
+        start_period = pd.Period(start_period, freq='M')
+        end_period = pd.Period(end_period, freq='M')
 
         vals = self.values()
         vals['date'] = pd.to_datetime(vals['date'])
