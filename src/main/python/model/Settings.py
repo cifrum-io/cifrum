@@ -1,1 +1,3 @@
-rostsber_url = 'http://rostsber.ru/api/data/'
+import os
+
+rostsber_url = os.environ.get('ROSTSBER_URL', 'http://rostsber.ru/api/data/')
