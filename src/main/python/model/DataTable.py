@@ -3,5 +3,5 @@ class DataTable:
         self.values = values
         self.financial_symbol = financial_symbol
 
-        self.date_min = values.index.min()
-        self.date_max = values.index.max()
+        self.period_min = values.index.min()
+        self.period_max = values.index.max()
