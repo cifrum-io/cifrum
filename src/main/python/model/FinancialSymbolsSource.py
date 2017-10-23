@@ -49,6 +49,42 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
         return self.financial_symbol if ticker == self.ticker else None
 
 
+class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
+    def __init__(self):
+        super().__init__(namespace='cbr')
+        self.short_names = {
+            Currency.RUB: 'Рубль РФ',
+            Currency.USD: 'Доллар США',
+            Currency.EUR: 'Евро',
+        }
+
+    @staticmethod
+    def __currency_values(ticker):
+        url = Settings.rostsber_url + 'currency/' + ticker + '-RUB.csv'
+        df = pd.read_csv(url, sep='\t')
+        df['close'] = 1.0
+        df['nominal'] = 1
+        del df['nominal']
+        return df
+
+    def fetch_financial_symbol(self, ticker: str):
+        currency = Currency.__dict__.get(ticker)
+        if currency is None:
+            return None
+        else:
+            fs = FinancialSymbol(
+                namespace='cbr',
+                ticker='EUR',
+                values=lambda: self.__currency_values(ticker),
+                short_name=self.short_names[currency],
+                currency=currency,
+                security_type=SecurityType.CURRENCY,
+                period=Period.DAY,
+                adjusted_close=True
+            )
+            return fs
+
+
 class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
@@ -150,3 +186,43 @@ class FinancialSymbolsRegistry(object):
                                 .format(result_count, namespace, ticker))
         else:
             return None
+
+
+class CurrencySymbolsRegistry(object):
+    def __init__(self):
+        self.url_base = Settings.rostsber_url + 'currency/'
+
+    @staticmethod
+    def __currency_symbol_str(currency: Currency):
+        return currency.name
+
+    def rate(self, currency_from: Currency, currency_to: Currency):
+        if currency_to == currency_from:
+            raise Exception('should be different')
+
+        if currency_to == Currency.RUB:
+            url = self.url_base + self.__currency_symbol_str(currency_from) + \
+                  '-' + self.__currency_symbol_str(currency_to) + '.csv'
+            df = pd.read_csv(url, sep='\t')
+            df['close'] = df['close'] * df['nominal']
+            df['date'] = pd.to_datetime(df['date'])
+            df['period'] = df['date'].dt.to_period('M')
+            vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
+            df = df[vals_lastdate_indices]
+            df.index = df['period']
+            del df['date'], df['period'], df['nominal']
+            return df
+        elif currency_from == Currency.RUB:
+            df = self.rate(currency_to, currency_from)
+            df['close'] = 1.0 / df['close']
+            return df
+        else:
+            df = self.rate(currency_from, Currency.RUB)
+            df_to = self.rate(Currency.RUB, currency_to)
+            df['date'] = df.index
+            df_to['date'] = df_to.index
+            df = df.merge(df_to, on='date', suffixes=('', '_to'))
+            df['close'] = df['close'] * df['close_to']
+            df.index = df['date']
+            del df['close_to'], df['date']
+            return df

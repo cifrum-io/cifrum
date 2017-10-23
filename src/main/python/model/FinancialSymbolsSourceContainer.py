@@ -4,6 +4,7 @@ from .FinancialSymbolsSource import *
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
+    cbr_currencies_symbols_source = providers.Singleton(CbrCurrencyFinancialSymbolsSource)
 
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
@@ -85,3 +86,5 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
             quandl_source(),
         ]
     )
+
+    currency_symbols_registry = providers.Singleton(CurrencySymbolsRegistry)
