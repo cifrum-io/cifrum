@@ -4,35 +4,13 @@ from .FinancialSymbolsSource import *
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
-    currency_usd_rub_source = providers.Singleton(
-        SingleFinancialSymbolSource,
-        namespace='cbr',
-        ticker='USD',
-        path='currency/USD-RUB.csv',
-        short_name='Доллар США',
-        currency=Currency.USD,
-        security_type=SecurityType.CURRENCY,
-        period=Period.DAY,
-        adjusted_close=True
-    )
-
-    currency_eur_rub_source = providers.Singleton(
-        SingleFinancialSymbolSource,
-        namespace='cbr',
-        ticker='EUR',
-        path='currency/EUR-RUB.csv',
-        short_name='Евро',
-        currency=Currency.EUR,
-        security_type=SecurityType.CURRENCY,
-        period=Period.DAY,
-        adjusted_close=True
-    )
 
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='RU',
-        path='inflation_ru/data.csv',
+        values_fetcher=lambda:
+            pd.read_csv(Settings.rostsber_url + 'inflation_ru/data.csv', sep='\t'),
         short_name='Инфляция РФ',
         currency=Currency.RUB,
         security_type=SecurityType.INFLATION,
@@ -44,7 +22,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='EU',
-        path='inflation_eu/data.csv',
+        values_fetcher=lambda:
+            pd.read_csv(Settings.rostsber_url + 'inflation_eu/data.csv', sep='\t'),
         short_name='Инфляция ЕС',
         currency=Currency.EUR,
         security_type=SecurityType.INFLATION,
@@ -56,7 +35,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='US',
-        path='inflation_us/data.csv',
+        values_fetcher=lambda:
+            pd.read_csv(Settings.rostsber_url + 'inflation_us/data.csv', sep='\t'),
         short_name='Инфляция США',
         currency=Currency.USD,
         security_type=SecurityType.INFLATION,
@@ -68,7 +48,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='cbr',
         ticker='TOP_rates',
-        path='cbr_deposit_rate/data.csv',
+        values_fetcher=lambda:
+            pd.read_csv(Settings.rostsber_url + 'cbr_deposit_rate/data.csv', sep='\t'),
         long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях) ',
         currency=Currency.RUB,
         security_type=SecurityType.RATES,
@@ -80,7 +61,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='micex',
         ticker='MCFTR',
-        path='moex/mcftr/data.csv',
+        values_fetcher=lambda:
+            pd.read_csv(Settings.rostsber_url + 'moex/mcftr/data.csv', sep='\t'),
         short_name='MICEX Total Return',
         currency=Currency.RUB,
         security_type=SecurityType.INDEX,
@@ -97,8 +79,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     financial_symbols_registry = providers.Singleton(
         FinancialSymbolsRegistry,
         symbol_sources=[
-            currency_usd_rub_source(),
-            currency_eur_rub_source(),
+            cbr_currencies_symbols_source(),
             cbr_top_rates_source(),
             inflation_ru_source(),
             inflation_eu_source(),

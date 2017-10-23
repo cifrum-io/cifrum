@@ -22,7 +22,7 @@ class FinancialSymbolsSource:
 
 
 class SingleFinancialSymbolSource(FinancialSymbolsSource):
-    def __init__(self, path, namespace, ticker,
+    def __init__(self, values_fetcher, namespace, ticker,
                  isin=None,
                  short_name=None,
                  long_name=None,
@@ -32,13 +32,10 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                  period=None,
                  adjusted_close=None):
         super().__init__(namespace)
-        self.path = path
         self.ticker = ticker
-
-        url = Settings.rostsber_url + self.path
         self.financial_symbol = FinancialSymbol(namespace=self.namespace,
                                                 ticker=self.ticker,
-                                                values=lambda: pd.read_csv(url, sep='\t'),
+                                                values=values_fetcher,
                                                 isin=isin,
                                                 short_name=short_name,
                                                 long_name=long_name,
