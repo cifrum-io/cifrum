@@ -63,7 +63,6 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
         url = Settings.rostsber_url + 'currency/' + ticker + '-RUB.csv'
         df = pd.read_csv(url, sep='\t')
         df['close'] = 1.0
-        df['nominal'] = 1
         del df['nominal']
         return df
 
@@ -74,7 +73,7 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
         else:
             fs = FinancialSymbol(
                 namespace='cbr',
-                ticker='EUR',
+                ticker=ticker,
                 values=lambda: self.__currency_values(ticker),
                 short_name=self.short_names[currency],
                 currency=currency,
