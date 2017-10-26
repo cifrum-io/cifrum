@@ -208,8 +208,7 @@ class CurrencySymbolsRegistry(object):
             df['period'] = df['date'].dt.to_period('M')
             vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
             df = df[vals_lastdate_indices]
-            df.index = df['period']
-            del df['date'], df['period'], df['nominal']
+            del df['date'], df['nominal']
             return df
         elif currency_from == Currency.RUB:
             df = self.rate(currency_to, currency_from)
@@ -218,10 +217,7 @@ class CurrencySymbolsRegistry(object):
         else:
             df = self.rate(currency_from, Currency.RUB)
             df_to = self.rate(Currency.RUB, currency_to)
-            df['date'] = df.index
-            df_to['date'] = df_to.index
-            df = df.merge(df_to, on='date', suffixes=('', '_to'))
+            df = df.merge(df_to, on='period', suffixes=('', '_to'))
             df['close'] = df['close'] * df['close_to']
-            df.index = df['date']
-            del df['close_to'], df['date']
+            del df['close_to']
             return df

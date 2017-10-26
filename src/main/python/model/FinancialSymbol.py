@@ -27,8 +27,7 @@ class FinancialSymbol:
             vals['period'] = vals['date'].dt.to_period('M')
             vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
             vals = vals[vals_lastdate_indices]
-            vals.index = vals['period']
-            del vals['date'], vals['period']
+            del vals['date']
             return vals
 
         self.namespace = namespace
@@ -47,7 +46,7 @@ class FinancialSymbol:
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
         vals = self.values().copy()
-        vals = vals[(vals.index >= start_period) & (vals.index < end_period)]
+        vals = vals[(vals['period'] >= start_period) & (vals['period'] < end_period)]
         currency = Currency.__dict__[currency]
         dt = DataTable(financial_symbol=self, values=vals, currency=currency)
         return dt
