@@ -1,6 +1,7 @@
 from pprint import pformat
 from .DataTable import DataTable
 import pandas as pd
+from .Enums import Currency, Period
 
 
 class FinancialSymbol:
@@ -42,11 +43,13 @@ class FinancialSymbol:
         self.period = period
         self.adjusted_close = adjusted_close
 
-    def get_table(self, start_period, end_period):
+    def get_table(self, start_period, end_period, currency):
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
-
-        dt = DataTable(financial_symbol=self, values=vals)
+        vals = self.values().copy()
+        vals = vals[(vals.index >= start_period) & (vals.index < end_period)]
+        currency = Currency.__dict__[currency]
+        dt = DataTable(financial_symbol=self, values=vals, currency=currency)
         return dt
 
     def __repr__(self):
