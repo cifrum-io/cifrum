@@ -6,7 +6,7 @@ class DataTable:
         self.values = values
         self.financial_symbol = financial_symbol
 
-        self.period_min = values['close'].min()
+        self.period_min = values['period'].min()
         self.period_max = values['period'].max()
 
         self.__convert_currency(currency)
