@@ -46,9 +46,11 @@ class FinancialSymbol:
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
         vals = self.values().copy()
-        vals = vals[(vals['period'] >= start_period) & (vals['period'] < end_period)]
+        vals = vals[(vals['period'] >= start_period) & (vals['period'] <= end_period)]
         currency = Currency.__dict__[currency]
-        dt = DataTable(financial_symbol=self, values=vals, currency=currency)
+        dt = DataTable(financial_symbol=self,
+                       values=vals,
+                       currency=currency)
         return dt
 
     def __repr__(self):
