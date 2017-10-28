@@ -27,6 +27,7 @@ class FinancialSymbol:
             vals['period'] = vals['date'].dt.to_period('M')
             vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
             vals = vals[vals_lastdate_indices]
+            vals.sort_values(by='period')
             del vals['date']
             return vals
 
