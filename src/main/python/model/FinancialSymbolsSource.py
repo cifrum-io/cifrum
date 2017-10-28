@@ -60,7 +60,10 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
 
     @staticmethod
     def __currency_values(ticker):
-        url = Settings.rostsber_url + 'currency/' + ticker + '-RUB.csv'
+        if ticker == Currency.RUB.name:
+            url = Settings.rostsber_url + 'currency/USD-RUB.csv'
+        else:
+            url = Settings.rostsber_url + 'currency/' + ticker + '-RUB.csv'
         df = pd.read_csv(url, sep='\t')
         df['close'] = 1.0
         del df['nominal']
