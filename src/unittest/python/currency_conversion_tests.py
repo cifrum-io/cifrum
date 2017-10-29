@@ -1,13 +1,12 @@
 import unittest
 
 import yapo
-from model.Enums import Currency, SecurityType, Period
-from model.FinancialSymbol import FinancialSymbol
+from model.Enums import Currency
 import numpy as np
 import itertools
 
 
-class FinancialSymbolInformationTest(unittest.TestCase):
+class CurrencyConversionTest(unittest.TestCase):
 
     def test_currency_should_not_be_converted_to_itself(self):
         info = yapo.information(ids='cbr/USD')

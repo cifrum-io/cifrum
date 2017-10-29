@@ -43,7 +43,7 @@ class FinancialSymbol:
         self.period = period
         self.adjusted_close = adjusted_close
 
-    def get_table(self, start_period, end_period, currency):
+    def get_table(self, start_period, end_period, currency) -> DataTable:
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
         vals = self.values().copy()
