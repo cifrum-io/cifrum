@@ -7,19 +7,19 @@ from model.FinancialSymbol import FinancialSymbol
 
 class FinancialSymbolInformationTest(unittest.TestCase):
 
-    def test_different_usages_of_ids(self):
-        info = yapo.information(ids='micex/SBER')
+    def test_returns_sym_info(self):
+        info = yapo.information(name='micex/SBER')
         self.assertIsInstance(info, FinancialSymbol)
 
-        info = yapo.information(ids=[])
+        info = yapo.portfolio(names=[])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 0)
 
-        info = yapo.information(ids=['infl/RU'])
+        info = yapo.portfolio(names=['infl/RU'])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 1)
 
-        info = yapo.information(ids=['micex/SBER', 'infl/RU'])
+        info = yapo.portfolio(names=['micex/SBER', 'infl/RU'])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 2)
 
@@ -78,16 +78,16 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_return_none_if_no_ticker_is_found(self):
         not_existing_id = 'micex/MCFTR_doesntexist'
         self.assertIsNone(yapo.information(not_existing_id))
-        infos = yapo.information(ids=['infl/RU', not_existing_id])
+        infos = yapo.portfolio(names=['infl/RU', not_existing_id])
         self.assertIsNotNone(infos[0])
         self.assertIsNone(infos[1])
 
     def test_return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
-        infos = yapo.information(ids=ids_arr)
+        infos = yapo.portfolio(names=ids_arr)
         self.assertEqual(len(infos), len(ids_arr))
 
     def test_be_invariant_in_respect_to_order(self):
-        infos1 = yapo.information(ids=['infl/RU', 'infl/EU'])
-        infos2 = yapo.information(ids=['infl/EU', 'infl/RU'])
+        infos1 = yapo.portfolio(names=['infl/RU', 'infl/EU'])
+        infos2 = yapo.portfolio(names=['infl/EU', 'infl/RU'])
         self.assertCountEqual(infos1, infos2)
