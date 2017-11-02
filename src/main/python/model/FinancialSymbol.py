@@ -15,19 +15,20 @@ class FinancialSymbol:
                  period=None,
                  adjusted_close=None):
         def values_transformer():
-            if period == Period.DAY:
-                pass
-            elif period == Period.MONTH:
-                return values()
-            else:
-                pass  # Consider what to do with other periods
-
             vals = values()
             vals['date'] = pd.to_datetime(vals['date'])
             vals['period'] = vals['date'].dt.to_period('M')
-            vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
-            vals = vals[vals_lastdate_indices]
-            vals.sort_values(by='period')
+
+            if period == Period.DAY:
+                vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
+                vals = vals[vals_lastdate_indices]
+            elif period == Period.MONTH:
+                pass
+            else:
+                pass  # Consider what to do with other periods
+
+            vals.sort_values(by='period', ascending=True)
+            vals.index = vals['period']
             del vals['date']
             return vals
 
