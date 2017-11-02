@@ -2,6 +2,7 @@ import itertools
 import unittest
 
 from pandas.core.dtypes.dtypes import PeriodDtype
+from pandas.tseries.offsets import MonthEnd
 
 import yapo
 from model.Enums import Currency
@@ -17,3 +18,4 @@ class DataTableTest(unittest.TestCase):
             dt = sym.get_table(start_period='2010-1', end_period='2015-6', currency=currency.name)
             self.assertIsInstance(dt.values.index.dtype, PeriodDtype,
                                   msg='Incorrect index type for ' + symbol_name)
+            self.assertIsInstance(dt.values.index.dtype.freq, MonthEnd)
