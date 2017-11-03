@@ -21,6 +21,8 @@ class FinancialSymbol:
             vals['period'] = vals['date'].dt.to_period('M')
 
             if period == Period.DAY:
+                if vals['date'].max() < datetime.datetime.now() - datetime.timedelta(days=30):
+                    vals = vals[vals['period'] < vals['period'].max()]
                 vals_not_current_period = vals['period'] != pd.Period.now(freq='M')
                 vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
                 vals = vals[vals_not_current_period & vals_lastdate_indices]

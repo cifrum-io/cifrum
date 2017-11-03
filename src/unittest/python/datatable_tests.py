@@ -70,3 +70,26 @@ class DataTableTest(unittest.TestCase):
         start_period = end_period - 2
         dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
         self.assertEqual(set(dt.values['period']), {end_period - 1, end_period - 2})
+
+    def test_drop_last_month_data_if_no_activity_within_30_days(self):
+        num_days = 60
+        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days + 31)
+        date_list = pd.date_range(date_start, periods=num_days, freq='D')
+
+        np.random.seed(42)
+        values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                               'date': date_list})
+
+        test_source = SingleFinancialSymbolSource(
+            namespace='test_ns', ticker='test',
+            values_fetcher=lambda: values,
+            period=Period.DAY,
+            currency=Currency.RUB
+        )
+        test_registry = FinancialSymbolsRegistry([test_source])
+        sym = test_registry.get('test_ns', 'test')
+
+        end_period = pd.Period.now(freq='M')
+        start_period = end_period - 2
+        dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
+        self.assertEqual(set(dt.values['period']), {end_period - 2})
