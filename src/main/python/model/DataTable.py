@@ -29,5 +29,5 @@ class DataTable:
         self.values = self.values.merge(currency_rate, on='period', how='left', suffixes=('', '_currency_rate'))
         self.values['close'] = self.values['close'] * self.values['close_currency_rate']
         self.values.index = self.values['period']
-        self.values.sort_values(by='period', ascending=True)
+        self.values.sort_values(by='period', ascending=True, inplace=True)
         del self.values['close_currency_rate']

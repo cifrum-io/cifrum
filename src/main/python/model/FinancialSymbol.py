@@ -27,7 +27,7 @@ class FinancialSymbol:
             else:
                 pass  # Consider what to do with other periods
 
-            vals.sort_values(by='period', ascending=True)
+            vals.sort_values(by='period', ascending=True, inplace=True)
             vals.index = vals['period']
             del vals['date']
             return vals
