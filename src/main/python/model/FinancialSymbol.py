@@ -2,6 +2,7 @@ from pprint import pformat
 from .DataTable import DataTable
 import pandas as pd
 from .Enums import Currency, Period
+import datetime
 
 
 class FinancialSymbol:
@@ -20,8 +21,9 @@ class FinancialSymbol:
             vals['period'] = vals['date'].dt.to_period('M')
 
             if period == Period.DAY:
+                vals_not_current_period = vals['period'] != pd.Period.now(freq='M')
                 vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
-                vals = vals[vals_lastdate_indices]
+                vals = vals[vals_not_current_period & vals_lastdate_indices]
             elif period == Period.MONTH:
                 pass
             else:

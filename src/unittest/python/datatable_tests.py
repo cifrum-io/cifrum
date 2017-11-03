@@ -3,9 +3,13 @@ import unittest
 
 from pandas.core.dtypes.dtypes import PeriodDtype
 from pandas.tseries.offsets import MonthEnd
+import pandas as pd
+import numpy as np
+import datetime
 
 import yapo
-from model.Enums import Currency
+from model.Enums import Currency, Period
+from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
 
 
 class DataTableTest(unittest.TestCase):
@@ -43,3 +47,26 @@ class DataTableTest(unittest.TestCase):
             self.assertIsInstance(dt.values.index.dtype, PeriodDtype,
                                   msg='Incorrect index type for ' + symbol_name_currency[0])
             self.assertIsInstance(dt.values.index.dtype.freq, MonthEnd)
+
+    def test_last_month_period_should_be_dropped(self):
+        num_days = 60
+        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days)
+        date_list = pd.date_range(date_start, periods=num_days, freq='D')
+
+        np.random.seed(42)
+        values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                               'date': date_list})
+
+        test_source = SingleFinancialSymbolSource(
+            namespace='test_ns', ticker='test',
+            values_fetcher=lambda: values,
+            period=Period.DAY,
+            currency=Currency.RUB
+        )
+        test_registry = FinancialSymbolsRegistry([test_source])
+        sym = test_registry.get('test_ns', 'test')
+
+        end_period = pd.Period.now(freq='M')
+        start_period = end_period - 2
+        dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
+        self.assertEqual(set(dt.values['period']), {end_period - 1, end_period - 2})
