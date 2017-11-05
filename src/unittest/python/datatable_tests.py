@@ -73,7 +73,7 @@ class DataTableTest(unittest.TestCase):
 
     def test_drop_last_month_data_if_no_activity_within_30_days(self):
         num_days = 60
-        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days + 31)
+        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days + 30)
         date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
         np.random.seed(42)
@@ -86,7 +86,7 @@ class DataTableTest(unittest.TestCase):
             period=Period.DAY,
             currency=Currency.RUB
         )
-        test_registry = FinancialSymbolsRegistry([test_source])
+        test_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
         sym = test_registry.get('test_ns', 'test')
 
         end_period = pd.Period.now(freq='M')
