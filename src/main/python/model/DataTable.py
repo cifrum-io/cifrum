@@ -1,4 +1,5 @@
 from .Enums import Currency
+from .Settings import change_column_name
 
 
 class DataTable:
@@ -11,10 +12,10 @@ class DataTable:
 
         self.__convert_currency(currency)
 
-        self.values['close_pctchange'] = self.values['close'].pct_change().fillna(value=0.)
+        self.values[change_column_name] = self.values['close'].pct_change().fillna(value=0.)
 
     def accumulated_rate_of_return(self):
-        cumprod = (self.values['close_pctchange'] + 1.).cumprod()
+        cumprod = (self.values[change_column_name] + 1.).cumprod()
         aror = cumprod[-1]
         return aror
 

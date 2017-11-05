@@ -93,3 +93,9 @@ class DataTableTest(unittest.TestCase):
         start_period = end_period - 2
         dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
         self.assertEqual(set(dt.values['period']), {end_period - 2})
+
+    def test_compute_accumulated_rate_of_return(self):
+        for symbol_name_currency in self.symbols_data.keys():
+            dt = self.symbols_data[symbol_name_currency]
+            aror = dt.accumulated_rate_of_return()
+            self.assertTrue(not np.isnan(aror))

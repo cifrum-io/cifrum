@@ -1,16 +1,24 @@
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 from .FinancialSymbolsSource import *
+from .Settings import change_column_name
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     cbr_currencies_symbols_source = providers.Singleton(CbrCurrencyFinancialSymbolsSource)
 
+    @classmethod
+    def __load_inflation(cls, inflation_country):
+        dt = pd.read_csv('{}/inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
+        dt.rename(columns={'close': change_column_name}, inplace=True)
+        dt['close'] = (dt[change_column_name] + 1.).cumprod()
+        return dt
+
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='RU',
-        values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'inflation_ru/data.csv', sep='\t'),
+        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('ru'),
         short_name='Инфляция РФ',
         currency=Currency.RUB,
         security_type=SecurityType.INFLATION,
@@ -22,7 +30,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='EU',
-        values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'inflation_eu/data.csv', sep='\t'),
+        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('eu'),
         short_name='Инфляция ЕС',
         currency=Currency.EUR,
         security_type=SecurityType.INFLATION,
@@ -34,7 +42,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         ticker='US',
-        values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'inflation_us/data.csv', sep='\t'),
+        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('us'),
         short_name='Инфляция США',
         currency=Currency.USD,
         security_type=SecurityType.INFLATION,
