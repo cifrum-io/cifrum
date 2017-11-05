@@ -36,6 +36,19 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.period, Period.DAY)
         self.assertEqual(info.adjusted_close, True)
 
+    def test_quandl_stocks_should_have_correct_fields(self):
+        info = yapo.information('quandl/VNQ')
+        self.assertEqual(info.namespace, 'quandl')
+        self.assertEqual(info.ticker, 'VNQ')
+        self.assertIsNone(info.isin)
+        self.assertEqual(info.short_name, 'Vanguard REIT')
+        self.assertIsNone(info.long_name)
+        self.assertEqual(info.exchange, 'NYSE Arca')
+        self.assertEqual(info.currency, Currency.USD)
+        self.assertEqual(info.security_type, SecurityType.STOCK_ETF)
+        self.assertEqual(info.period, Period.DAY)
+        self.assertEqual(info.adjusted_close, True)
+
     def test_currency_usd__should_have_correct_fields(self):
         info = yapo.information('cbr/USD')
         self.assertEqual(info.namespace, 'cbr')

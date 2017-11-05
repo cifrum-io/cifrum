@@ -141,6 +141,8 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
 
     def __init__(self):
         super().__init__(namespace='quandl')
+        ticker_list_url = 'http://static.quandl.com/end_of_day_us_stocks/ticker_list.csv'
+        self.ticker_list = pd.read_csv(filepath_or_buffer=ticker_list_url, index_col=0)
 
     @staticmethod
     def _extract_values(ticker):
@@ -154,7 +156,8 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
         symbol = FinancialSymbol(namespace=self.namespace,
                                  ticker=ticker,
                                  values=lambda: self._extract_values(ticker),
-                                 exchange='NASDAQ',
+                                 exchange=self.ticker_list.loc[ticker, 'Exchange'],
+                                 short_name=self.ticker_list.loc[ticker, 'Name'],
                                  currency=Currency.USD,
                                  security_type=SecurityType.STOCK_ETF,
                                  period=Period.DAY,
