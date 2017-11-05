@@ -10,6 +10,7 @@ import datetime
 import yapo
 from model.Enums import Currency, Period
 from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
+from model.Settings import change_column_name
 
 
 class DataTableTest(unittest.TestCase):
@@ -99,3 +100,10 @@ class DataTableTest(unittest.TestCase):
             dt = self.symbols_data[symbol_name_currency]
             aror = dt.accumulated_rate_of_return()
             self.assertTrue(not np.isnan(aror))
+
+    def test_close_and_its_change_should_preserve_ratio(self):
+        for symbol_name_currency in self.symbols_data.keys():
+            dt = self.symbols_data[symbol_name_currency]
+            values_change_given = dt.values[change_column_name]
+            values_change_expected = dt.values['close'].pct_change().fillna(value=0.)
+            self.assertTrue(np.all(values_change_given == values_change_expected))
