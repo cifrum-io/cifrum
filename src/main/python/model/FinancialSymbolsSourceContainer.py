@@ -9,7 +9,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
 
     @classmethod
     def __load_inflation(cls, inflation_country):
-        dt = pd.read_csv('{}/inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
+        dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
         dt.rename(columns={'close': change_column_name}, inplace=True)
         dt['close'] = (dt[change_column_name] + 1.).cumprod()
         return dt
