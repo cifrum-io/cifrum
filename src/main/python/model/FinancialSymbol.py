@@ -17,23 +17,36 @@ class FinancialSymbol:
                  adjusted_close=None):
         def values_transformer():
             vals = values()
-            vals['date'] = pd.to_datetime(vals['date'])
-            vals['period'] = vals['date'].dt.to_period('M')
 
             if period == Period.DAY:
+                vals['date'] = pd.to_datetime(vals['date'])
+                vals['period'] = vals['date'].dt.to_period('M')
                 if vals['date'].max() < datetime.datetime.now() - datetime.timedelta(days=30):
                     vals = vals[vals['period'] < vals['period'].max()]
                 vals_not_current_period = vals['period'] != pd.Period.now(freq='M')
                 vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
                 vals = vals[vals_not_current_period & vals_lastdate_indices]
+                del vals['date']
             elif period == Period.MONTH:
-                pass
+                vals['date'] = pd.to_datetime(vals['date'])
+                vals['period'] = vals['date'].dt.to_period('M')
+                del vals['date']
+            elif period == Period.DECADE:
+                vals.rename(columns={'decade': 'period'}, inplace=True)
+
+                def convert_decade(decade_str):
+                    [decade_num, month, year] = decade_str.split('.')
+                    if decade_num == 'III':
+                        return pd.Period('{}-{}'.format(year, month), freq='M')
+                    else:
+                        return None
+                vals['period'] = vals['period'].apply(convert_decade)
+                vals = vals[~vals['period'].isnull()]
             else:
-                pass  # Consider what to do with other periods
+                raise Exception('Unexpected type of `period`')
 
             vals.sort_values(by='period', ascending=True, inplace=True)
             vals.index = vals['period']
-            del vals['date']
             return vals
 
         self.namespace = namespace

@@ -14,6 +14,13 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         dt['close'] = (dt[change_column_name] + 1.).cumprod()
         return dt
 
+    @classmethod
+    def __load_toprates(cls):
+        dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(Settings.rostsber_url), sep='\t')
+        dt.rename(columns={'rate': change_column_name}, inplace=True)
+        dt['close'] = (dt[change_column_name] + 1.).cumprod()
+        return dt
+
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
@@ -54,7 +61,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='cbr',
         ticker='TOP_rates',
-        values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'cbr_deposit_rate/data.csv', sep='\t'),
+        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_toprates(),
         long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях) ',
         currency=Currency.RUB,
         security_type=SecurityType.RATES,

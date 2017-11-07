@@ -19,7 +19,7 @@ class DataTableTest(unittest.TestCase):
         cls.sample_symbol_names = ['quandl/MSFT',
                                    'micex/SBER', 'micex/SBERP', 'micex/MCFTR',
                                    'nlu/419',
-                                   'cbr/USD', 'cbr/EUR', 'cbr/RUB',
+                                   'cbr/TOP_rates', 'cbr/USD', 'cbr/EUR', 'cbr/RUB',
                                    'infl/RU', 'infl/US', 'infl/EU']
         cls.symbols_data = {}
         for symbol_name, currency in itertools.product(cls.sample_symbol_names, Currency):
