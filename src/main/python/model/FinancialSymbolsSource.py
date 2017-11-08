@@ -197,17 +197,21 @@ class CurrencySymbolsRegistry(object):
     def __init__(self):
         self.url_base = Settings.rostsber_url + 'currency/'
 
-    @staticmethod
-    def __currency_symbol_str(currency: Currency):
-        return currency.name
-
-    def rate(self, currency_from: Currency, currency_to: Currency):
+    def convert(self, currency_from: Currency, currency_to: Currency):
         if currency_to == currency_from:
-            raise Exception('should be different')
-
-        if currency_to == Currency.RUB:
-            url = self.url_base + self.__currency_symbol_str(currency_from) + \
-                  '-' + self.__currency_symbol_str(currency_to) + '.csv'
+            url = '{}{}-{}.csv'.format(self.url_base, 'USD', 'RUB')
+            df = pd.read_csv(url, sep='\t')
+            df['close'] = 1.0
+            df['date'] = pd.to_datetime(df['date'])
+            df['period'] = df['date'].dt.to_period('M')
+            vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
+            df = df[vals_lastdate_indices]
+            del df['date'], df['nominal']
+            return df
+        elif currency_to == Currency.RUB:
+            url = '{}{}-{}.csv'.format(self.url_base,
+                                       currency_from.name,
+                                       currency_to.name)
             df = pd.read_csv(url, sep='\t')
             df['close'] = df['close'] * df['nominal']
             df['date'] = pd.to_datetime(df['date'])
@@ -217,12 +221,12 @@ class CurrencySymbolsRegistry(object):
             del df['date'], df['nominal']
             return df
         elif currency_from == Currency.RUB:
-            df = self.rate(currency_to, currency_from)
+            df = self.convert(currency_to, currency_from)
             df['close'] = 1.0 / df['close']
             return df
         else:
-            df = self.rate(currency_from, Currency.RUB)
-            df_to = self.rate(Currency.RUB, currency_to)
+            df = self.convert(currency_from, Currency.RUB)
+            df_to = self.convert(Currency.RUB, currency_to)
             df = df.merge(df_to, on='period', suffixes=('', '_to'))
             df['close'] = df['close'] * df['close_to']
             del df['close_to']

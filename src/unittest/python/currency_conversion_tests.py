@@ -8,11 +8,20 @@ import itertools
 
 class CurrencyConversionTest(unittest.TestCase):
 
-    def test_currency_should_not_be_converted_to_itself(self):
-        info = yapo.information(name='cbr/USD')
-        dt = info.get_table(start_period='2015-1', end_period='2017-1', currency='USD')
-        vs = dt.values['close'].as_matrix()
-        self.assertTrue(np.all(np.abs(vs - 1.) < 1e-3))
+    def test_currency_should_not_be_converted_to_itself_inside_converter(self):
+        from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
+        csr = FinancialSymbolsSourceContainer.currency_symbols_registry()
+        for cur in Currency:
+            dt = csr.convert(currency_from=cur, currency_to=cur)
+            vs = dt['close'].values
+            self.assertTrue(np.all(np.abs(vs - 1.) < 1e-3))
+
+    def test_currency_should_not_be_converted_to_itself_inside_datatable(self):
+        for cur in Currency:
+            info = yapo.information(name='cbr/' + cur.name)
+            dt = info.get_table(start_period='2015-1', end_period='2017-1', currency=cur.name)
+            vs = dt.values['close'].values
+            self.assertTrue(np.all(np.abs(vs - 1.) < 1e-3))
 
     def test_currency_should_be_converted_other_currency(self):
         info = yapo.information(name='cbr/EUR')
