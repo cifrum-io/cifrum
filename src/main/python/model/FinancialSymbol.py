@@ -33,15 +33,8 @@ class FinancialSymbol:
                 del vals['date']
             elif period == Period.DECADE:
                 vals.rename(columns={'decade': 'period'}, inplace=True)
-
-                def convert_decade(decade_str):
-                    [decade_num, month, year] = decade_str.split('.')
-                    if decade_num == 'III':
-                        return pd.Period('{}-{}'.format(year, month), freq='M')
-                    else:
-                        return None
-                vals['period'] = vals['period'].apply(convert_decade)
-                vals = vals[~vals['period'].isnull()]
+                vals = vals[vals['period'].str[-1] == '3']
+                vals['period'] = vals['period'].apply(lambda p: pd.Period(p[:-2], freq='M'))
             else:
                 raise Exception('Unexpected type of `period`')
 

@@ -1,7 +1,6 @@
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 from .FinancialSymbolsSource import *
-from .Settings import change_column_name
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
@@ -10,15 +9,23 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     @classmethod
     def __load_inflation(cls, inflation_country):
         dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
-        dt.rename(columns={'close': change_column_name}, inplace=True)
-        dt['close'] = (dt[change_column_name] + 1.).cumprod()
+        dt.sort_values(by='date', inplace=True)
+        dt['close'] = (dt['close'] + 1.).cumprod()
         return dt
 
     @classmethod
     def __load_toprates(cls):
+        def convert_decade(decade_str):
+            [decade_num, month, year] = decade_str.split('.')
+            decade_num_convert = {'I': 1, 'II': 2, 'III': 3}
+            return '{}-{}-{}'.format(year, month, decade_num_convert[decade_num])
         dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(Settings.rostsber_url), sep='\t')
-        dt.rename(columns={'rate': change_column_name}, inplace=True)
-        dt['close'] = (dt[change_column_name] + 1.).cumprod()
+        dt['decade'] = dt['decade'].apply(convert_decade)
+        dt.sort_values(by='decade', inplace=True)
+
+        dt.rename(columns={'rate': 'close'}, inplace=True)
+        dt['close'] = (dt['close'] + 1.).cumprod()
+
         return dt
 
     inflation_ru_source = providers.Singleton(
