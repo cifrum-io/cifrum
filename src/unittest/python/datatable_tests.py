@@ -23,7 +23,7 @@ class DataTableTest(unittest.TestCase):
                                    'infl/RU', 'infl/US', 'infl/EU']
         cls.symbols_data = {}
         for symbol_name, currency in itertools.product(cls.sample_symbol_names, Currency):
-            sym = yapo.information(symbol_name)
+            sym = yapo.information(name=symbol_name)
             dt = sym.get_table(start_period='2010-1', end_period='2015-6', currency=currency.name)
             cls.symbols_data.update({(symbol_name, currency.name): dt})
 
