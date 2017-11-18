@@ -1,57 +1,45 @@
-import itertools
 import unittest
 
 from pandas.core.dtypes.dtypes import PeriodDtype
 from pandas.tseries.offsets import MonthEnd
 import pandas as pd
 import numpy as np
-import datetime
+import datetime as dtm
 
 import yapo
 from model.Enums import Currency, Period
 from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
-from model.Settings import change_column_name
 
 
 class DataTableTest(unittest.TestCase):
+
     @classmethod
     def setUpClass(cls):
-        cls.sample_symbol_names = ['quandl/MSFT',
-                                   'micex/SBER', 'micex/SBERP', 'micex/MCFTR',
-                                   'nlu/419',
-                                   'cbr/TOP_rates', 'cbr/USD', 'cbr/EUR', 'cbr/RUB',
-                                   'infl/RU', 'infl/US', 'infl/EU']
-        cls.symbols_data = {}
-        for symbol_name, currency in itertools.product(cls.sample_symbol_names, Currency):
-            sym = yapo.information(name=symbol_name)
-            dt = sym.get_table(start_period='2010-1', end_period='2015-6', currency=currency.name)
-            cls.symbols_data.update({(symbol_name, currency.name): dt})
+        cls.portfolio = yapo.portfolio(assets=[('quandl/MSFT', 1.),
+                                               ('micex/SBER', 1.), ('micex/SBERP', 1.),
+                                               ('nlu/419', 1.),
+                                               ('cbr/USD', 1.), ('cbr/EUR', 1.), ('cbr/RUB', 1.)],
+                                       start_period='2011-3', end_period='2015-5', currency='USD')
 
     def test_period_should_be_sorted(self):
-        for symbol_name_currency in self.symbols_data.keys():
-            dt = self.symbols_data[symbol_name_currency]
-            values_period = dt.values['period'].values
-            self.assertTrue(all(values_period[i] <= values_period[i + 1] for i in range(len(values_period) - 1)))
-
-            values_period = dt.values.index
-            self.assertTrue(all(values_period[i] <= values_period[i + 1] for i in range(len(values_period) - 1)))
+        for asset in self.portfolio.assets:
+            self.assertTrue(all(asset.period()[i] <= asset.period()[i + 1]
+                                for i in range(len(asset.period()) - 1)))
 
     def test_values_should_have_correct_schema(self):
-        for symbol_name_currency in self.symbols_data.keys():
-            dt = self.symbols_data[symbol_name_currency]
-            self.assertTrue(set(dt.values.columns) >= {'period', 'close'})
+        for asset in self.portfolio.assets:
+            self.assertTrue(set(asset.values.columns) >= {'period', 'close'})
 
     def test_index_should_be_numerical(self):
-        for symbol_name_currency in self.symbols_data.keys():
-            dt = self.symbols_data[symbol_name_currency]
-            self.assertTrue(set(dt.values.columns) >= {'period', 'close'})
-            self.assertIsInstance(dt.values.index.dtype, PeriodDtype,
-                                  msg='Incorrect index type for ' + symbol_name_currency[0])
-            self.assertIsInstance(dt.values.index.dtype.freq, MonthEnd)
+        for asset in self.portfolio.assets:
+            self.assertTrue(set(asset.values.columns) >= {'period', 'close'})
+            self.assertIsInstance(asset.values.index.dtype, PeriodDtype,
+                                  msg='Incorrect index type for ' + str(asset))
+            self.assertIsInstance(asset.values.index.dtype.freq, MonthEnd)
 
     def test_last_month_period_should_be_dropped(self):
         num_days = 60
-        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days)
+        date_start = dtm.datetime.now() - dtm.timedelta(days=num_days)
         date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
         np.random.seed(42)
@@ -64,17 +52,18 @@ class DataTableTest(unittest.TestCase):
             period=Period.DAY,
             currency=Currency.RUB
         )
-        test_registry = FinancialSymbolsRegistry([test_source])
-        sym = test_registry.get('test_ns', 'test')
-
+        fin_sym_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
+        yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
-        dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
-        self.assertEqual(set(dt.values['period']), {end_period - 1, end_period - 2})
+        prtfl = yapo_instance.portfolio(assets=[('test_ns/test', 1.)],
+                                        start_period=str(start_period), end_period=str(end_period),
+                                        currency='USD')
+        self.assertEqual(set(prtfl.assets[0].period()), {end_period - 1, end_period - 2})
 
     def test_drop_last_month_data_if_no_activity_within_30_days(self):
         num_days = 60
-        date_start = datetime.datetime.now() - datetime.timedelta(days=num_days + 30)
+        date_start = dtm.datetime.now() - dtm.timedelta(days=num_days + 30)
         date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
         np.random.seed(42)
@@ -87,23 +76,23 @@ class DataTableTest(unittest.TestCase):
             period=Period.DAY,
             currency=Currency.RUB
         )
-        test_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
-        sym = test_registry.get('test_ns', 'test')
-
+        fin_sym_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
+        yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
-        dt = sym.get_table(start_period, end_period, currency=Currency.USD.name)
-        self.assertEqual(set(dt.values['period']), {end_period - 2})
+        prtfl = yapo_instance.portfolio(assets=[('test_ns/test', 1.)],
+                                        start_period=str(start_period), end_period=str(end_period),
+                                        currency='USD')
+        self.assertEqual(set(prtfl.assets[0].period()), {end_period - 2})
 
     def test_compute_accumulated_rate_of_return(self):
-        for symbol_name_currency in self.symbols_data.keys():
-            dt = self.symbols_data[symbol_name_currency]
-            aror = dt.accumulated_rate_of_return()
+        for asset in self.portfolio.assets:
+            aror = asset.accumulated_rate_of_return()
             self.assertTrue(not np.isnan(aror))
+        self.assertTrue(not np.isnan(self.portfolio.accumulated_rate_of_return()))
 
     def test_close_and_its_change_should_preserve_ratio(self):
-        for symbol_name_currency in self.symbols_data.keys():
-            dt = self.symbols_data[symbol_name_currency]
-            values_change_given = dt.values[change_column_name]
-            values_change_expected = dt.values['close'].pct_change().fillna(value=0.)
-            self.assertTrue(np.all(values_change_given == values_change_expected))
+        for asset in self.portfolio.assets:
+            values_change_given = asset.close_change()
+            values_change_expected = np.diff(asset.close()) / asset.close()[:-1]
+            self.assertTrue(np.all(np.abs(values_change_given[1:] - values_change_expected) < 1e-3))

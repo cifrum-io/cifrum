@@ -1,3 +1,4 @@
+PyContracts
 numpy
 quandl
 dependency_injector

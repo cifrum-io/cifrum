@@ -18,47 +18,51 @@ class CurrencyConversionTest(unittest.TestCase):
 
     def test_currency_should_not_be_converted_to_itself_inside_datatable(self):
         for cur in Currency:
-            info = yapo.information(name='cbr/' + cur.name)
-            dt = info.get_table(start_period='2015-1', end_period='2017-1', currency=cur.name)
-            vs = dt.values['close'].values
+            vs = yapo.portfolio(assets=[('cbr/' + cur.name, 1.)],
+                                start_period='2015-1', end_period='2017-1',
+                                currency=cur.name).assets[0].close()
+
             self.assertTrue(np.all(np.abs(vs - 1.) < 1e-3))
 
     def test_currency_should_be_converted_other_currency(self):
-        info = yapo.information(name='cbr/EUR')
-        dt = info.get_table(start_period='2015-1', end_period='2017-1', currency='USD')
-        vs = dt.values['close'].as_matrix()
+        vs = yapo.portfolio(assets=[('cbr/EUR', 1.)],
+                            start_period='2015-1', end_period='2017-1',
+                            currency='USD').assets[0].close()
+
         self.assertTrue(np.all(vs > 1.05))
 
     def test_support_all_types_of_currency_conversions(self):
         for currency_from, currency_to in itertools.product(Currency, Currency):
-            info = yapo.information(name='cbr/' + currency_from.name)
-            dt = info.get_table(start_period='2015-1', end_period='2016-12', currency=currency_to.name)
-            vs = dt.values['close'].as_matrix()
+            vs = yapo.portfolio(assets=[('cbr/' + currency_from.name, 1.)],
+                                start_period='2015-1', end_period='2016-12',
+                                currency=currency_to.name).assets[0].close()
+
             self.assertEqual(vs.size, 2 * 12)
             self.assertTrue(np.all(vs > 0.))
 
     def test_currency_conversion_should_be_inversive(self):
         for currency1, currency2 in itertools.product(Currency, Currency):
-            info1 = yapo.information(name='cbr/' + currency1.name)
-            dt1 = info1.get_table(start_period='2015-1', end_period='2016-12', currency=currency2.name)
-            vs1 = dt1.values['close'].as_matrix()
+            vs1 = yapo.portfolio(assets=[('cbr/' + currency1.name, 1.)],
+                                 start_period='2015-1', end_period='2016-12',
+                                 currency=currency2.name).assets[0].close()
 
-            info2 = yapo.information(name='cbr/' + currency2.name)
-            dt2 = info2.get_table(start_period='2015-1', end_period='2016-12', currency=currency1.name)
-            vs2 = dt2.values['close'].as_matrix()
+            vs2 = yapo.portfolio(assets=[('cbr/' + currency2.name, 1.)],
+                                 start_period='2015-1', end_period='2016-12',
+                                 currency=currency1.name).assets[0].close()
 
             self.assertTrue(np.all(np.abs(vs1 * vs2 - 1.) < 1e-3))
 
     def test_asset_should_be_converted_correctly(self):
-        info = yapo.information(name='nlu/630')
-        dt_eur = info.get_table(start_period='2011-1', end_period='2017-2', currency='EUR')
-        vs_eur = dt_eur.values['close'].as_matrix()
+        vs_eur = yapo.portfolio(assets=[('nlu/630', 1.)],
+                                start_period='2011-1', end_period='2017-2',
+                                currency='EUR').assets[0].close()
 
-        dt_usd = info.get_table(start_period='2011-1', end_period='2017-2', currency='USD')
-        vs_usd = dt_usd.values['close'].as_matrix()
+        vs_usd = yapo.portfolio(assets=[('nlu/630', 1.)],
+                                start_period='2011-1', end_period='2017-2',
+                                currency='USD').assets[0].close()
 
-        info_curr = yapo.information(name='cbr/USD')
-        dt_curr = info_curr.get_table(start_period='2011-1', end_period='2017-2', currency='EUR')
-        vs_curr = dt_curr.values['close'].as_matrix()
+        vs_curr = yapo.portfolio(assets=[('cbr/USD', 1.)],
+                                 start_period='2011-1', end_period='2017-2',
+                                 currency='EUR').assets[0].close()
 
         self.assertTrue(np.all(np.abs(vs_eur / vs_usd - vs_curr) < 1e-3))
