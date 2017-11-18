@@ -1,6 +1,7 @@
 import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 from .FinancialSymbolsSource import *
+from .Settings import change_column_name
 
 
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
@@ -10,7 +11,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     def __load_inflation(cls, inflation_country):
         dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
         dt.sort_values(by='date', inplace=True)
-        dt['close'] = (dt['close'] + 1.).cumprod()
+        dt.rename(columns={'close': change_column_name}, inplace=True)
+
         return dt
 
     @classmethod
@@ -23,8 +25,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         dt['decade'] = dt['decade'].apply(convert_decade)
         dt.sort_values(by='decade', inplace=True)
 
-        dt.rename(columns={'rate': 'close'}, inplace=True)
-        dt['close'] = (dt['close'] + 1.).cumprod()
+        dt.rename(columns={'close': change_column_name}, inplace=True)
 
         return dt
 
