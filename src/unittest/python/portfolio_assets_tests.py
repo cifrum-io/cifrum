@@ -11,7 +11,7 @@ from model.Enums import Currency, Period
 from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
 
 
-class DataTableTest(unittest.TestCase):
+class PortfolioAssetsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
