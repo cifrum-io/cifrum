@@ -12,6 +12,7 @@ ve*
 *.iml
 .idea
 out
+.ipynb_checkpoints
 
 # generated pdoc documentation
 api-doc
