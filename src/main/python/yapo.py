@@ -1,6 +1,6 @@
 from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
 from model.Portfolio import Portfolio
-from model.Enums import Currency
+from model.Enums import Currency, SecurityType
 from model.FinancialSymbol import FinancialSymbol
 from contracts import contract
 from typing import Tuple, List, Union
@@ -63,6 +63,11 @@ class Yapo:
         currency = Currency.__dict__[currency.upper()]
 
         finsym_infos = self.information(names=names)
+
+        allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT, SecurityType.CURRENCY}
+        for sym in finsym_infos:
+            assert sym.security_type in allowed_security_types
+
         portfolio_instance = Portfolio(finsym_infos,
                                        weights,
                                        start_period=start_period,

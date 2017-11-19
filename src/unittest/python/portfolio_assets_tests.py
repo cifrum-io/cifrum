@@ -7,7 +7,7 @@ import numpy as np
 import datetime as dtm
 
 import yapo
-from model.Enums import Currency, Period
+from model.Enums import Currency, Period, SecurityType
 from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
 
 
@@ -20,6 +20,14 @@ class PortfolioAssetsTest(unittest.TestCase):
                                                ('nlu/419', 1.),
                                                ('cbr/USD', 1.), ('cbr/EUR', 1.), ('cbr/RUB', 1.)],
                                        start_period='2011-3', end_period='2015-5', currency='USD')
+
+    def test_fail_if_asset_security_type_is_not_supported(self):
+        unsupported_ids = ['infl/RU', 'infl/US', 'infl/EU', 'cbr/TOP_rates', 'micex/MCFTR']
+
+        for unsupported_id in unsupported_ids:
+            self.assertRaises(AssertionError,
+                              lambda: yapo.portfolio(assets=[(unsupported_id, 1.)],
+                                                     start_period='2011-3', end_period='2015-5', currency='USD'))
 
     def test_period_should_be_sorted(self):
         for asset in self.portfolio.assets:
@@ -49,6 +57,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         test_source = SingleFinancialSymbolSource(
             namespace='test_ns', ticker='test',
             values_fetcher=lambda: values,
+            security_type=SecurityType.STOCK_ETF,
             period=Period.DAY,
             currency=Currency.RUB
         )
@@ -73,6 +82,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         test_source = SingleFinancialSymbolSource(
             namespace='test_ns', ticker='test',
             values_fetcher=lambda: values,
+            security_type=SecurityType.STOCK_ETF,
             period=Period.DAY,
             currency=Currency.RUB
         )
