@@ -71,6 +71,6 @@ class Yapo:
         return portfolio_instance
 
 
-yapo = Yapo(fin_syms_registry=FinancialSymbolsSourceContainer.financial_symbols_registry())
-information = yapo.information
-portfolio = yapo.portfolio
+yapo_instance = Yapo(fin_syms_registry=FinancialSymbolsSourceContainer.financial_symbols_registry())
+information = yapo_instance.information
+portfolio = yapo_instance.portfolio
