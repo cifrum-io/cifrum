@@ -45,12 +45,11 @@ class Yapo:
                   assets: List[Tuple[str, float]],
                   start_period, end_period, currency) -> Portfolio:
         """
-
-        :param assets:
-        :param start_period:
-        :param end_period:
-        :param currency:
-        :return:
+        :param assets: list of RostSber IDs. Supported security types: stock/ETF, MUT, Currency
+        :param start_period: preferred period to start
+        :param end_period: preferred period to end
+        :param currency: common currency for all assets
+        :return: returns instance of portfolio
         """
         [names, weights] = zip(*assets)
         weights = np.array(weights)
