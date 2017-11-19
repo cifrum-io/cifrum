@@ -1,8 +1,9 @@
 from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
 from model.Portfolio import Portfolio
 from model.Enums import Currency
+from model.FinancialSymbol import FinancialSymbol
 from contracts import contract
-from typing import Tuple, List
+from typing import Tuple, List, Union
 import pandas as pd
 import numpy as np
 
@@ -11,7 +12,7 @@ class Yapo:
     def __init__(self, fin_syms_registry):
         self.fin_syms_registry = fin_syms_registry
 
-    def information(self, **kwargs):
+    def information(self, **kwargs) -> Union[FinancialSymbol, List[FinancialSymbol]]:
         """
         Fetches ticker information based on internal ID.
         The information includes ISIN, short and long
