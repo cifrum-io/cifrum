@@ -1,5 +1,6 @@
 import unittest
 import yapo
+import numpy as np
 
 
 class PortfolioStatisticsTest(unittest.TestCase):
@@ -8,4 +9,5 @@ class PortfolioStatisticsTest(unittest.TestCase):
         p = yapo.portfolio(assets=[('quandl/BND', 1.)],
                            start_period='2011-1', end_period='2017-2',
                            currency='USD')
-        self.assertTrue(1.20 < p.accumulated_rate_of_return() < 1.21)
+        arors = p.accumulated_rate_of_return()[1:]
+        self.assertTrue(np.all((.0014 < arors) & (arors < .24)))

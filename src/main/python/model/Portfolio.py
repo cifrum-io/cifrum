@@ -66,7 +66,7 @@ class PortfolioAsset:
         return self.values['period'].values
 
     def accumulated_rate_of_return(self):
-        return (self.close_change() + 1.).prod()
+        return (self.close_change() + 1.).cumprod() - 1.
 
     # def compound_annual_growth_rate(self, years):
     #     period_start = self.period_max - years * 12
