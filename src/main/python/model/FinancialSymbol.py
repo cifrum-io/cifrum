@@ -1,4 +1,5 @@
 from pprint import pformat
+import pandas as pd
 
 
 class FinancialSymbol:
@@ -13,7 +14,8 @@ class FinancialSymbol:
                  adjusted_close=None):
         self.namespace = namespace
         self.ticker = ticker
-        self.values = values
+        self.values = lambda start_period, end_period: values(start_period=pd.Period(start_period, freq='M'),
+                                                              end_period=pd.Period(end_period, freq='M'))
         self.isin = isin
         self.short_name = short_name
         self.long_name = long_name

@@ -8,18 +8,17 @@ from .Settings import change_column_name
 
 class PortfolioAsset:
 
-    def __init__(self, symbol: FinancialSymbol, weight: float):
+    def __init__(self, symbol: FinancialSymbol, weight: float, start_period):
         self.symbol = symbol
         self.weight = weight
-        self.values = self.__transform_values()
+        self.values = self.__transform_values(start_period, pd.Period.now(freq='M'))
         self.period_min = self.values['period'].min()
         self.period_max = self.values['period'].max()
 
-    def __transform_values(self):
-        vals = self.symbol.values()
+    def __transform_values(self, start_period, end_period):
+        vals = self.symbol.values(start_period, end_period)
 
         if self.symbol.period == Period.DAY:
-            vals['date'] = pd.to_datetime(vals['date'])
             vals['period'] = vals['date'].dt.to_period('M')
             if vals['date'].max() < datetime.datetime.now() - datetime.timedelta(days=30):
                 vals = vals[vals['period'] < vals['period'].max()]
@@ -28,11 +27,9 @@ class PortfolioAsset:
             vals = vals[vals_not_current_period & vals_lastdate_indices]
             del vals['date']
         elif self.symbol.period == Period.MONTH:
-            vals['date'] = pd.to_datetime(vals['date'])
             vals['period'] = vals['date'].dt.to_period('M')
             del vals['date']
         elif self.symbol.period == Period.DECADE:
-            vals.rename(columns={'decade': 'period'}, inplace=True)
             vals = vals[vals['period'].str[-1] == '3']
             vals['period'] = vals['period'].apply(lambda p: pd.Period(p[:-2], freq='M'))
         else:
@@ -84,7 +81,7 @@ class Portfolio:
         self.period_min = start_period
         self.period_max = end_period
         for symbol, weight in zip(symbols, weights):
-            asset = PortfolioAsset(symbol, weight)
+            asset = PortfolioAsset(symbol, weight, start_period)
             self.period_min = max(self.period_min, asset.period_min)
             self.period_max = min(self.period_max, asset.period_max)
             self.assets.append(asset)

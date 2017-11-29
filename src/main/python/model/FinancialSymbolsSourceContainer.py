@@ -24,8 +24,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(Settings.rostsber_url), sep='\t')
         dt['decade'] = dt['decade'].apply(convert_decade)
         dt.sort_values(by='decade', inplace=True)
-
-        dt.rename(columns={'close': change_column_name}, inplace=True)
+        dt.rename(columns={'close': change_column_name, 'decade': 'date'},
+                  inplace=True)
 
         return dt
 
