@@ -3,6 +3,7 @@ import unittest
 import yapo
 from model.Enums import Currency, SecurityType, Period
 from model.FinancialSymbol import FinancialSymbol
+from model.Settings import change_column_name
 
 
 class FinancialSymbolInformationTest(unittest.TestCase):
@@ -74,6 +75,21 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.security_type, SecurityType.INFLATION)
         self.assertEqual(info.period, Period.MONTH)
         self.assertEqual(info.adjusted_close, False)
+        self.assertTrue(set(info.values().columns), {'date', change_column_name})
+
+    def test_top_rates__should_have_correct_fields(self):
+        info = yapo.information(name='cbr/TOP_rates')
+        self.assertEqual(info.namespace, 'cbr')
+        self.assertEqual(info.ticker, 'TOP_rates')
+        self.assertIsNone(info.isin)
+        self.assertIsNone(info.short_name)
+        self.assertTrue(info.long_name.startswith('Динамика максимальной процентной'))
+        self.assertIsNone(info.exchange)
+        self.assertEqual(info.currency, Currency.RUB)
+        self.assertEqual(info.security_type, SecurityType.RATES)
+        self.assertEqual(info.period, Period.DECADE)
+        self.assertEqual(info.adjusted_close, False)
+        self.assertTrue(set(info.values().columns), {'date', change_column_name})
 
     def test_all_data_should_be_available(self):
         self.assertIsNotNone(yapo.information(name='quandl/MSFT'))

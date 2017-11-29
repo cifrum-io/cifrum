@@ -70,7 +70,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         namespace='cbr',
         ticker='TOP_rates',
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_toprates(),
-        long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях) ',
+        long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях)',
         currency=Currency.RUB,
         security_type=SecurityType.RATES,
         period=Period.DECADE,
