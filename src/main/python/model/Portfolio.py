@@ -4,16 +4,18 @@ import pandas as pd
 import numpy as np
 import datetime
 from .Settings import change_column_name
+from contracts import contract
 
 
 class PortfolioAsset:
 
-    def __init__(self, symbol: FinancialSymbol, weight: float, start_period):
+    def __init__(self, symbol: FinancialSymbol, weight: float, start_period, portfolio):
         self.symbol = symbol
         self.weight = weight
         self.values = self.__transform_values(start_period, pd.Period.now(freq='M'))
         self.period_min = self.values['period'].min()
         self.period_max = self.values['period'].max()
+        self.portfolio = portfolio
 
     def __transform_values(self, start_period, end_period):
         vals = self.symbol.values(start_period, end_period)
@@ -65,10 +67,26 @@ class PortfolioAsset:
     def accumulated_rate_of_return(self):
         return (self.close_change() + 1.).cumprod() - 1.
 
-    # def compound_annual_growth_rate(self, years):
-    #     period_start = self.period_max - years * 12
-    #     values = self.values[self.values['period'] > period_start]
-    #     return
+    @contract(
+        years_ago='int,>0|None|list[int,>0]',
+    )
+    def compound_annual_growth_rate(self, years_ago=None):
+        months_in_year = 12
+        if years_ago is None:
+            years_total = (self.portfolio.period_max - self.portfolio.period_min) / months_in_year
+            close_changes = self.values[change_column_name].values
+            cagr = (close_changes + 1.).prod() ** (1 / years_total) - 1.
+            return cagr
+        elif isinstance(years_ago, list):
+            return np.array([self.compound_annual_growth_rate(years_ago=y) for y in years_ago])
+        else:
+            months_count = years_ago * months_in_year
+            if self.portfolio.period_min > self.portfolio.period_max - months_count:
+                return self.compound_annual_growth_rate(years_ago=None)
+            period_start = self.portfolio.period_max - months_count
+            close_changes = self.values[self.values['period'] > period_start][change_column_name].values
+            cagr = (close_changes + 1.).prod() ** (1 / years_ago) - 1.
+            return cagr
 
 
 class Portfolio:
@@ -77,11 +95,12 @@ class Portfolio:
                  start_period: pd.Period,
                  end_period: pd.Period,
                  currency: Currency):
+        self.weights = weights
         self.assets = []
         self.period_min = start_period
         self.period_max = end_period
         for symbol, weight in zip(symbols, weights):
-            asset = PortfolioAsset(symbol, weight, start_period)
+            asset = PortfolioAsset(symbol, weight, start_period, self)
             self.period_min = max(self.period_min, asset.period_min)
             self.period_max = min(self.period_max, asset.period_max)
             self.assets.append(asset)
@@ -95,3 +114,10 @@ class Portfolio:
     def accumulated_rate_of_return(self):
         return sum(asset.accumulated_rate_of_return() * asset.weight
                    for asset in self.assets)
+
+    @contract(
+        years_ago='int,>0|None|list[int,>0]',
+    )
+    def compound_annual_growth_rate(self, years_ago=None):
+        cagrs = np.array([asset.compound_annual_growth_rate(years_ago) for asset in self.assets])
+        return np.sum(cagrs * self.weights, axis=0)
