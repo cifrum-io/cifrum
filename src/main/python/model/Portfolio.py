@@ -111,11 +111,9 @@ class Portfolio:
                                       end_period=self.period_max,
                                       currency=currency) for a in assets]
 
-        self.asset_weight = dict(zip(self.assets, weights))
-
     def accumulated_rate_of_return(self):
-        return sum(asset.accumulated_rate_of_return() * self.asset_weight[asset]
-                   for asset in self.assets)
+        arors = np.array([asset.accumulated_rate_of_return() for asset in self.assets])
+        return (arors.T * self.weights).sum(axis=1)
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
