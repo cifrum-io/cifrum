@@ -5,19 +5,26 @@ import numpy as np
 import datetime
 from .Settings import change_column_name
 from contracts import contract
+from typing import List
 
 
 class PortfolioAsset:
 
-    def __init__(self, symbol: FinancialSymbol, weight: float, start_period, portfolio):
+    def __init__(self, symbol: FinancialSymbol,
+                 start_period: pd.Period, end_period: pd.Period, currency):
         self.symbol = symbol
-        self.weight = weight
-        self.values = self.__transform_values(start_period, pd.Period.now(freq='M'))
+        self.start_period = start_period
+        self.end_period = end_period
+        self.values = self.__transform_values_according_to_period(start_period, pd.Period.now(freq='M'))
+        self.values = self.values[(self.values['period'] >= start_period) &
+                                  (self.values['period'] <= end_period)]
         self.period_min = self.values['period'].min()
         self.period_max = self.values['period'].max()
-        self.portfolio = portfolio
+        self.currency = currency
+        self.__convert_currency(currency_to=currency)
+        self.values[change_column_name] = self.values['close'].pct_change().fillna(value=0.)
 
-    def __transform_values(self, start_period, end_period):
+    def __transform_values_according_to_period(self, start_period, end_period):
         vals = self.symbol.values(start_period, end_period)
 
         if self.symbol.period == Period.DAY:
@@ -41,7 +48,7 @@ class PortfolioAsset:
         vals.index = vals['period']
         return vals
 
-    def convert_currency(self, currency_to: Currency):
+    def __convert_currency(self, currency_to: Currency):
         from .FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer as Fssc
 
         currency_from = self.symbol.currency
@@ -73,7 +80,7 @@ class PortfolioAsset:
     def compound_annual_growth_rate(self, years_ago=None):
         months_in_year = 12
         if years_ago is None:
-            years_total = (self.portfolio.period_max - self.portfolio.period_min) / months_in_year
+            years_total = (self.period_max - self.period_min) / months_in_year
             close_changes = self.values[change_column_name].values
             cagr = (close_changes + 1.).prod() ** (1 / years_total) - 1.
             return cagr
@@ -81,38 +88,33 @@ class PortfolioAsset:
             return np.array([self.compound_annual_growth_rate(years_ago=y) for y in years_ago])
         else:
             months_count = years_ago * months_in_year
-            if self.portfolio.period_min > self.portfolio.period_max - months_count:
+            if self.period_min > self.period_max - months_count:
                 return self.compound_annual_growth_rate(years_ago=None)
-            period_start = self.portfolio.period_max - months_count
+            period_start = self.period_max - months_count
             close_changes = self.values[self.values['period'] > period_start][change_column_name].values
             cagr = (close_changes + 1.).prod() ** (1 / years_ago) - 1.
             return cagr
 
 
 class Portfolio:
-    def __init__(self, symbols,
+    def __init__(self,
+                 assets: List[PortfolioAsset],
                  weights: np.array,
-                 start_period: pd.Period,
-                 end_period: pd.Period,
+                 start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
         self.weights = weights
-        self.assets = []
-        self.period_min = start_period
-        self.period_max = end_period
-        for symbol, weight in zip(symbols, weights):
-            asset = PortfolioAsset(symbol, weight, start_period, self)
-            self.period_min = max(self.period_min, asset.period_min)
-            self.period_max = min(self.period_max, asset.period_max)
-            self.assets.append(asset)
+        self.period_min = max([a.period_min for a in assets] + [start_period])
+        self.period_max = min([a.period_max for a in assets] + [end_period])
 
-        for asset in self.assets:
-            asset.values = asset.values[(asset.values['period'] >= self.period_min) &
-                                        (asset.values['period'] <= self.period_max)]
-            asset.convert_currency(currency_to=currency)
-            asset.values[change_column_name] = asset.values['close'].pct_change().fillna(value=0.)
+        self.assets = [PortfolioAsset(a.symbol,
+                                      start_period=self.period_min,
+                                      end_period=self.period_max,
+                                      currency=currency) for a in assets]
+
+        self.asset_weight = dict(zip(self.assets, weights))
 
     def accumulated_rate_of_return(self):
-        return sum(asset.accumulated_rate_of_return() * asset.weight
+        return sum(asset.accumulated_rate_of_return() * self.asset_weight[asset]
                    for asset in self.assets)
 
     @contract(

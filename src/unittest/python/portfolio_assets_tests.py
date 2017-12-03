@@ -15,10 +15,10 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.portfolio = yapo.portfolio(assets=[('quandl/MSFT', 1.),
-                                               ('micex/SBER', 1.), ('micex/SBERP', 1.),
-                                               ('nlu/419', 1.),
-                                               ('cbr/USD', 1.), ('cbr/EUR', 1.), ('cbr/RUB', 1.)],
+        cls.portfolio = yapo.portfolio(assets={'quandl/MSFT': 1.,
+                                               'micex/SBER': 1., 'micex/SBERP': 1.,
+                                               'nlu/419': 1.,
+                                               'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
                                        start_period='2011-3', end_period='2015-5', currency='USD')
 
     def test_fail_if_asset_security_type_is_not_supported(self):
@@ -26,8 +26,8 @@ class PortfolioAssetsTest(unittest.TestCase):
 
         for unsupported_id in unsupported_ids:
             self.assertRaises(AssertionError,
-                              lambda: yapo.portfolio(assets=[(unsupported_id, 1.)],
-                                                     start_period='2011-3', end_period='2015-5', currency='USD'))
+                              lambda: yapo.portfolio_asset(name=unsupported_id,
+                                                           start_period='2011-3', end_period='2015-5', currency='USD'))
 
     def test_period_should_be_sorted(self):
         for asset in self.portfolio.assets:
@@ -65,10 +65,10 @@ class PortfolioAssetsTest(unittest.TestCase):
         yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
-        prtfl = yapo_instance.portfolio(assets=[('test_ns/test', 1.)],
-                                        start_period=str(start_period), end_period=str(end_period),
-                                        currency='USD')
-        self.assertEqual(set(prtfl.assets[0].period()), {end_period - 1, end_period - 2})
+        asset = yapo_instance.portfolio_asset(name='test_ns/test',
+                                              start_period=str(start_period), end_period=str(end_period),
+                                              currency='USD')
+        self.assertEqual(set(asset.period()), {end_period - 1, end_period - 2})
 
     def test_drop_last_month_data_if_no_activity_within_30_days(self):
         num_days = 60
@@ -90,10 +90,10 @@ class PortfolioAssetsTest(unittest.TestCase):
         yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
-        prtfl = yapo_instance.portfolio(assets=[('test_ns/test', 1.)],
-                                        start_period=str(start_period), end_period=str(end_period),
-                                        currency='USD')
-        self.assertEqual(set(prtfl.assets[0].period()), {end_period - 2})
+        asset = yapo_instance.portfolio_asset(name='test_ns/test',
+                                              start_period=str(start_period), end_period=str(end_period),
+                                              currency='USD')
+        self.assertEqual(set(asset.period()), {end_period - 2})
 
     def test_compute_accumulated_rate_of_return(self):
         for asset in self.portfolio.assets:
