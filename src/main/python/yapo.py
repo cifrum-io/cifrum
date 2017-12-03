@@ -79,7 +79,7 @@ class Yapo:
         :return: returns instance of portfolio
         """
         names = list(assets.keys())
-        weights = np.fromiter(assets.values(), dtype=float)
+        weights = np.fromiter(assets.values(), dtype=float, count=len(names))
         weights /= np.abs(weights.sum())
 
         assets = self.portfolio_asset(names=names,
