@@ -121,5 +121,9 @@ class Portfolio:
         years_ago='int,>0|None|list[int,>0]',
     )
     def compound_annual_growth_rate(self, years_ago=None):
-        cagrs = np.array([asset.compound_annual_growth_rate(years_ago) for asset in self.assets])
-        return np.sum(cagrs * self.weights, axis=0)
+        if isinstance(years_ago, list):
+            return [self.compound_annual_growth_rate(y) for y in years_ago]
+        else:
+            cagrs = np.array([asset.compound_annual_growth_rate(years_ago)
+                              for asset in self.assets])
+            return np.sum(cagrs * self.weights)
