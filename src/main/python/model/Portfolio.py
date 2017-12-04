@@ -74,6 +74,9 @@ class PortfolioAsset:
     def accumulated_rate_of_return(self):
         return (self.close_change() + 1.).cumprod() - 1.
 
+    def risk(self):
+        return np.std(self.close_change())
+
     @contract(
         years_ago='int,>0|None|list[int,>0]',
     )
@@ -102,7 +105,7 @@ class Portfolio:
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
-        self.weights = weights
+        self.weights = weights.reshape(-1, 1)
         self.period_min = max([a.period_min for a in assets] + [start_period])
         self.period_max = min([a.period_max for a in assets] + [end_period])
 
@@ -113,7 +116,11 @@ class Portfolio:
 
     def accumulated_rate_of_return(self):
         arors = np.array([asset.accumulated_rate_of_return() for asset in self.assets])
-        return (arors.T * self.weights).sum(axis=1)
+        return (arors * self.weights).sum(axis=0)
+
+    def risk(self):
+        risks = np.array([asset.risk() for asset in self.assets])
+        return (risks * self.weights).sum()
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
