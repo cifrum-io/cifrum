@@ -106,8 +106,8 @@ class Portfolio:
                  start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
         self.weights = weights.reshape(-1, 1)
-        self.period_min = max([a.period_min for a in assets] + [start_period])
-        self.period_max = min([a.period_max for a in assets] + [end_period])
+        self.period_min = max(start_period, *[a.period_min for a in assets])
+        self.period_max = min(end_period, *[a.period_max for a in assets])
 
         self.assets = [PortfolioAsset(a.symbol,
                                       start_period=self.period_min,
