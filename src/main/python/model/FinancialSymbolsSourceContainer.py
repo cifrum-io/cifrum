@@ -32,7 +32,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker='RU',
+        ticker=Currency.RUB.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('ru'),
         short_name='Инфляция РФ',
         currency=Currency.RUB,
@@ -44,7 +44,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_eu_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker='EU',
+        ticker=Currency.EUR.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('eu'),
         short_name='Инфляция ЕС',
         currency=Currency.EUR,
@@ -56,7 +56,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_us_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker='US',
+        ticker=Currency.USD.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('us'),
         short_name='Инфляция США',
         currency=Currency.USD,

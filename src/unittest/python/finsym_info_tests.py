@@ -17,11 +17,11 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 0)
 
-        info = yapo.information(names=['infl/RU'])
+        info = yapo.information(names=['infl/RUB'])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 1)
 
-        info = yapo.information(names=['micex/SBER', 'infl/RU'])
+        info = yapo.information(names=['micex/SBER', 'infl/RUB'])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 2)
 
@@ -65,9 +65,9 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.adjusted_close, True)
 
     def test_inflation_ru__should_have_correct_fields(self):
-        info = yapo.information(name='infl/RU')
+        info = yapo.information(name='infl/RUB')
         self.assertEqual(info.namespace, 'infl')
-        self.assertEqual(info.ticker, 'RU')
+        self.assertEqual(info.ticker, 'RUB')
         self.assertIsNone(info.isin)
         self.assertEqual(info.short_name, 'Инфляция РФ')
         self.assertIsNone(info.long_name)
@@ -104,24 +104,24 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsNotNone(yapo.information(name='nlu/419'))
         self.assertIsNotNone(yapo.information(name='cbr/USD'))
         self.assertIsNotNone(yapo.information(name='cbr/EUR'))
-        self.assertIsNotNone(yapo.information(name='infl/RU'))
-        self.assertIsNotNone(yapo.information(name='infl/US'))
-        self.assertIsNotNone(yapo.information(name='infl/EU'))
+        self.assertIsNotNone(yapo.information(name='infl/RUB'))
+        self.assertIsNotNone(yapo.information(name='infl/USD'))
+        self.assertIsNotNone(yapo.information(name='infl/EUR'))
         self.assertIsNotNone(yapo.information(name='cbr/TOP_rates'))
 
     def test_return_none_if_no_ticker_is_found(self):
         not_existing_id = 'micex/MCFTR_doesntexist'
         self.assertIsNone(yapo.information(name=not_existing_id))
-        infos = yapo.information(names=['infl/RU', not_existing_id])
+        infos = yapo.information(names=['infl/RUB', not_existing_id])
         self.assertIsNotNone(infos[0])
         self.assertIsNone(infos[1])
 
     def test_return_same_infos_count_as_provided(self):
-        ids_arr = ['infl/RU', 'infl/EU', 'micex/MCFTR', 'micex/SBER']
+        ids_arr = ['infl/RUB', 'infl/EUR', 'micex/MCFTR', 'micex/SBER']
         infos = yapo.information(names=ids_arr)
         self.assertEqual(len(infos), len(ids_arr))
 
     def test_be_invariant_in_respect_to_order(self):
-        infos1 = yapo.information(names=['infl/RU', 'infl/EU'])
-        infos2 = yapo.information(names=['infl/EU', 'infl/RU'])
+        infos1 = yapo.information(names=['infl/RUB', 'infl/EUR'])
+        infos2 = yapo.information(names=['infl/EUR', 'infl/RUB'])
         self.assertCountEqual(infos1, infos2)
