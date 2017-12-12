@@ -12,7 +12,7 @@ import dateutil.relativedelta
 class PortfolioAsset:
 
     def __init__(self, symbol: FinancialSymbol,
-                 start_period: pd.Period, end_period: pd.Period, currency):
+                 start_period: pd.Period, end_period: pd.Period, currency: Currency):
         self.symbol = symbol
         self.start_period = start_period
         self.end_period = end_period
