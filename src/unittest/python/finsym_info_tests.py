@@ -43,7 +43,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.namespace, 'quandl')
         self.assertEqual(info.ticker, 'VNQ')
         self.assertIsNone(info.isin)
-        self.assertEqual(info.short_name, 'Vanguard REIT')
+        self.assertEqual(info.short_name, 'Vanguard Real Estate')
         self.assertIsNone(info.long_name)
         self.assertEqual(info.exchange, 'NYSE Arca')
         self.assertEqual(info.currency, Currency.USD)
