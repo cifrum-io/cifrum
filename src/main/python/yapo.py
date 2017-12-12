@@ -80,7 +80,8 @@ class Yapo:
         """
         names = list(assets.keys())
         weights = np.fromiter(assets.values(), dtype=float, count=len(names))
-        weights /= np.abs(weights.sum())
+        if np.abs(weights.sum() - 1.) > 1e-3:
+            weights /= np.abs(weights.sum())
 
         assets = self.portfolio_asset(names=names,
                                       start_period=start_period, end_period=end_period,
