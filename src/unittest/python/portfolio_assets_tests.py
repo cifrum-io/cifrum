@@ -5,6 +5,7 @@ from pandas.tseries.offsets import MonthEnd
 import pandas as pd
 import numpy as np
 import datetime as dtm
+from freezegun import freeze_time
 
 import yapo
 from model.Enums import Currency, Period, SecurityType
@@ -69,6 +70,12 @@ class PortfolioAssetsTest(unittest.TestCase):
                                               start_period=str(start_period), end_period=str(end_period),
                                               currency='USD')
         self.assertEqual(set(asset.period()), {end_period - 1, end_period - 2})
+
+    @freeze_time('2018-1-30 1:0:0')
+    def test_quandl_values(self):
+        asset = yapo.portfolio_asset(name='quandl/SPY',
+                                     start_period='2017-11', end_period='2018-2', currency='usd')
+        self.assertEqual(set(asset.period()), {pd.Period('2017-11'), pd.Period('2017-12')})
 
     def test_drop_last_month_data_if_no_activity_within_30_days(self):
         num_days = 60

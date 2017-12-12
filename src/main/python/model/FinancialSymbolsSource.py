@@ -175,7 +175,7 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
     def __extract_values(ticker, start_period, end_period):
         df = quandl.get('EOD/{}.11'.format(ticker),
                         start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
-                        end_date=end_period.to_timestamp().strftime('%Y-%m-%d'),
+                        end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),
                         collapse='monthly')
         df_res = pd.DataFrame()
         df_res['close'] = df['Adj_Close']

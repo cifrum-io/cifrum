@@ -2,10 +2,11 @@ from .FinancialSymbol import FinancialSymbol
 from .Enums import Currency, Period
 import pandas as pd
 import numpy as np
-import datetime
 from .Settings import change_column_name
 from contracts import contract
 from typing import List
+import datetime as dtm
+import dateutil.relativedelta
 
 
 class PortfolioAsset:
@@ -15,7 +16,12 @@ class PortfolioAsset:
         self.symbol = symbol
         self.start_period = start_period
         self.end_period = end_period
-        self.values = self.__transform_values_according_to_period(start_period, pd.Period.now(freq='M'))
+
+        datetime_now = dtm.datetime.now()
+        if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
+            datetime_now -= dateutil.relativedelta.relativedelta(months=1)
+        period_end = pd.Period(datetime_now, freq='M')  # can't use Period.now because `now` is mocked in tests
+        self.values = self.__transform_values_according_to_period(start_period=start_period, end_period=period_end)
         self.values = self.values[(self.values['period'] >= start_period) &
                                   (self.values['period'] <= end_period)]
         self.period_min = self.values['period'].min()
@@ -29,7 +35,7 @@ class PortfolioAsset:
 
         if self.symbol.period == Period.DAY:
             vals['period'] = vals['date'].dt.to_period('M')
-            if vals['date'].max() < datetime.datetime.now() - datetime.timedelta(days=30):
+            if vals['date'].max() < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
                 vals = vals[vals['period'] < vals['period'].max()]
             vals_not_current_period = vals['period'] != pd.Period.now(freq='M')
             vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
