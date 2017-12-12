@@ -120,6 +120,9 @@ class Portfolio:
                                       end_period=self.period_max,
                                       currency=currency) for a in assets]
 
+    def assets_weighted(self):
+        return list(zip(self.assets, self.weights.T[0]))
+
     def accumulated_rate_of_return(self):
         arors = np.array([asset.accumulated_rate_of_return() for asset in self.assets])
         return (arors * self.weights).sum(axis=0)
@@ -138,3 +141,11 @@ class Portfolio:
         if cagrs.shape == (1,):
             cagrs = cagrs[0]
         return cagrs
+
+    def close(self):
+        closes = np.vstack(a.close() for a in self.assets)
+        return (closes * self.weights).sum(axis=0)
+
+    def close_change(self):
+        close_changes = np.vstack(a.close_change() for a in self.assets)
+        return (close_changes * self.weights).sum(axis=0)

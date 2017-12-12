@@ -10,6 +10,14 @@ class PortfolioStatisticsTest(unittest.TestCase):
         cls.portfolio = yapo.portfolio(assets={'quandl/BND': .4, 'quandl/VTI': .4, 'quandl/VXUS': .2},
                                        start_period='2011-1', end_period='2017-2', currency='USD')
 
+    def test_close(self):
+        close_naive = sum(asset.close() * weight for asset, weight in self.portfolio.assets_weighted())
+        self.assertTrue(np.all(np.abs(self.portfolio.close() - close_naive) < 1e-3))
+
+    def test_close_change(self):
+        close_change_naive = sum(asset.close_change() * weight for asset, weight in self.portfolio.assets_weighted())
+        self.assertTrue(np.all(np.abs(self.portfolio.close_change() - close_change_naive) < 1e-3))
+
     def test_accumulated_rate_of_return(self):
         arors = self.portfolio.accumulated_rate_of_return()[1:]
         self.assertTrue(np.all((-.06 < arors) & (arors < .55)))
