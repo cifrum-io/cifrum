@@ -124,8 +124,7 @@ class Portfolio:
         return list(zip(self.assets, self.weights.T[0]))
 
     def accumulated_rate_of_return(self):
-        arors = np.array([asset.accumulated_rate_of_return() for asset in self.assets])
-        return (arors * self.weights).sum(axis=0)
+        return (self.rate_of_return() + 1.).cumprod() - 1.
 
     def risk(self):
         risks = np.array([asset.risk() for asset in self.assets])
