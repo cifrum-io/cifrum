@@ -71,17 +71,17 @@ class PortfolioAsset:
     def close(self):
         return self.values['close'].values
 
-    def close_change(self):
+    def rate_of_return(self):
         return self.values[change_column_name].values
 
     def period(self):
         return self.values['period'].values
 
     def accumulated_rate_of_return(self):
-        return (self.close_change() + 1.).cumprod() - 1.
+        return (self.rate_of_return() + 1.).cumprod() - 1.
 
     def risk(self):
-        return np.std(self.close_change())
+        return np.std(self.rate_of_return())
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
@@ -146,6 +146,6 @@ class Portfolio:
         closes = np.vstack(a.close() for a in self.assets)
         return (closes * self.weights).sum(axis=0)
 
-    def close_change(self):
-        close_changes = np.vstack(a.close_change() for a in self.assets)
-        return (close_changes * self.weights).sum(axis=0)
+    def rate_of_return(self):
+        assets_rate_of_returns = np.vstack(a.rate_of_return() for a in self.assets)
+        return (assets_rate_of_returns * self.weights).sum(axis=0)
