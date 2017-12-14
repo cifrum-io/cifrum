@@ -142,10 +142,6 @@ class Portfolio:
             cagrs = cagrs[0]
         return cagrs
 
-    def close(self):
-        closes = np.vstack(a.close() for a in self.assets)
-        return (closes * self.weights).sum(axis=0)
-
     def rate_of_return(self):
         assets_rate_of_returns = np.vstack(a.rate_of_return() for a in self.assets)
         return (assets_rate_of_returns * self.weights).sum(axis=0)
