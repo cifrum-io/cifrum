@@ -110,6 +110,6 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     def test_close_and_its_change_should_preserve_ratio(self):
         for asset in self.portfolio.assets:
-            values_change_given = asset.close_change()
-            values_change_expected = np.diff(asset.close()) / asset.close()[:-1]
-            self.assertTrue(np.all(np.abs(values_change_given[1:] - values_change_expected) < 1e-3))
+            rate_of_return_given = asset.rate_of_return()
+            rate_of_return_expected = np.diff(asset.close()) / asset.close()[:-1]
+            self.assertTrue(np.all(np.abs(rate_of_return_given[1:] - rate_of_return_expected) < 1e-3))
