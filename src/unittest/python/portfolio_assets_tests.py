@@ -56,7 +56,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                'date': date_list})
 
         test_source = SingleFinancialSymbolSource(
-            namespace='test_ns', ticker='test',
+            namespace='test_ns', name='test',
             values_fetcher=lambda: values,
             security_type=SecurityType.STOCK_ETF,
             period=Period.DAY,
@@ -87,7 +87,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                'date': date_list})
 
         test_source = SingleFinancialSymbolSource(
-            namespace='test_ns', ticker='test',
+            namespace='test_ns', name='test',
             values_fetcher=lambda: values,
             security_type=SecurityType.STOCK_ETF,
             period=Period.DAY,

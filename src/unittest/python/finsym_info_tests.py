@@ -109,7 +109,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsNotNone(yapo.information(name='infl/EUR'))
         self.assertIsNotNone(yapo.information(name='cbr/TOP_rates'))
 
-    def test_return_none_if_no_ticker_is_found(self):
+    def test_return_none_if_no_finsym_is_found(self):
         not_existing_id = 'micex/MCFTR_doesntexist'
         self.assertIsNone(yapo.information(name=not_existing_id))
         infos = yapo.information(names=['infl/RUB', not_existing_id])

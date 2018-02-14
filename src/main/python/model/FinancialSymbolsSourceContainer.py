@@ -32,7 +32,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker=Currency.RUB.name,
+        name=Currency.RUB.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('ru'),
         short_name='Инфляция РФ',
         currency=Currency.RUB,
@@ -44,7 +44,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_eu_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker=Currency.EUR.name,
+        name=Currency.EUR.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('eu'),
         short_name='Инфляция ЕС',
         currency=Currency.EUR,
@@ -56,7 +56,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     inflation_us_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
-        ticker=Currency.USD.name,
+        name=Currency.USD.name,
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('us'),
         short_name='Инфляция США',
         currency=Currency.USD,
@@ -68,7 +68,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     cbr_top_rates_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='cbr',
-        ticker='TOP_rates',
+        name='TOP_rates',
         values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_toprates(),
         long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях)',
         currency=Currency.RUB,
@@ -80,7 +80,7 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     micex_mcftr_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='micex',
-        ticker='MCFTR',
+        name='MCFTR',
         values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'moex/mcftr/data.csv', sep='\t'),
         short_name='MICEX Total Return',
         currency=Currency.RUB,

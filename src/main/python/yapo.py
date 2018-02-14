@@ -15,7 +15,7 @@ class Yapo:
 
     def information(self, **kwargs) -> Union[FinancialSymbol, List[FinancialSymbol]]:
         """
-        Fetches ticker information based on internal ID.
+        Fetches financial symbol information based on internal ID.
         The information includes ISIN, short and long
         names, exchange, currency, etc.
 

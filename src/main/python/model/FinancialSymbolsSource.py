@@ -15,7 +15,7 @@ class FinancialSymbolsSource:
     def __init__(self, namespace):
         self.namespace = namespace
 
-    def fetch_financial_symbol(self, ticker: str):
+    def fetch_financial_symbol(self, name: str):
         raise Exception('should not be called')
 
     def __repr__(self):
@@ -30,7 +30,7 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
         return df[(df['date'].dt.to_period('M') >= start_period) &
                   (df['date'].dt.to_period('M') <= end_period)].copy()
 
-    def __init__(self, values_fetcher, namespace, ticker,
+    def __init__(self, values_fetcher, namespace, name,
                  isin=None,
                  short_name=None,
                  long_name=None,
@@ -40,9 +40,9 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                  period=None,
                  adjusted_close=None):
         super().__init__(namespace)
-        self.ticker = ticker
+        self.name = name
         self.financial_symbol = \
-            FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=self.ticker),
+            FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=self.name),
                             values=lambda start_period, end_period:
                                 self.__extract_values(values_fetcher, start_period, end_period),
                             isin=isin,
@@ -54,8 +54,8 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                             period=period,
                             adjusted_close=adjusted_close)
 
-    def fetch_financial_symbol(self, ticker: str):
-        return self.financial_symbol if ticker == self.ticker else None
+    def fetch_financial_symbol(self, name: str):
+        return self.financial_symbol if name == self.name else None
 
 
 class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
@@ -68,13 +68,13 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
         }
 
     @staticmethod
-    def __currency_values(ticker, start_period, end_period):
+    def __currency_values(name, start_period, end_period):
         currency_min_date = {
             Currency.RUB.name: pd.Period('1990', freq='M'),
             Currency.USD.name: pd.Period('1900', freq='M'),
             Currency.EUR.name: pd.Period('1999', freq='M'),
         }
-        start_period = max(start_period, currency_min_date[ticker])
+        start_period = max(start_period, currency_min_date[name])
         end_period = min(end_period, pd.Period.now(freq='M'))
         date_range = pd.date_range(start=start_period.to_timestamp(),
                                    end=(end_period + 1).to_timestamp(),
@@ -84,14 +84,14 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
         return df[(df['date'].dt.to_period('M') >= start_period) &
                   (df['date'].dt.to_period('M') <= end_period)].copy()
 
-    def fetch_financial_symbol(self, ticker: str):
-        currency = Currency.__dict__.get(ticker)
+    def fetch_financial_symbol(self, name: str):
+        currency = Currency.__dict__.get(name)
         if currency is None:
             return None
         else:
             fs = FinancialSymbol(
-                identifier=FinancialSymbolId(namespace='cbr', name=ticker),
-                values=lambda start_period, end_period: self.__currency_values(ticker, start_period, end_period),
+                identifier=FinancialSymbolId(namespace='cbr', name=name),
+                values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
                 short_name=self.short_names[currency],
                 currency=currency,
                 security_type=SecurityType.CURRENCY,
@@ -113,10 +113,10 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         return df[(df['date'].dt.to_period('M') >= start_period) &
                   (df['date'].dt.to_period('M') <= end_period)].copy()
 
-    def fetch_financial_symbol(self, ticker: str):
+    def fetch_financial_symbol(self, name: str):
         for _, row in self.index.iterrows():
             secid = row['SECID']
-            if secid == ticker:
+            if secid == name:
                 symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=secid),
                                          values=lambda start_period, end_period:
                                              self.__extract_values(secid, start_period, end_period),
@@ -145,10 +145,10 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         return df[(df['date'].dt.to_period('M') >= start_period) &
                   (df['date'].dt.to_period('M') <= end_period)].copy()
 
-    def fetch_financial_symbol(self, ticker: str):
+    def fetch_financial_symbol(self, name: str):
         for _, row in self.index.iterrows():
             row_id = str(row['id'])
-            if row_id == ticker:
+            if row_id == name:
                 symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=row_id),
                                          values=lambda start_period, end_period:
                                              self.__extract_values(row_id, start_period, end_period),
@@ -166,12 +166,12 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
 
     def __init__(self):
         super().__init__(namespace='quandl')
-        ticker_list_url = 'http://static.quandl.com/end_of_day_us_stocks/ticker_list.csv'
-        self.ticker_list = pd.read_csv(filepath_or_buffer=ticker_list_url, index_col=0)
+        names_list_url = 'http://static.quandl.com/end_of_day_us_stocks/ticker_list.csv'
+        self.names_list = pd.read_csv(filepath_or_buffer=names_list_url, index_col=0)
 
     @staticmethod
-    def __extract_values(ticker, start_period, end_period):
-        df = quandl.get('EOD/{}.11'.format(ticker),
+    def __extract_values(name, start_period, end_period):
+        df = quandl.get('EOD/{}.11'.format(name),
                         start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
                         end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),
                         collapse='monthly')
@@ -180,12 +180,12 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
         df_res['date'] = df_res.index
         return df_res
 
-    def fetch_financial_symbol(self, ticker: str):
-        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=ticker),
+    def fetch_financial_symbol(self, name: str):
+        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                  values=lambda start_period, end_period:
-                                     self.__extract_values(ticker, start_period, end_period),
-                                 exchange=self.ticker_list.loc[ticker, 'Exchange'],
-                                 short_name=self.ticker_list.loc[ticker, 'Name'],
+                                     self.__extract_values(name, start_period, end_period),
+                                 exchange=self.names_list.loc[name, 'Exchange'],
+                                 short_name=self.names_list.loc[name, 'Name'],
                                  currency=Currency.USD,
                                  security_type=SecurityType.STOCK_ETF,
                                  period=Period.DAY,
@@ -215,7 +215,7 @@ class FinancialSymbolsRegistry(object):
             elif result_count == 0:
                 return None
             else:
-                raise Exception('Something went wrong. {} tickers are found for {}. '
+                raise Exception('Something went wrong. {} names are found for {}. '
                                 'Please, submit the issue'
                                 .format(result_count, financial_symbol_id.format()))
         else:
