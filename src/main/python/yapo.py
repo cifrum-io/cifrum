@@ -2,6 +2,7 @@ from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContaine
 from model.Portfolio import Portfolio, PortfolioAsset
 from model.Enums import Currency, SecurityType
 from model.FinancialSymbol import FinancialSymbol
+from model.FinancialSymbolId import FinancialSymbolId
 from contracts import contract
 from typing import List, Dict, Union
 import pandas as pd
@@ -29,8 +30,8 @@ class Yapo:
         """
         if 'name' in kwargs:
             name = kwargs['name']
-            ticker_namespace, ticker = name.split('/')
-            finsym_info = self.fin_syms_registry.get(ticker_namespace, ticker)
+            financial_symbol_id = FinancialSymbolId.parse(name)
+            finsym_info = self.fin_syms_registry.get(financial_symbol_id)
             return finsym_info
         elif 'names' in kwargs:
             names = kwargs['names']

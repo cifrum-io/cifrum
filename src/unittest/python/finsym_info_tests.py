@@ -28,7 +28,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_micex_stocks_should_have_correct_fields(self):
         info = yapo.information(name='micex/SBER')
         self.assertEqual(info.namespace, 'micex')
-        self.assertEqual(info.ticker, 'SBER')
+        self.assertEqual(info.name, 'SBER')
         self.assertEqual(info.isin, 'RU0009029540')
         self.assertEqual(info.short_name, 'Сбербанк')
         self.assertEqual(info.long_name, 'Сбербанк России ПАО ао')
@@ -41,7 +41,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_quandl_stocks_should_have_correct_fields(self):
         info = yapo.information(name='quandl/VNQ')
         self.assertEqual(info.namespace, 'quandl')
-        self.assertEqual(info.ticker, 'VNQ')
+        self.assertEqual(info.name, 'VNQ')
         self.assertIsNone(info.isin)
         self.assertEqual(info.short_name, 'Vanguard Real Estate')
         self.assertIsNone(info.long_name)
@@ -54,7 +54,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_currency_usd__should_have_correct_fields(self):
         info = yapo.information(name='cbr/USD')
         self.assertEqual(info.namespace, 'cbr')
-        self.assertEqual(info.ticker, 'USD')
+        self.assertEqual(info.name, 'USD')
         self.assertIsNone(info.isin)
         self.assertEqual(info.short_name, 'Доллар США')
         self.assertIsNone(info.long_name)
@@ -67,7 +67,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_inflation_ru__should_have_correct_fields(self):
         info = yapo.information(name='infl/RUB')
         self.assertEqual(info.namespace, 'infl')
-        self.assertEqual(info.ticker, 'RUB')
+        self.assertEqual(info.name, 'RUB')
         self.assertIsNone(info.isin)
         self.assertEqual(info.short_name, 'Инфляция РФ')
         self.assertIsNone(info.long_name)
@@ -83,7 +83,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
     def test_top_rates__should_have_correct_fields(self):
         info = yapo.information(name='cbr/TOP_rates')
         self.assertEqual(info.namespace, 'cbr')
-        self.assertEqual(info.ticker, 'TOP_rates')
+        self.assertEqual(info.name, 'TOP_rates')
         self.assertIsNone(info.isin)
         self.assertIsNone(info.short_name)
         self.assertTrue(info.long_name.startswith('Динамика максимальной процентной'))

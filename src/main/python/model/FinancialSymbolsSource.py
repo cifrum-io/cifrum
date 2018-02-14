@@ -8,6 +8,7 @@ import quandl
 from . import Settings
 from .Enums import Currency, SecurityType, Period
 from .FinancialSymbol import FinancialSymbol
+from .FinancialSymbolId import FinancialSymbolId
 
 
 class FinancialSymbolsSource:
@@ -40,18 +41,18 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                  adjusted_close=None):
         super().__init__(namespace)
         self.ticker = ticker
-        self.financial_symbol = FinancialSymbol(namespace=self.namespace,
-                                                ticker=self.ticker,
-                                                values=lambda start_period, end_period:
-                                                    self.__extract_values(values_fetcher, start_period, end_period),
-                                                isin=isin,
-                                                short_name=short_name,
-                                                long_name=long_name,
-                                                exchange=exchange,
-                                                currency=currency,
-                                                security_type=security_type,
-                                                period=period,
-                                                adjusted_close=adjusted_close)
+        self.financial_symbol = \
+            FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=self.ticker),
+                            values=lambda start_period, end_period:
+                                self.__extract_values(values_fetcher, start_period, end_period),
+                            isin=isin,
+                            short_name=short_name,
+                            long_name=long_name,
+                            exchange=exchange,
+                            currency=currency,
+                            security_type=security_type,
+                            period=period,
+                            adjusted_close=adjusted_close)
 
     def fetch_financial_symbol(self, ticker: str):
         return self.financial_symbol if ticker == self.ticker else None
@@ -89,8 +90,7 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
             return None
         else:
             fs = FinancialSymbol(
-                namespace='cbr',
-                ticker=ticker,
+                identifier=FinancialSymbolId(namespace='cbr', name=ticker),
                 values=lambda start_period, end_period: self.__currency_values(ticker, start_period, end_period),
                 short_name=self.short_names[currency],
                 currency=currency,
@@ -117,8 +117,7 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         for _, row in self.index.iterrows():
             secid = row['SECID']
             if secid == ticker:
-                symbol = FinancialSymbol(namespace=self.namespace,
-                                         ticker=secid,
+                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=secid),
                                          values=lambda start_period, end_period:
                                              self.__extract_values(secid, start_period, end_period),
                                          exchange='MICEX',
@@ -150,8 +149,7 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         for _, row in self.index.iterrows():
             row_id = str(row['id'])
             if row_id == ticker:
-                symbol = FinancialSymbol(namespace=self.namespace,
-                                         ticker=row_id,
+                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=row_id),
                                          values=lambda start_period, end_period:
                                              self.__extract_values(row_id, start_period, end_period),
                                          short_name=row['ПИФ'],
@@ -183,8 +181,7 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
         return df_res
 
     def fetch_financial_symbol(self, ticker: str):
-        symbol = FinancialSymbol(namespace=self.namespace,
-                                 ticker=ticker,
+        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=ticker),
                                  values=lambda start_period, end_period:
                                      self.__extract_values(ticker, start_period, end_period),
                                  exchange=self.ticker_list.loc[ticker, 'Exchange'],
@@ -205,11 +202,11 @@ class FinancialSymbolsRegistry(object):
         for k, v in groupby(symbol_sources, key=symbol_source_key):
             self.symbol_sources.update({k: list(v)})
 
-    def get(self, namespace, ticker):
-        if namespace in self.symbol_sources.keys():
+    def get(self, financial_symbol_id: FinancialSymbolId):
+        if financial_symbol_id.namespace in self.symbol_sources.keys():
             result = []
-            for symbol_source in self.symbol_sources.get(namespace):
-                fin_symbol = symbol_source.fetch_financial_symbol(ticker)
+            for symbol_source in self.symbol_sources.get(financial_symbol_id.namespace):
+                fin_symbol = symbol_source.fetch_financial_symbol(financial_symbol_id.name)
                 if fin_symbol:
                     result.append(fin_symbol)
             result_count = len(result)
@@ -218,9 +215,9 @@ class FinancialSymbolsRegistry(object):
             elif result_count == 0:
                 return None
             else:
-                raise Exception('Something went wrong. {} tickers are found for {}/{}. '
+                raise Exception('Something went wrong. {} tickers are found for {}. '
                                 'Please, submit the issue'
-                                .format(result_count, namespace, ticker))
+                                .format(result_count, financial_symbol_id.format()))
         else:
             return None
 
