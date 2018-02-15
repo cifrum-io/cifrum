@@ -3,6 +3,7 @@ from itertools import groupby
 from pprint import pformat
 
 import pandas as pd
+import numpy as np
 import quandl
 
 from . import Settings
@@ -20,6 +21,9 @@ class FinancialSymbolsSource:
 
     def __repr__(self):
         return pformat(vars(self))
+
+    def get_names(self):
+        raise Exception('should not be called')
 
 
 class SingleFinancialSymbolSource(FinancialSymbolsSource):
@@ -56,6 +60,9 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
 
     def fetch_financial_symbol(self, name: str):
         return self.financial_symbol if name == self.name else None
+
+    def get_names(self):
+        return [self.financial_symbol.identifier.format()]
 
 
 class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
@@ -100,6 +107,10 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
             )
             return fs
 
+    def get_names(self):
+        return [FinancialSymbolId(self.namespace, short_name.name).format()
+                for short_name in self.short_names.keys()]
+
 
 class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
@@ -131,6 +142,10 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
                 return symbol
         return None
 
+    def get_names(self):
+        def finsym_format(secid: str): return FinancialSymbolId(self.namespace, secid).format()
+        return list(self.index['SECID'].apply(finsym_format).values)
+
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
@@ -159,6 +174,11 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
                                          adjusted_close=True)
                 return symbol
         return None
+
+    def get_names(self):
+        def finsym_format(id_str: int):
+            return FinancialSymbolId(self.namespace, str(id_str)).format()
+        return list(self.index['id'].apply(finsym_format).values)
 
 
 class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
@@ -192,6 +212,11 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
                                  adjusted_close=True)
         return symbol
 
+    def get_names(self):
+        def finsym_format(ticker_name: str):
+            return FinancialSymbolId(self.namespace, str(ticker_name)).format()
+        return list(np.vectorize(finsym_format)(self.names_list.index.values))
+
 
 class FinancialSymbolsRegistry(object):
     def __init__(self, symbol_sources):
@@ -201,6 +226,16 @@ class FinancialSymbolsRegistry(object):
         self.symbol_sources = {}
         for k, v in groupby(symbol_sources, key=symbol_source_key):
             self.symbol_sources.update({k: list(v)})
+
+    def namespaces(self):
+        return list(self.symbol_sources.keys())
+
+    def get_names(self, namespace):
+        if namespace is None:
+            return None
+        return [name
+                for sym_source in self.symbol_sources.get(namespace)
+                for name in sym_source.get_names()]
 
     def get(self, financial_symbol_id: FinancialSymbolId):
         if financial_symbol_id.namespace in self.symbol_sources.keys():

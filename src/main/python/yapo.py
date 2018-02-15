@@ -97,8 +97,36 @@ class Yapo:
                                        currency=currency)
         return portfolio_instance
 
+    def available_names(self, **kwargs):
+        """
+        Returns the list of registered financial symbols names
+
+        :param kwargs:
+            either `namespace`, or `namespaces`, or nothing should be provided
+
+            namespace (str): namespace of financial symbols
+
+            namespaces (List[str]): a list of namespaces of financial symbols
+
+            DEFAULT: returns the list of all registered namespaces
+
+        :returns: (List[str]) list of financial symbols full names
+        """
+        if 'namespace' in kwargs:
+            namespace = kwargs['namespace']
+            return self.fin_syms_registry.get_names(namespace)
+        elif 'namespaces' in kwargs:
+            namespaces = kwargs['namespaces']
+            assert isinstance(namespaces, list)
+            return [name
+                    for namespace in namespaces
+                    for name in self.available_names(namespace=namespace)]
+        else:
+            return self.fin_syms_registry.namespaces()
+
 
 yapo_instance = Yapo(fin_syms_registry=FinancialSymbolsSourceContainer.financial_symbols_registry())
 information = yapo_instance.information
 portfolio = yapo_instance.portfolio
 portfolio_asset = yapo_instance.portfolio_asset
+available_names = yapo_instance.available_names
