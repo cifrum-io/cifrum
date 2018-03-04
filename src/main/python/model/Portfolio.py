@@ -80,8 +80,18 @@ class PortfolioAsset:
     def accumulated_rate_of_return(self):
         return (self.rate_of_return() + 1.).cumprod() - 1.
 
-    def risk(self):
-        return np.std(self.rate_of_return())
+    def risk(self, period='year'):
+        """
+        Returns risk of the asset
+
+        :param period:
+            month - returns monthly risk
+
+            year - returns risk approximated to yearly value
+        """
+        return Portfolio(assets=[self], weights=np.array([1.0]),
+                         start_period=self.start_period, end_period=self.end_period,
+                         currency=self.currency).risk(period=period)
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
@@ -126,9 +136,22 @@ class Portfolio:
     def accumulated_rate_of_return(self):
         return (self.rate_of_return() + 1.).cumprod() - 1.
 
-    def risk(self):
-        risks = np.array([asset.risk() for asset in self.assets])
-        return (risks * self.weights).sum()
+    def risk(self, period='year'):
+        """
+        Returns risk of the asset
+
+        :param period:
+            month - returns monthly risk
+
+            year - returns risk approximated to yearly value
+        """
+        if period == 'month':
+            return np.std(self.rate_of_return()[1:])
+        elif period == 'year':
+            mean = np.mean(1 + self.rate_of_return()[1:])
+            return np.sqrt((self.risk('month') ** 2 + mean ** 2) ** 12 - mean ** 24)
+        else:
+            raise Exception('unexpected value of `period` {}'.format(period))
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
