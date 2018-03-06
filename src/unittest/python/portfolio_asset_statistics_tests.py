@@ -29,4 +29,4 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertTrue(np.all(cagr_diff))
 
     def test_risk(self):
-        self.assertTrue(abs(self.asset.risk() - .009) < 1e-3)
+        self.assertTrue(abs(self.asset.risk() - .0311) < 1e-3)
