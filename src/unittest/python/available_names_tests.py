@@ -10,22 +10,27 @@ class AvailableNamesTest(unittest.TestCase):
                          {'infl', 'cbr', 'micex', 'nlu', 'quandl'})
 
     def test__get_names_for_individual_namespace(self):
-        self.assertEqual(set(yapo.available_names(namespace='infl')),
-                         {'infl/RUB', 'infl/EUR', 'infl/USD'})
-        self.assertEqual(set(yapo.available_names(namespace='cbr')),
-                         {'cbr/TOP_rates', 'cbr/RUB', 'cbr/USD', 'cbr/EUR'})
-        self.assertTrue(set(yapo.available_names(namespace='micex')).issuperset(
+        def __fin_sim_ids(namespace):
+            return set(available_name.fin_sym_id.format()
+                       for available_name in yapo.available_names(namespace=namespace))
+
+        self.assertEqual(__fin_sim_ids(namespace='infl'), {'infl/RUB', 'infl/EUR', 'infl/USD'})
+        self.assertEqual(__fin_sim_ids(namespace='cbr'), {'cbr/TOP_rates', 'cbr/RUB', 'cbr/USD', 'cbr/EUR'})
+        self.assertTrue(__fin_sim_ids(namespace='micex').issuperset(
             {'micex/MCFTR', 'micex/MRKY', 'micex/URKZ', 'micex/VSMO', 'micex/ROSN'}
         ))
-        self.assertTrue(set(yapo.available_names(namespace='nlu')).issuperset(
+        self.assertTrue(__fin_sim_ids(namespace='nlu').issuperset(
             {'nlu/1129', 'nlu/630', 'nlu/6', 'nlu/617'}
         ))
-        self.assertTrue(set(yapo.available_names(namespace='quandl')).issuperset(
+        self.assertTrue(__fin_sim_ids(namespace='quandl').issuperset(
             {'quandl/A', 'quandl/AA', 'quandl/AAAP', 'quandl/AABA', 'quandl/AAC'}
         ))
 
     def test__return_several_namespaces(self):
-        self.assertTrue(set(yapo.available_names(namespaces=['infl', 'quandl'])).issuperset(
+        available_name_ids = set(available_name.fin_sym_id.format()
+                                 for available_name in yapo.available_names(namespaces=['infl', 'quandl']))
+
+        self.assertTrue(available_name_ids.issuperset(
             {'infl/RUB', 'infl/EUR', 'infl/USD',
              'quandl/A', 'quandl/AA', 'quandl/AAAP', 'quandl/AABA', 'quandl/AAC'}
         ))

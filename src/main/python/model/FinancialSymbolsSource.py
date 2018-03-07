@@ -10,6 +10,7 @@ from . import Settings
 from .Enums import Currency, SecurityType, Period
 from .FinancialSymbol import FinancialSymbol
 from .FinancialSymbolId import FinancialSymbolId
+from .FinancialSymbolInfo import FinancialSymbolInfo
 
 
 class FinancialSymbolsSource:
@@ -22,7 +23,7 @@ class FinancialSymbolsSource:
     def __repr__(self):
         return pformat(vars(self))
 
-    def get_names(self):
+    def get_all_infos(self):
         raise Exception('should not be called')
 
 
@@ -61,8 +62,12 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
     def fetch_financial_symbol(self, name: str):
         return self.financial_symbol if name == self.name else None
 
-    def get_names(self):
-        return [self.financial_symbol.identifier.format()]
+    def get_all_infos(self):
+        fin_sym_info = FinancialSymbolInfo(
+            fin_sym_id=self.financial_symbol.identifier,
+            short_name=self.financial_symbol.short_name
+        )
+        return [fin_sym_info]
 
 
 class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
@@ -107,9 +112,13 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
             )
             return fs
 
-    def get_names(self):
-        return [FinancialSymbolId(self.namespace, short_name.name).format()
-                for short_name in self.short_names.keys()]
+    def get_all_infos(self):
+        return [
+            FinancialSymbolInfo(
+                fin_sym_id=FinancialSymbolId(self.namespace, short_name.name),
+                short_name=short_name
+            ) for short_name in self.short_names.keys()
+        ]
 
 
 class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
@@ -141,9 +150,14 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
                 return symbol
         return None
 
-    def get_names(self):
-        def finsym_format(secid: str): return FinancialSymbolId(self.namespace, secid).format()
-        return list(self.index['name'].apply(finsym_format).values)
+    def get_all_infos(self):
+        def finsym_format(row):
+            fin_sym_info = FinancialSymbolInfo(
+                fin_sym_id=FinancialSymbolId(self.namespace, row['name']),
+                short_name=row['short_name']
+            )
+            return fin_sym_info
+        return list(self.index.apply(finsym_format, axis=1).values)
 
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
@@ -173,10 +187,14 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
                 return symbol
         return None
 
-    def get_names(self):
-        def finsym_format(id_str: int):
-            return FinancialSymbolId(self.namespace, str(id_str)).format()
-        return list(self.index['name'].apply(finsym_format).values)
+    def get_all_infos(self):
+        def finsym_format(row):
+            fin_sym_info = FinancialSymbolInfo(
+                fin_sym_id=FinancialSymbolId(self.namespace, str(row['name'])),
+                short_name=row['short_name']
+            )
+            return fin_sym_info
+        return list(self.index.apply(finsym_format, axis=1).values)
 
 
 class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
@@ -210,9 +228,10 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
                                  adjusted_close=True)
         return symbol
 
-    def get_names(self):
+    def get_all_infos(self):
         def finsym_format(ticker_name: str):
-            return FinancialSymbolId(self.namespace, str(ticker_name)).format()
+            fsi = FinancialSymbolId(self.namespace, str(ticker_name)).format()
+            return FinancialSymbolInfo(fin_sym_id=fsi, short_name=self.names_list.loc[ticker_name, 'Name'])
         return list(np.vectorize(finsym_format)(self.names_list.index.values))
 
 
@@ -228,12 +247,12 @@ class FinancialSymbolsRegistry(object):
     def namespaces(self):
         return list(self.symbol_sources.keys())
 
-    def get_names(self, namespace):
+    def get_all_infos(self, namespace):
         if namespace is None:
             return None
         return [name
                 for sym_source in self.symbol_sources.get(namespace)
-                for name in sym_source.get_names()]
+                for name in sym_source.get_all_infos()]
 
     def get(self, financial_symbol_id: FinancialSymbolId):
         if financial_symbol_id.namespace in self.symbol_sources.keys():

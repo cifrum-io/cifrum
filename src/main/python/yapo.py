@@ -114,7 +114,7 @@ class Yapo:
         """
         if 'namespace' in kwargs:
             namespace = kwargs['namespace']
-            return self.fin_syms_registry.get_names(namespace)
+            return self.fin_syms_registry.get_all_infos(namespace)
         elif 'namespaces' in kwargs:
             namespaces = kwargs['namespaces']
             assert isinstance(namespaces, list)
