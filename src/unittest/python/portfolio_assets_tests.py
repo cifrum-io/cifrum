@@ -18,7 +18,7 @@ class PortfolioAssetsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.portfolio = yapo.portfolio(assets={'quandl/MSFT': 1.,
                                                'micex/SBER': 1., 'micex/SBERP': 1.,
-                                               'nlu/419': 1.,
+                                               'nlu/449': 1.,
                                                'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
                                        start_period='2011-3', end_period='2015-5', currency='USD')
 

@@ -116,7 +116,7 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
-        self.index = pd.read_csv(self.url_base + 'stocks_list.csv', sep='\t')
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
     def __extract_values(self, secid, start_period, end_period):
         df = pd.read_csv(self.url_base + secid + '.csv', sep='\t')
@@ -126,15 +126,14 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
 
     def fetch_financial_symbol(self, name: str):
         for _, row in self.index.iterrows():
-            secid = row['SECID']
-            if secid == name:
-                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=secid),
+            if row['name'] == name:
+                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                          values=lambda start_period, end_period:
-                                             self.__extract_values(secid, start_period, end_period),
+                                             self.__extract_values(name, start_period, end_period),
                                          exchange='MICEX',
-                                         short_name=row['SHORTNAME'],
-                                         long_name=row['NAME'],
-                                         isin=row['ISIN'],
+                                         short_name=row['short_name'],
+                                         long_name=row['long_name'],
+                                         isin=row['isin'],
                                          currency=Currency.RUB,
                                          security_type=SecurityType.STOCK_ETF,
                                          period=Period.DAY,
@@ -144,14 +143,14 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
 
     def get_names(self):
         def finsym_format(secid: str): return FinancialSymbolId(self.namespace, secid).format()
-        return list(self.index['SECID'].apply(finsym_format).values)
+        return list(self.index['name'].apply(finsym_format).values)
 
 
 class NluFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='nlu')
         self.url_base = Settings.rostsber_url + 'mut_rus/'
-        self.index = pd.read_csv(self.url_base + 'mut_rus.csv', sep='\t')
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
@@ -162,12 +161,11 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
 
     def fetch_financial_symbol(self, name: str):
         for _, row in self.index.iterrows():
-            row_id = str(row['id'])
-            if row_id == name:
-                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=row_id),
+            if str(row['name']) == name:
+                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                          values=lambda start_period, end_period:
-                                             self.__extract_values(row_id, start_period, end_period),
-                                         short_name=row['ПИФ'],
+                                             self.__extract_values(name, start_period, end_period),
+                                         short_name=row['short_name'],
                                          currency=Currency.RUB,
                                          security_type=SecurityType.MUT,
                                          period=Period.DAY,
@@ -178,7 +176,7 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
     def get_names(self):
         def finsym_format(id_str: int):
             return FinancialSymbolId(self.namespace, str(id_str)).format()
-        return list(self.index['id'].apply(finsym_format).values)
+        return list(self.index['name'].apply(finsym_format).values)
 
 
 class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
