@@ -148,6 +148,9 @@ class Portfolio:
         if period == 'month':
             return np.std(self.rate_of_return()[1:])
         elif period == 'year':
+            if self.period_max - self.period_min < 12:
+                raise Exception('year risk is request for less than 12 months')
+
             mean = np.mean(1 + self.rate_of_return()[1:])
             return np.sqrt((self.risk('month') ** 2 + mean ** 2) ** 12 - mean ** 24)
         else:

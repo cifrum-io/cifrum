@@ -7,7 +7,8 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.portfolio = yapo.portfolio(assets={'quandl/BND': .4, 'quandl/VTI': .4, 'quandl/VXUS': .2},
+        cls.asset_names = {'quandl/BND': .4, 'quandl/VTI': .4, 'quandl/VXUS': .2}
+        cls.portfolio = yapo.portfolio(assets=cls.asset_names,
                                        start_period='2011-1', end_period='2017-2', currency='USD')
 
     def test_rate_of_return(self):
@@ -34,4 +35,11 @@ class PortfolioStatisticsTest(unittest.TestCase):
         self.assertTrue(np.all(cagr_diff))
 
     def test_risk(self):
+        short_portfolio = \
+            yapo.portfolio(assets=self.asset_names,
+                           start_period='2016-8', end_period='2016-12', currency='USD')
+
+        self.assertRaises(Exception, short_portfolio, period='year')
         self.assertTrue(abs(self.portfolio.risk() - .078) < 1e-3)
+        self.assertTrue(abs(self.portfolio.risk(period='year') - .078) < 1e-3)
+        self.assertTrue(abs(self.portfolio.risk(period='month') - .021) < 1e-3)
