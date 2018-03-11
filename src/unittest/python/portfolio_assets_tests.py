@@ -119,7 +119,6 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
 
         self.assertEqual(self.portfolio.inflation(kind='values').size,
-                         self.portfolio.close().size)
-        self.assertTrue(abs(self.portfolio.inflation(kind='accumulated') - 0.1102) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.inflation(kind='mean') - 0.0173) < self.epsilon)
-
+                         self.portfolio.rate_of_return().size)
+        self.assertTrue(abs(self.portfolio.inflation(kind='accumulated') - .0478) < self.epsilon)
+        self.assertTrue(abs(self.portfolio.inflation(kind='mean') - .0134) < self.epsilon)

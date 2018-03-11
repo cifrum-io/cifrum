@@ -23,13 +23,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
-        self.assertTrue(abs(cagr_default - .182) < self.epsilon)
+        self.assertTrue(abs(cagr_default - .174) < self.epsilon)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20)
         self.assertTrue(abs(cagr_default - cagr_long_time) < self.epsilon)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1)
-        self.assertTrue(abs(cagr_one_year - .475) < self.epsilon)
+        self.assertTrue(abs(cagr_one_year - .473) < self.epsilon)
 
         cagr_array = self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1])
         cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon

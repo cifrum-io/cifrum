@@ -18,13 +18,13 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate(self):
         cagr_default = self.asset.compound_annual_growth_rate()
-        self.assertTrue(abs(cagr_default - 0.03) < self.epsilon)
+        self.assertTrue(abs(cagr_default - 0.027) < self.epsilon)
 
         cagr_long_time = self.asset.compound_annual_growth_rate(years_ago=20)
         self.assertTrue(abs(cagr_default - cagr_long_time) < self.epsilon)
 
         cagr_one_year = self.asset.compound_annual_growth_rate(years_ago=1)
-        self.assertTrue(abs(cagr_one_year - .012) < self.epsilon)
+        self.assertTrue(abs(cagr_one_year - .011) < self.epsilon)
 
         cagr_array = self.asset.compound_annual_growth_rate(years_ago=[None, 20, 1])
         cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon
@@ -44,7 +44,6 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
 
         self.assertEqual(self.asset.inflation(kind='values').size,
-                         self.asset.rate_of_return().size)
-        self.assertTrue(abs(self.asset.inflation(kind='accumulated') - 0.1102) < self.epsilon)
-        self.assertTrue(abs(self.asset.inflation(kind='mean') - 0.0173) < self.epsilon)
-
+                         self.asset.close().size)
+        self.assertTrue(abs(self.asset.inflation(kind='accumulated') - .1102) < self.epsilon)
+        self.assertTrue(abs(self.asset.inflation(kind='mean') - .0173) < self.epsilon)

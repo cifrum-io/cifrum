@@ -23,7 +23,7 @@ class AvailableNamesTest(unittest.TestCase):
             {'nlu/1129', 'nlu/630', 'nlu/6', 'nlu/617'}
         ))
         self.assertTrue(__fin_sim_ids(namespace='quandl').issuperset(
-            {'quandl/A', 'quandl/AA', 'quandl/AAAP', 'quandl/AABA', 'quandl/AAC'}
+            {'quandl/T', 'quandl/MSFT', 'quandl/GOOG', 'quandl/AAPL'}
         ))
 
     def test__return_several_namespaces(self):
@@ -32,5 +32,5 @@ class AvailableNamesTest(unittest.TestCase):
 
         self.assertTrue(available_name_ids.issuperset(
             {'infl/RUB', 'infl/EUR', 'infl/USD',
-             'quandl/A', 'quandl/AA', 'quandl/AAAP', 'quandl/AABA', 'quandl/AAC'}
+             'quandl/T', 'quandl/MSFT', 'quandl/GOOG', 'quandl/AAPL'}
         ))
