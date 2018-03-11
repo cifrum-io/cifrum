@@ -40,3 +40,11 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertTrue(abs(self.asset.risk(period='year') - .0311) < self.epsilon)
         self.assertTrue(abs(self.asset.risk(period='month') - .0087) < self.epsilon)
 
+    def test_inflation(self):
+        self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
+
+        self.assertEqual(self.asset.inflation(kind='values').size,
+                         self.asset.rate_of_return().size)
+        self.assertTrue(abs(self.asset.inflation(kind='accumulated') - 0.1102) < self.epsilon)
+        self.assertTrue(abs(self.asset.inflation(kind='mean') - 0.0173) < self.epsilon)
+

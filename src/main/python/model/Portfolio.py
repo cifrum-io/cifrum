@@ -9,7 +9,42 @@ import datetime as dtm
 import dateutil.relativedelta
 
 
-class PortfolioAsset:
+class PortfolioInflation:
+    def __init__(self, currency: Currency,
+                 period_min: pd.Period, period_max: pd.Period):
+        self.currency = currency
+        self.period_min = period_min
+        self.period_max = period_max
+
+    @contract(
+        kind='str',
+    )
+    def inflation(self, kind):
+        """
+        Computes the properly reduced inflation for the currency
+        :param kind:
+            accumulated - accumulated inflation
+
+            mean - geometric mean of inflation
+
+            values - raw values of inflation
+        :return:
+        """
+        inflation = self.currency.inflation(start_period=self.period_min, end_period=self.period_max)
+        if kind == 'accumulated':
+            return (inflation + 1.).prod() - 1.
+        elif kind == 'mean':
+            months_in_year = 12
+            years_total = (self.period_max - self.period_min) / months_in_year
+            inflation_mean = (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
+            return inflation_mean
+        elif kind == 'values':
+            return inflation
+        else:
+            raise Exception('inflation kind is not supported: {}'.format(kind))
+
+
+class PortfolioAsset(PortfolioInflation):
 
     def __init__(self, symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: Currency):
@@ -29,6 +64,8 @@ class PortfolioAsset:
         self.currency = currency
         self.__convert_currency(currency_to=currency)
         self.values[change_column_name] = self.values['close'].pct_change().fillna(value=0.)
+
+        super().__init__(self.currency, self.period_min, self.period_max)
 
     def __transform_values_according_to_period(self, start_period, end_period):
         vals = self.symbol.values(start_period, end_period)
@@ -115,7 +152,7 @@ class PortfolioAsset:
             return cagr
 
 
-class Portfolio:
+class Portfolio(PortfolioInflation):
     def __init__(self,
                  assets: List[PortfolioAsset],
                  weights: np.array,
@@ -124,6 +161,9 @@ class Portfolio:
         self.weights = weights.reshape(-1, 1)
         self.period_min = max(start_period, *[a.period_min for a in assets])
         self.period_max = min(end_period, *[a.period_max for a in assets])
+        self.currency = currency
+
+        super().__init__(self.currency, self.period_min, self.period_max)
 
         self.assets = [PortfolioAsset(a.symbol,
                                       start_period=self.period_min,

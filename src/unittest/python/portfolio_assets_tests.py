@@ -21,6 +21,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                                'nlu/449': 1.,
                                                'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
                                        start_period='2011-3', end_period='2015-5', currency='USD')
+        cls.epsilon = 1e-3
 
     def test_fail_if_asset_security_type_is_not_supported(self):
         unsupported_ids = ['infl/RUB', 'infl/USD', 'infl/EUR', 'cbr/TOP_rates', 'micex/MCFTR']
@@ -112,4 +113,13 @@ class PortfolioAssetsTest(unittest.TestCase):
         for asset in self.portfolio.assets:
             rate_of_return_given = asset.rate_of_return()
             rate_of_return_expected = np.diff(asset.close()) / asset.close()[:-1]
-            self.assertTrue(np.all(np.abs(rate_of_return_given[1:] - rate_of_return_expected) < 1e-3))
+            self.assertTrue(np.all(np.abs(rate_of_return_given[1:] - rate_of_return_expected) < self.epsilon))
+
+    def test_inflation(self):
+        self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
+
+        self.assertEqual(self.portfolio.inflation(kind='values').size,
+                         self.portfolio.close().size)
+        self.assertTrue(abs(self.portfolio.inflation(kind='accumulated') - 0.1102) < self.epsilon)
+        self.assertTrue(abs(self.portfolio.inflation(kind='mean') - 0.0173) < self.epsilon)
+
