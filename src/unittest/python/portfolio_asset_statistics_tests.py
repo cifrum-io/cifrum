@@ -33,6 +33,20 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon
         self.assertTrue(np.all(cagr_diff))
 
+    def test_compound_annual_growth_rate_real(self):
+        cagr_default = self.asset.compound_annual_growth_rate(real=True)
+        self.assertTrue(abs(cagr_default - .0092) < self.epsilon)
+
+        cagr_long_time = self.asset.compound_annual_growth_rate(years_ago=20, real=True)
+        self.assertTrue(abs(cagr_default - cagr_long_time) < self.epsilon)
+
+        cagr_one_year = self.asset.compound_annual_growth_rate(years_ago=1, real=True)
+        self.assertTrue(abs(cagr_one_year - (-.01429)) < self.epsilon)
+
+        cagr_array = self.asset.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
+        cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon
+        self.assertTrue(np.all(cagr_diff))
+
     def test_risk(self):
         short_asset = \
             yapo.portfolio_asset(name=self.asset_name,

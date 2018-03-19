@@ -18,8 +18,9 @@ class PortfolioInflation:
 
     @contract(
         kind='str',
+        years_ago='int,>0|None',
     )
-    def inflation(self, kind):
+    def inflation(self, kind, years_ago=None):
         """
         Computes the properly reduced inflation for the currency
         :param kind:
@@ -31,6 +32,9 @@ class PortfolioInflation:
         :return:
         """
         inflation = self.currency.inflation(start_period=self.period_min, end_period=self.period_max)
+        if isinstance(years_ago, int):
+            inflation = inflation[-years_ago * 12:]
+
         if kind == 'accumulated':
             return (inflation + 1.).prod() - 1.
         elif kind == 'a_mean':
@@ -120,7 +124,6 @@ class PortfolioAsset(PortfolioInflation):
         aror = (self.rate_of_return() + 1.).cumprod() - 1.
         if real:
             inflation = self.inflation(kind='values')
-            assert aror.size == inflation.size
             aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
         return aror
 
@@ -139,24 +142,32 @@ class PortfolioAsset(PortfolioInflation):
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
+        real='bool',
     )
-    def compound_annual_growth_rate(self, years_ago=None):
+    def compound_annual_growth_rate(self, years_ago=None, real=False):
         months_in_year = 12
         if years_ago is None:
             years_total = (self.period_max - self.period_min) / months_in_year
-            close_changes = self.values[change_column_name].values
-            cagr = (close_changes + 1.).prod() ** (1 / years_total) - 1.
+            cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
+            if real:
+                cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
             return cagr
         elif isinstance(years_ago, list):
-            return np.array([self.compound_annual_growth_rate(years_ago=y) for y in years_ago])
-        else:
+            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
+                             for y in years_ago])
+        elif isinstance(years_ago, int):
             months_count = years_ago * months_in_year
             if self.period_min > self.period_max - months_count:
-                return self.compound_annual_growth_rate(years_ago=None)
-            period_start = self.period_max - months_count
-            close_changes = self.values[self.values['period'] > period_start][change_column_name].values
-            cagr = (close_changes + 1.).prod() ** (1 / years_ago) - 1.
+                return self.compound_annual_growth_rate(years_ago=None, real=real)
+
+            ror_series = self.rate_of_return()[-months_count:]
+            cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
+            if real:
+                inflation = self.inflation(kind='accumulated', years_ago=years_ago)
+                cagr = (cagr + 1.) / (inflation + 1.) ** (1 / years_ago) - 1.
             return cagr
+        else:
+            raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
 
 class Portfolio(PortfolioInflation):
@@ -184,7 +195,6 @@ class Portfolio(PortfolioInflation):
         aror = (self.rate_of_return() + 1.).cumprod() - 1.
         if real:
             inflation = self.inflation(kind='values')
-            assert aror.size == inflation.size
             aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
         return aror
 
@@ -210,9 +220,10 @@ class Portfolio(PortfolioInflation):
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',
+        real='bool',
     )
-    def compound_annual_growth_rate(self, years_ago=None):
-        cagrs_per_asset = np.vstack([a.compound_annual_growth_rate(years_ago=years_ago)
+    def compound_annual_growth_rate(self, years_ago=None, real=False):
+        cagrs_per_asset = np.vstack([a.compound_annual_growth_rate(years_ago=years_ago, real=real)
                                      for a in self.assets])
         cagrs = cagrs_per_asset.sum(axis=0)
         if cagrs.shape == (1,):
