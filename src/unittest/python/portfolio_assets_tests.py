@@ -121,4 +121,5 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertEqual(self.portfolio.inflation(kind='values').size,
                          self.portfolio.rate_of_return().size)
         self.assertTrue(abs(self.portfolio.inflation(kind='accumulated') - .0478) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.inflation(kind='mean') - .0134) < self.epsilon)
+        self.assertTrue(abs(self.portfolio.inflation(kind='a_mean') - .0011) < self.epsilon)
+        self.assertTrue(abs(self.portfolio.inflation(kind='g_mean') - .0134) < self.epsilon)

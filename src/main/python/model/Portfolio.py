@@ -33,7 +33,9 @@ class PortfolioInflation:
         inflation = self.currency.inflation(start_period=self.period_min, end_period=self.period_max)
         if kind == 'accumulated':
             return (inflation + 1.).prod() - 1.
-        elif kind == 'mean':
+        elif kind == 'a_mean':
+            return inflation.mean()
+        elif kind == 'g_mean':
             months_in_year = 12
             years_total = (self.period_max - self.period_min) / months_in_year
             inflation_mean = (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
