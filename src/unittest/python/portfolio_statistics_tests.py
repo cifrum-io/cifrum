@@ -19,7 +19,10 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_accumulated_rate_of_return(self):
         arors = self.portfolio.accumulated_rate_of_return()[1:]
-        self.assertTrue(np.all((-.065 < arors) & (arors < .51)))
+        self.assertTrue(np.all((-.063 < arors) & (arors < .4796)))
+
+        arors_real = self.portfolio.accumulated_rate_of_return(real=True)[1:]
+        self.assertTrue(np.all((-.0951 < arors_real) & (arors_real < 0.3327)))
 
     def test_compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()

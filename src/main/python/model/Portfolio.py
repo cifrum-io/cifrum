@@ -116,8 +116,13 @@ class PortfolioAsset(PortfolioInflation):
     def period(self):
         return self.values['period'].values
 
-    def accumulated_rate_of_return(self):
-        return (self.rate_of_return() + 1.).cumprod() - 1.
+    def accumulated_rate_of_return(self, real=False):
+        aror = (self.rate_of_return() + 1.).cumprod() - 1.
+        if real:
+            inflation = self.inflation(kind='values')
+            assert aror.size == inflation.size
+            aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
+        return aror
 
     def risk(self, period='year'):
         """
@@ -175,8 +180,13 @@ class Portfolio(PortfolioInflation):
     def assets_weighted(self):
         return list(zip(self.assets, self.weights.T[0]))
 
-    def accumulated_rate_of_return(self):
-        return (self.rate_of_return() + 1.).cumprod() - 1.
+    def accumulated_rate_of_return(self, real=False):
+        aror = (self.rate_of_return() + 1.).cumprod() - 1.
+        if real:
+            inflation = self.inflation(kind='values')
+            assert aror.size == inflation.size
+            aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
+        return aror
 
     def risk(self, period='year'):
         """

@@ -14,7 +14,10 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
 
     def test_accumulated_rate_of_return(self):
         arors = self.asset.accumulated_rate_of_return()[1:]
-        self.assertTrue(np.all((.0014 < arors) & (arors < .24)))
+        self.assertTrue(np.all((.0014 < arors) & (arors < .2070)))
+
+        arors_real = self.asset.accumulated_rate_of_return(real=True)[1:]
+        self.assertTrue(np.all((-.0183 < arors_real) & (arors_real < 0.1027)))
 
     def test_compound_annual_growth_rate(self):
         cagr_default = self.asset.compound_annual_growth_rate()
