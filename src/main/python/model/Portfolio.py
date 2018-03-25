@@ -1,12 +1,15 @@
-from .FinancialSymbol import FinancialSymbol
-from .Enums import Currency, Period
-import pandas as pd
-import numpy as np
-from .Settings import change_column_name
-from contracts import contract
-from typing import List
 import datetime as dtm
+from textwrap import dedent
+from typing import List
+
 import dateutil.relativedelta
+import numpy as np
+import pandas as pd
+from contracts import contract
+
+from .Enums import Currency, Period
+from .FinancialSymbol import FinancialSymbol
+from .Settings import change_column_name
 
 
 class PortfolioInflation:
@@ -175,6 +178,17 @@ class PortfolioAsset(PortfolioInflation):
         else:
             raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
+    def __repr__(self):
+        asset_repr = """\
+            PortfolioAsset(
+                 symbol: {},
+                 currency: {},
+                 start_period: {},
+                 end_period: {}
+            )""".format(self.symbol.identifier, self.currency,
+                        self.start_period, self.end_period)
+        return dedent(asset_repr)
+
 
 class Portfolio(PortfolioInflation):
     def __init__(self,
@@ -239,3 +253,15 @@ class Portfolio(PortfolioInflation):
     def rate_of_return(self):
         assets_rate_of_returns = np.vstack(a.rate_of_return() for a in self.assets)
         return (assets_rate_of_returns * self.weights).sum(axis=0)
+
+    def __repr__(self):
+        assets_repr = ', '.join(asset.symbol.identifier.__repr__() for asset in self.assets)
+        portfolio_repr = """\
+            Portfolio(
+                 assets: {},
+                 currency: {},
+                 start_period: {},
+                 end_period: {}
+            )""".format(assets_repr, self.currency,
+                        self.period_min, self.period_max)
+        return dedent(portfolio_repr)

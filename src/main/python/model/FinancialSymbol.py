@@ -1,4 +1,3 @@
-from pprint import pformat
 import pandas as pd
 
 
@@ -35,4 +34,5 @@ class FinancialSymbol:
         return self.identifier.namespace
 
     def __repr__(self):
+        from pprint import pformat
         return pformat(vars(self))
