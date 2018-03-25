@@ -23,10 +23,16 @@ class PortfolioInflation:
     def inflation(self, kind, years_ago=None):
         """
         Computes the properly reduced inflation for the currency
+
+        :param years_ago:
+            years back from `period_max` to calculate inflation
+
         :param kind:
             accumulated - accumulated inflation
 
-            mean - geometric mean of inflation
+            a_mean - arithmetic mean of inflation
+
+            g_mean - geometric mean of inflation
 
             values - raw values of inflation
         :return:
