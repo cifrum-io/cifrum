@@ -1,17 +1,21 @@
-from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
-from model.Portfolio import Portfolio, PortfolioAsset
+from typing import List, Dict, Union
+
+import numpy as np
+import pandas as pd
+from contracts import contract
+
 from model.Enums import Currency, SecurityType
 from model.FinancialSymbol import FinancialSymbol
 from model.FinancialSymbolId import FinancialSymbolId
-from contracts import contract
-from typing import List, Dict, Union
-import pandas as pd
-import numpy as np
+from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
+from model.Portfolio import Portfolio, PortfolioAsset
 
 
 class Yapo:
     def __init__(self, fin_syms_registry):
         self.fin_syms_registry = fin_syms_registry
+        self.__period_lowest = '1900-1'
+        self.__period_highest = lambda: str(pd.Period.now(freq='M'))
 
     def information(self, **kwargs) -> Union[FinancialSymbol, List[FinancialSymbol]]:
         """
@@ -41,16 +45,21 @@ class Yapo:
             raise Exception('Unexpected state of kwargs')
 
     def portfolio_asset(self,
-                        start_period: str, end_period: str,
-                        currency: str,
+                        currency: str=None,
+                        start_period: str=None, end_period: str=None,
                         **kwargs) -> Union[PortfolioAsset, List[PortfolioAsset]]:
+        if start_period is None:
+            start_period = self.__period_lowest
+        if end_period is None:
+            end_period = self.__period_highest()
+
         if 'name' in kwargs:
             start_period = pd.Period(start_period, freq='M')
             end_period = pd.Period(end_period, freq='M')
-            currency = Currency.__dict__[currency.upper()]
 
             name = kwargs['name']
             finsym_info = self.information(name=name)
+            currency = finsym_info.currency if currency is None else Currency.__dict__[currency.upper()]
 
             allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT, SecurityType.CURRENCY}
             assert finsym_info.security_type in allowed_security_types
@@ -71,7 +80,8 @@ class Yapo:
     )
     def portfolio(self,
                   assets: Dict[str, float],
-                  start_period: str, end_period: str, currency) -> Portfolio:
+                  currency: str,
+                  start_period: str=None, end_period: str=None) -> Portfolio:
         """
         :param assets: list of RostSber IDs. Supported security types: stock/ETF, MUT, Currency
         :param start_period: preferred period to start
@@ -79,6 +89,11 @@ class Yapo:
         :param currency: common currency for all assets
         :return: returns instance of portfolio
         """
+        if start_period is None:
+            start_period = self.__period_lowest
+        if end_period is None:
+            end_period = self.__period_highest()
+
         names = list(assets.keys())
         weights = np.fromiter(assets.values(), dtype=float, count=len(names))
         if np.abs(weights.sum() - 1.) > 1e-3:
