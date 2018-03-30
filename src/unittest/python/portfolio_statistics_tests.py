@@ -24,6 +24,15 @@ class PortfolioStatisticsTest(unittest.TestCase):
         arors_real = self.portfolio.accumulated_rate_of_return(real=True)[1:]
         self.assertTrue(np.all((-.0951 < arors_real) & (arors_real < 0.3327)))
 
+    def test_handle_related_inflation(self):
+        self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
+
+        self.assertAlmostEqual(self.portfolio.inflation(kind='accumulated'), 0.1101, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.inflation(kind='a_mean'), 0.0014, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.inflation(kind='g_mean'), 0.0173, delta=self.epsilon)
+        self.assertEqual(self.portfolio.inflation(kind='values').size,
+                         self.portfolio.rate_of_return().size)
+
     def test_compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
         self.assertTrue(abs(cagr_default - .174) < self.epsilon)

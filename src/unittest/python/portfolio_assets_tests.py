@@ -114,12 +114,3 @@ class PortfolioAssetsTest(unittest.TestCase):
             rate_of_return_given = asset.rate_of_return()
             rate_of_return_expected = np.diff(asset.close()) / asset.close()[:-1]
             self.assertTrue(np.all(np.abs(rate_of_return_given[1:] - rate_of_return_expected) < self.epsilon))
-
-    def test_inflation(self):
-        self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
-
-        self.assertEqual(self.portfolio.inflation(kind='values').size,
-                         self.portfolio.rate_of_return().size)
-        self.assertTrue(abs(self.portfolio.inflation(kind='accumulated') - .0478) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.inflation(kind='a_mean') - .0011) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.inflation(kind='g_mean') - .0134) < self.epsilon)
