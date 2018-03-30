@@ -40,6 +40,16 @@ class PortfolioAssetsTest(unittest.TestCase):
         for asset in self.portfolio.assets:
             self.assertTrue(set(asset.values.columns) >= {'period', 'close'})
 
+    def test_default_periods(self):
+        asset = yapo.portfolio_asset(name='micex/SBER')
+        self.assertGreaterEqual(asset.period_min, pd.Period('1900-1', freq='M'))
+        self.assertGreaterEqual(pd.Period.now(freq='M'), asset.period_max)
+        self.assertEqual(asset.currency, Currency.RUB)
+
+        portfolio = yapo.portfolio(assets={'micex/SBER': 1.}, currency='rub')
+        self.assertGreaterEqual(portfolio.period_min, pd.Period('1900-1', freq='M'))
+        self.assertGreaterEqual(pd.Period.now(freq='M'), portfolio.period_max)
+
     def test_index_should_be_numerical(self):
         for asset in self.portfolio.assets:
             self.assertTrue(set(asset.values.columns) >= {'period', 'close'})

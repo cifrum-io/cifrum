@@ -64,8 +64,6 @@ class PortfolioAsset(PortfolioInflation):
     def __init__(self, symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: Currency):
         self.symbol = symbol
-        self.start_period = start_period
-        self.end_period = end_period
 
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
@@ -146,7 +144,7 @@ class PortfolioAsset(PortfolioInflation):
             year - returns risk approximated to yearly value
         """
         return Portfolio(assets=[self], weights=np.array([1.0]),
-                         start_period=self.start_period, end_period=self.end_period,
+                         start_period=self.period_min, end_period=self.period_max,
                          currency=self.currency).risk(period=period)
 
     @contract(
@@ -183,10 +181,10 @@ class PortfolioAsset(PortfolioInflation):
             PortfolioAsset(
                  symbol: {},
                  currency: {},
-                 start_period: {},
-                 end_period: {}
+                 period_min: {},
+                 period_max: {}
             )""".format(self.symbol.identifier, self.currency,
-                        self.start_period, self.end_period)
+                        self.period_min, self.period_max)
         return dedent(asset_repr)
 
 
