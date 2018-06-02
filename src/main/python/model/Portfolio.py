@@ -69,11 +69,18 @@ class PortfolioAsset(PortfolioInflation):
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
             datetime_now -= dateutil.relativedelta.relativedelta(months=1)
         period_end = pd.Period(datetime_now, freq='M')  # can't use Period.now because `now` is mocked in tests
-        self.values = self.__transform_values_according_to_period(start_period=start_period, end_period=period_end)
-        self.values = self.values[(self.values['period'] >= start_period) &
-                                  (self.values['period'] <= end_period)]
-        self.period_min = self.values['period'].min()
-        self.period_max = self.values['period'].max()
+        self.period_min = max(
+            pd.Period(self.symbol.start_period, freq='M'),
+            start_period,
+        )
+        self.period_max = min(
+            pd.Period(self.symbol.end_period, freq='M'),
+            period_end,
+            end_period,
+        )
+        self.values = \
+            self.__transform_values_according_to_period(start_period=self.period_min, end_period=self.period_max)
+
         self.currency = currency
         self.__convert_currency(currency_to=currency)
         self.values[change_column_name] = self.values['close'].pct_change().fillna(value=0.)
@@ -84,15 +91,22 @@ class PortfolioAsset(PortfolioInflation):
         vals = self.symbol.values(start_period, end_period)
 
         if self.symbol.period == Period.DAY:
+            # we are interested in day-time data as follows
+            # - if there is no data for month or more (ticker is dead, probably), we drop all data for
+            #   the last available period
+            # - we drop data for the period of the current month
+            # - for every period we take the value that is last in each month
+
             vals['period'] = vals['date'].dt.to_period('M')
-            if vals['date'].max() < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
-                vals = vals[vals['period'] < vals['period'].max()]
-            vals_not_current_period = vals['period'] != pd.Period.now(freq='M')
-            vals_lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
-            vals = vals[vals_not_current_period & vals_lastdate_indices]
+            if self.symbol.end_period < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
+                vals = vals[vals['period'] < pd.Period(self.symbol.end_period, freq='M')]
+            indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
+            indicator__lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
+            vals = vals[indicator__lastdate_indices & indicator__not_current_period]
             del vals['date']
+
+            self.period_max = min(self.period_max, vals['period'].max())
         elif self.symbol.period == Period.MONTH:
-            vals['period'] = vals['date'].dt.to_period('M')
             del vals['date']
         elif self.symbol.period == Period.DECADE:
             vals = vals[vals['period'].str[-1] == '3']

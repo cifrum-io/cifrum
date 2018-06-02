@@ -5,6 +5,8 @@ class FinancialSymbol:
     def __init__(self,
                  identifier,
                  values,
+                 start_period=None,
+                 end_period=None,
                  isin=None,
                  short_name=None,
                  long_name=None,
@@ -14,16 +16,21 @@ class FinancialSymbol:
                  period=None,
                  adjusted_close=None):
         self.identifier = identifier
-        self.values = lambda start_period, end_period: values(start_period=pd.Period(start_period, freq='M'),
-                                                              end_period=pd.Period(end_period, freq='M'))
+        self.__values = values
         self.isin = isin
         self.short_name = short_name
         self.long_name = long_name
         self.exchange = exchange
         self.currency = currency
         self.security_type = security_type
+        self.start_period = start_period
+        self.end_period = end_period
         self.period = period
         self.adjusted_close = adjusted_close
+
+    def values(self, start_period, end_period):
+        return self.__values(start_period=pd.Period(start_period, freq='M'),
+                             end_period=pd.Period(end_period, freq='M'))
 
     @property
     def name(self):

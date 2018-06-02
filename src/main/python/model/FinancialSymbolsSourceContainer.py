@@ -4,30 +4,54 @@ from .FinancialSymbolsSource import *
 from .Settings import change_column_name
 
 
+def _load_inflation_values(inflation_country):
+    dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
+    dt.sort_values(by='date', inplace=True)
+    dt.rename(columns={'close': change_column_name}, inplace=True)
+    return dt
+
+
+def _load_inflation_index(inflation_country):
+    dt = pd.read_csv('{}inflation_{}/__index.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
+    return dt
+
+
+def _load_inflation_date(inflation_country, kind):
+    index = _load_inflation_index(inflation_country)
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
+
+
+def _load_toprates():
+    dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(Settings.rostsber_url), sep='\t')
+    dt.sort_values(by='decade', inplace=True)
+    dt.rename(columns={'close': change_column_name, 'decade': 'date'},
+              inplace=True)
+    return dt
+
+
+def _load_cbr_deposit_rate_date(kind):
+    index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(Settings.rostsber_url), sep='\t')
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
+
+
+def _load_micex_mcftr_date(kind):
+    index = pd.read_csv(Settings.rostsber_url + 'moex/mcftr/__index.csv', sep='\t')
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
+
+
 class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
     cbr_currencies_symbols_source = providers.Singleton(CbrCurrencyFinancialSymbolsSource)
-
-    @classmethod
-    def __load_inflation(cls, inflation_country):
-        dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
-        dt.sort_values(by='date', inplace=True)
-        dt.rename(columns={'close': change_column_name}, inplace=True)
-
-        return dt
-
-    @classmethod
-    def __load_toprates(cls):
-        dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(Settings.rostsber_url), sep='\t')
-        dt.sort_values(by='decade', inplace=True)
-        dt.rename(columns={'close': change_column_name, 'decade': 'date'},
-                  inplace=True)
-        return dt
 
     inflation_ru_source = providers.Singleton(
         SingleFinancialSymbolSource,
         namespace='infl',
         name=Currency.RUB.name,
-        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('ru'),
+        values_fetcher=lambda: _load_inflation_values('ru'),
+        start_period=_load_inflation_date('ru', 'date_start'),
+        end_period=_load_inflation_date('ru', 'date_end'),
         short_name='Инфляция РФ',
         currency=Currency.RUB,
         security_type=SecurityType.INFLATION,
@@ -39,7 +63,9 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         name=Currency.EUR.name,
-        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('eu'),
+        values_fetcher=lambda: _load_inflation_values('eu'),
+        start_period=_load_inflation_date('eu', 'date_start'),
+        end_period=_load_inflation_date('eu', 'date_start'),
         short_name='Инфляция ЕС',
         currency=Currency.EUR,
         security_type=SecurityType.INFLATION,
@@ -51,7 +77,9 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='infl',
         name=Currency.USD.name,
-        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_inflation('us'),
+        values_fetcher=lambda: _load_inflation_values('us'),
+        start_period=_load_inflation_date('us', 'date_start'),
+        end_period=_load_inflation_date('us', 'date_start'),
         short_name='Инфляция США',
         currency=Currency.USD,
         security_type=SecurityType.INFLATION,
@@ -63,7 +91,9 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         SingleFinancialSymbolSource,
         namespace='cbr',
         name='TOP_rates',
-        values_fetcher=lambda: FinancialSymbolsSourceContainer.__load_toprates(),
+        values_fetcher=lambda: _load_toprates(),
+        start_period=_load_cbr_deposit_rate_date('date_start'),
+        end_period=_load_cbr_deposit_rate_date('date_end'),
         long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях)',
         currency=Currency.RUB,
         security_type=SecurityType.RATES,
@@ -76,6 +106,8 @@ class FinancialSymbolsSourceContainer(containers.DeclarativeContainer):
         namespace='micex',
         name='MCFTR',
         values_fetcher=lambda: pd.read_csv(Settings.rostsber_url + 'moex/mcftr/data.csv', sep='\t'),
+        start_period=_load_micex_mcftr_date('date_start'),
+        end_period=_load_micex_mcftr_date('date_end'),
         short_name='MICEX Total Return',
         currency=Currency.RUB,
         security_type=SecurityType.INDEX,

@@ -1,6 +1,7 @@
 import os
 from itertools import groupby
 from pprint import pformat
+import datetime as dtm
 
 import pandas as pd
 import numpy as np
@@ -28,14 +29,13 @@ class FinancialSymbolsSource:
 
 
 class SingleFinancialSymbolSource(FinancialSymbolsSource):
-    @staticmethod
-    def __extract_values(values_fetcher, start_period, end_period):
-        df = values_fetcher()
+    def __extract_values(self, start_period, end_period):
+        df = self.__values_fetcher()
         df['date'] = pd.to_datetime(df['date'])
         return df[(df['date'].dt.to_period('M') >= start_period) &
                   (df['date'].dt.to_period('M') <= end_period)].copy()
 
-    def __init__(self, values_fetcher, namespace, name,
+    def __init__(self, values_fetcher, namespace, name, start_period, end_period,
                  isin=None,
                  short_name=None,
                  long_name=None,
@@ -46,13 +46,15 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                  adjusted_close=None):
         super().__init__(namespace)
         self.name = name
+        self.__values_fetcher = values_fetcher
         self.financial_symbol = \
             FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=self.name),
-                            values=lambda start_period, end_period:
-                                self.__extract_values(values_fetcher, start_period, end_period),
+                            values=self.__extract_values,
                             isin=isin,
                             short_name=short_name,
                             long_name=long_name,
+                            start_period=start_period,
+                            end_period=end_period,
                             exchange=exchange,
                             currency=currency,
                             security_type=security_type,
@@ -73,28 +75,30 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
 class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
-        self.short_names = {
+        self.url_base = Settings.rostsber_url + 'currency/'
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
+        self.__short_names = {
             Currency.RUB: 'Рубль РФ',
             Currency.USD: 'Доллар США',
             Currency.EUR: 'Евро',
         }
-
-    @staticmethod
-    def __currency_values(name, start_period, end_period):
-        currency_min_date = {
+        self.__currency_min_date = {
             Currency.RUB.name: pd.Period('1990', freq='M'),
             Currency.USD.name: pd.Period('1900', freq='M'),
             Currency.EUR.name: pd.Period('1999', freq='M'),
         }
-        start_period = max(start_period, currency_min_date[name])
+
+    def __currency_values(self, name, start_period, end_period):
+        start_period = max(start_period, self.__currency_min_date[name])
         end_period = min(end_period, pd.Period.now(freq='M'))
         date_range = pd.date_range(start=start_period.to_timestamp(),
                                    end=(end_period + 1).to_timestamp(),
                                    freq='D')
         df = pd.DataFrame({'date': date_range, 'close': 1.0})
 
-        return df[(df['date'].dt.to_period('M') >= start_period) &
-                  (df['date'].dt.to_period('M') <= end_period)].copy()
+        period = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        return df_new
 
     def fetch_financial_symbol(self, name: str):
         currency = Currency.__dict__.get(name)
@@ -104,7 +108,9 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
             fs = FinancialSymbol(
                 identifier=FinancialSymbolId(namespace='cbr', name=name),
                 values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
-                short_name=self.short_names[currency],
+                short_name=self.__short_names[currency],
+                start_period=self.__currency_min_date[currency.name],
+                end_period=dtm.datetime.now(),
                 currency=currency,
                 security_type=SecurityType.CURRENCY,
                 period=Period.DAY,
@@ -117,7 +123,7 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
             FinancialSymbolInfo(
                 fin_sym_id=FinancialSymbolId(self.namespace, short_name.name),
                 short_name=short_name
-            ) for short_name in self.short_names.keys()
+            ) for short_name in self.__short_names.keys()
         ]
 
 
@@ -126,12 +132,15 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         super().__init__(namespace='micex')
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
+        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
+        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
 
     def __extract_values(self, secid, start_period, end_period):
         df = pd.read_csv(self.url_base + secid + '.csv', sep='\t')
         df['date'] = pd.to_datetime(df['date'])
-        return df[(df['date'].dt.to_period('M') >= start_period) &
-                  (df['date'].dt.to_period('M') <= end_period)].copy()
+        period = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        return df_new
 
     def fetch_financial_symbol(self, name: str):
         for _, row in self.index.iterrows():
@@ -140,6 +149,8 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
                                          values=lambda start_period, end_period:
                                              self.__extract_values(name, start_period, end_period),
                                          exchange='MICEX',
+                                         start_period=row['date_start'],
+                                         end_period=row['date_end'],
                                          short_name=row['short_name'],
                                          long_name=row['long_name'],
                                          isin=row['isin'],
@@ -166,35 +177,48 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         self.url_base = Settings.rostsber_url + 'mut_rus/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
+        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
+        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
+        assert self.index.index.dtype == np.int64
+
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
         df = pd.read_csv(url, sep='\t')
         df['date'] = pd.to_datetime(df['date'])
-        return df[(df['date'].dt.to_period('M') >= start_period) &
-                  (df['date'].dt.to_period('M') <= end_period)].copy()
+        period = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        return df_new
 
     def fetch_financial_symbol(self, name: str):
-        for _, row in self.index.iterrows():
-            if str(row['name']) == name:
-                symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                         values=lambda start_period, end_period:
-                                             self.__extract_values(name, start_period, end_period),
-                                         short_name=row['short_name'],
-                                         currency=Currency.RUB,
-                                         security_type=SecurityType.MUT,
-                                         period=Period.DAY,
-                                         adjusted_close=True)
-                return symbol
+        try:
+            name_int = int(name)
+        except ValueError:
+            return None
+        if name_int in self.index.index:
+            row = self.index.loc[name_int]
+            symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
+                                     values=lambda start_period, end_period:
+                                         self.__extract_values(name, start_period, end_period),
+                                     short_name=row['short_name'],
+                                     start_period=row['date_start'],
+                                     end_period=row['date_end'],
+                                     currency=Currency.RUB,
+                                     security_type=SecurityType.MUT,
+                                     period=Period.DAY,
+                                     adjusted_close=True)
+            return symbol
         return None
 
     def get_all_infos(self):
-        def finsym_format(row):
+        infos = []
+        for idx, row in self.index.iterrows():
             fin_sym_info = FinancialSymbolInfo(
-                fin_sym_id=FinancialSymbolId(self.namespace, str(row['name'])),
+                fin_sym_id=FinancialSymbolId(self.namespace, str(idx)),
                 short_name=row['short_name']
             )
-            return fin_sym_info
-        return list(self.index.apply(finsym_format, axis=1).values)
+            infos.append(fin_sym_info)
+        return infos
 
 
 class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
@@ -202,8 +226,10 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
 
     def __init__(self):
         super().__init__(namespace='quandl')
-        names_list_url = 'http://static.quandl.com/end_of_day_us_stocks/ticker_list.csv'
-        self.names_list = pd.read_csv(filepath_or_buffer=names_list_url, index_col=0)
+        self.url_base = Settings.rostsber_url + 'quandl/'
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
+        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
+        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
 
     @staticmethod
     def __extract_values(name, start_period, end_period):
@@ -217,22 +243,28 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
         return df_res
 
     def fetch_financial_symbol(self, name: str):
-        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                 values=lambda start_period, end_period:
-                                     self.__extract_values(name, start_period, end_period),
-                                 exchange=self.names_list.loc[name, 'Exchange'],
-                                 short_name=self.names_list.loc[name, 'Name'],
-                                 currency=Currency.USD,
-                                 security_type=SecurityType.STOCK_ETF,
-                                 period=Period.DAY,
-                                 adjusted_close=True)
-        return symbol
+        if name in self.index.index:
+            symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
+                                     values=lambda start_period, end_period:
+                                         self.__extract_values(name, start_period, end_period),
+                                     exchange=self.index.loc[name, 'exchange'],
+                                     short_name=self.index.loc[name, 'short_name'],
+                                     start_period=self.index.loc[name, 'date_start'],
+                                     end_period=self.index.loc[name, 'date_end'],
+                                     currency=Currency.USD,
+                                     security_type=SecurityType.STOCK_ETF,
+                                     period=Period.DAY,
+                                     adjusted_close=True)
+            return symbol
+        return None
 
     def get_all_infos(self):
-        def finsym_format(ticker_name: str):
-            fsi = FinancialSymbolId(self.namespace, str(ticker_name)).format()
-            return FinancialSymbolInfo(fin_sym_id=fsi, short_name=self.names_list.loc[ticker_name, 'Name'])
-        return list(np.vectorize(finsym_format)(self.names_list.index.values))
+        infos = []
+        for idx, row in self.index.iterrows():
+            fsi = FinancialSymbolId(self.namespace, str(idx)).format()
+            fs_info = FinancialSymbolInfo(fin_sym_id=fsi, short_name=idx)
+            infos.append(fs_info)
+        return infos
 
 
 class FinancialSymbolsRegistry(object):

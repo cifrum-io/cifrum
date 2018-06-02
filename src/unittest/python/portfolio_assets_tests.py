@@ -70,6 +70,8 @@ class PortfolioAssetsTest(unittest.TestCase):
             namespace='test_ns', name='test',
             values_fetcher=lambda: values,
             security_type=SecurityType.STOCK_ETF,
+            start_period=values['date'].min(),
+            end_period=values['date'].max(),
             period=Period.DAY,
             currency=Currency.RUB
         )
@@ -101,6 +103,8 @@ class PortfolioAssetsTest(unittest.TestCase):
             namespace='test_ns', name='test',
             values_fetcher=lambda: values,
             security_type=SecurityType.STOCK_ETF,
+            start_period=values['date'].min(),
+            end_period=values['date'].max(),
             period=Period.DAY,
             currency=Currency.RUB
         )
