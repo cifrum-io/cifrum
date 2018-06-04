@@ -196,20 +196,20 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
             name_int = int(name)
         except ValueError:
             return None
-        if name_int in self.index.index:
-            row = self.index.loc[name_int]
-            symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                     values=lambda start_period, end_period:
-                                         self.__extract_values(name, start_period, end_period),
-                                     short_name=row['short_name'],
-                                     start_period=row['date_start'],
-                                     end_period=row['date_end'],
-                                     currency=Currency.RUB,
-                                     security_type=SecurityType.MUT,
-                                     period=Period.DAY,
-                                     adjusted_close=True)
-            return symbol
-        return None
+        if name_int not in self.index.index:
+            return None
+        row = self.index.loc[name_int]
+        symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
+                                 values=lambda start_period, end_period:
+                                     self.__extract_values(name, start_period, end_period),
+                                 short_name=row['short_name'],
+                                 start_period=row['date_start'],
+                                 end_period=row['date_end'],
+                                 currency=Currency.RUB,
+                                 security_type=SecurityType.MUT,
+                                 period=Period.DAY,
+                                 adjusted_close=True)
+        return symbol
 
     def get_all_infos(self):
         infos = []
