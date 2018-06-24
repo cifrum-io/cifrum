@@ -1,6 +1,5 @@
 *.pyc
 __pycache__
-target
 .DS_Store
 .coverage
 user
@@ -13,6 +12,15 @@ ve*
 .idea
 out
 .ipynb_checkpoints
+
+# entire target except dist folder
+target/*
+!target/dist
+target/dist/*
+!target/dist/yapo-0.1.0.dev
+target/dist/yapo-0.1.0.dev/*
+!target/dist/yapo-0.1.0.dev/dist/
+target/dist/yapo-0.1.0.dev/dist/*.whl
 
 # generated pdoc documentation
 api-doc
