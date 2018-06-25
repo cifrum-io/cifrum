@@ -311,7 +311,8 @@ class CurrencySymbolsRegistry(object):
     def __init__(self):
         self.url_base = Settings.rostsber_url + 'currency/'
 
-    def convert(self, currency_from: Currency, currency_to: Currency):
+    def convert(self, currency_from: Currency, currency_to: Currency,
+                start_period: pd.Period, end_period: pd.Period):
         if currency_to == currency_from:
             url = '{}{}-{}.csv'.format(self.url_base, 'USD', 'RUB')
             df = pd.read_csv(url, sep='\t', parse_dates=['date'])
@@ -320,7 +321,6 @@ class CurrencySymbolsRegistry(object):
             vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
             df = df[vals_lastdate_indices]
             del df['date'], df['nominal']
-            return df
         elif currency_to == Currency.RUB:
             url = '{}{}-{}.csv'.format(self.url_base,
                                        currency_from.name,
@@ -331,15 +331,16 @@ class CurrencySymbolsRegistry(object):
             vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
             df = df[vals_lastdate_indices]
             del df['date'], df['nominal']
-            return df
         elif currency_from == Currency.RUB:
-            df = self.convert(currency_to, currency_from)
+            df = self.convert(currency_to, currency_from, start_period, end_period)
             df['close'] = 1.0 / df['close']
-            return df
         else:
-            df = self.convert(currency_from, Currency.RUB)
-            df_to = self.convert(Currency.RUB, currency_to)
+            df = self.convert(currency_from, Currency.RUB, start_period, end_period)
+            df_to = self.convert(Currency.RUB, currency_to, start_period, end_period)
             df = df.merge(df_to, on='period', suffixes=('', '_to'))
             df['close'] = df['close'] * df['close_to']
             del df['close_to']
-            return df
+
+        df = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
+        df.sort_values(by='period', ascending=True, inplace=True)
+        return df

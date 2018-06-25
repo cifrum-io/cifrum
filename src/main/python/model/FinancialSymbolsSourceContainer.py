@@ -5,10 +5,11 @@ from .Settings import change_column_name
 
 
 def _load_inflation_values(inflation_country):
-    dt = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
-    dt.sort_values(by='date', inplace=True)
-    dt.rename(columns={'close': change_column_name}, inplace=True)
-    return dt
+    df = pd.read_csv('{}inflation_{}/data.csv'.format(Settings.rostsber_url, inflation_country), sep='\t')
+    df['period'] = pd.to_datetime(df['date']).dt.to_period('M')
+    df.sort_values(by='period', inplace=True)
+    df.rename(columns={'close': change_column_name}, inplace=True)
+    return df
 
 
 def _load_inflation_index(inflation_country):

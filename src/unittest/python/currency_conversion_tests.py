@@ -2,6 +2,7 @@ import unittest
 
 import yapo
 from model.Enums import Currency
+import pandas as pd
 import numpy as np
 import itertools
 
@@ -12,7 +13,8 @@ class CurrencyConversionTest(unittest.TestCase):
         from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
         csr = FinancialSymbolsSourceContainer.currency_symbols_registry()
         for cur in Currency:
-            dt = csr.convert(currency_from=cur, currency_to=cur)
+            dt = csr.convert(currency_from=cur, currency_to=cur,
+                             start_period=pd.Period('1991-1', freq='M'), end_period=pd.Period('2015-1', freq='M'))
             vs = dt['close'].values
             self.assertTrue(np.all(np.abs(vs - 1.) < 1e-3))
 

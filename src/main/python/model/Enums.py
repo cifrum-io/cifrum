@@ -1,6 +1,5 @@
 from enum import Enum, auto
 import yapo
-import pandas as pd
 
 
 class Currency(Enum):
@@ -8,10 +7,9 @@ class Currency(Enum):
     USD = auto()
     EUR = auto()
 
-    def inflation(self, start_period: pd.Period, end_period: pd.Period):
+    def inflation(self):
         inflation_sym = yapo.information(name='infl/' + self.name)
-        values = inflation_sym.values(start_period=start_period, end_period=end_period)
-        return values.value.values
+        return inflation_sym
 
 
 class SecurityType(Enum):

@@ -1,7 +1,5 @@
 import unittest
 
-from pandas.core.dtypes.dtypes import PeriodDtype
-from pandas.tseries.offsets import MonthEnd
 import pandas as pd
 import numpy as np
 import datetime as dtm
@@ -36,10 +34,6 @@ class PortfolioAssetsTest(unittest.TestCase):
             self.assertTrue(all(asset.period()[i] <= asset.period()[i + 1]
                                 for i in range(len(asset.period()) - 1)))
 
-    def test_values_should_have_correct_schema(self):
-        for asset in self.portfolio.assets:
-            self.assertTrue(set(asset.values.columns) >= {'period', 'close'})
-
     def test_default_periods(self):
         asset = yapo.portfolio_asset(name='micex/SBER')
         self.assertGreaterEqual(asset.period_min, pd.Period('1900-1', freq='M'))
@@ -49,13 +43,6 @@ class PortfolioAssetsTest(unittest.TestCase):
         portfolio = yapo.portfolio(assets={'micex/SBER': 1.}, currency='rub')
         self.assertGreaterEqual(portfolio.period_min, pd.Period('1900-1', freq='M'))
         self.assertGreaterEqual(pd.Period.now(freq='M'), portfolio.period_max)
-
-    def test_index_should_be_numerical(self):
-        for asset in self.portfolio.assets:
-            self.assertTrue(set(asset.values.columns) >= {'period', 'close'})
-            self.assertIsInstance(asset.values.index.dtype, PeriodDtype,
-                                  msg='Incorrect index type for ' + str(asset))
-            self.assertIsInstance(asset.values.index.dtype.freq, MonthEnd)
 
     def test_last_month_period_should_be_dropped(self):
         num_days = 60
@@ -127,4 +114,4 @@ class PortfolioAssetsTest(unittest.TestCase):
         for asset in self.portfolio.assets:
             rate_of_return_given = asset.rate_of_return()
             rate_of_return_expected = np.diff(asset.close()) / asset.close()[:-1]
-            self.assertTrue(np.all(np.abs(rate_of_return_given[1:] - rate_of_return_expected) < self.epsilon))
+            self.assertTrue(np.all(np.abs(rate_of_return_given - rate_of_return_expected) < self.epsilon))

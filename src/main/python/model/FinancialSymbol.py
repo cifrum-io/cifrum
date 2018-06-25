@@ -29,8 +29,9 @@ class FinancialSymbol:
         self.adjusted_close = adjusted_close
 
     def values(self, start_period, end_period):
-        return self.__values(start_period=pd.Period(start_period, freq='M'),
-                             end_period=pd.Period(end_period, freq='M'))
+        start_period = pd.Period(start_period, freq='M')
+        end_period = pd.Period(end_period, freq='M')
+        return self.__values(start_period=start_period, end_period=end_period)
 
     @property
     def name(self):

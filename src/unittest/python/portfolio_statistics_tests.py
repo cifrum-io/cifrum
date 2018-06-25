@@ -18,18 +18,18 @@ class PortfolioStatisticsTest(unittest.TestCase):
         self.assertTrue(np.all(np.abs(self.portfolio.rate_of_return() - rate_of_return_naive) < self.epsilon))
 
     def test_accumulated_rate_of_return(self):
-        arors = self.portfolio.accumulated_rate_of_return()[1:]
+        arors = self.portfolio.accumulated_rate_of_return()
         self.assertTrue(np.all((-.063 < arors) & (arors < .4796)))
 
-        arors_real = self.portfolio.accumulated_rate_of_return(real=True)[1:]
-        self.assertTrue(np.all((-.0951 < arors_real) & (arors_real < 0.3327)))
+        arors_real = self.portfolio.accumulated_rate_of_return(real=True)
+        self.assertTrue(np.all((-.0951 < arors_real) & (arors_real < .3394)))
 
     def test_handle_related_inflation(self):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
 
-        self.assertAlmostEqual(self.portfolio.inflation(kind='accumulated'), 0.1101, delta=self.epsilon)
-        self.assertAlmostEqual(self.portfolio.inflation(kind='a_mean'), 0.0014, delta=self.epsilon)
-        self.assertAlmostEqual(self.portfolio.inflation(kind='g_mean'), 0.0173, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.inflation(kind='accumulated'), .1046, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.inflation(kind='a_mean'), .0014, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.inflation(kind='g_mean'), .0173, delta=self.epsilon)
         self.assertEqual(self.portfolio.inflation(kind='values').size,
                          self.portfolio.rate_of_return().size)
 
@@ -49,24 +49,23 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertTrue(abs(cagr_default - .1207) < self.epsilon)
+        self.assertAlmostEqual(cagr_default, .1232, delta=self.epsilon)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
-        self.assertTrue(abs(cagr_default - cagr_long_time) < self.epsilon)
+        self.assertEqual(cagr_default, cagr_long_time)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1, real=True)
-        self.assertTrue(abs(cagr_one_year - .3879) < self.epsilon)
+        self.assertAlmostEqual(cagr_one_year, .3879, delta=self.epsilon)
 
         cagr_array = self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
         cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon
         self.assertTrue(np.all(cagr_diff))
 
     def test_risk(self):
-        short_portfolio = \
-            yapo.portfolio(assets=self.asset_names,
-                           start_period='2016-8', end_period='2016-12', currency='USD')
+        short_portfolio = yapo.portfolio(assets=self.asset_names,
+                                         start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_portfolio, period='year')
-        self.assertTrue(abs(self.portfolio.risk() - .078) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.risk(period='year') - .078) < self.epsilon)
-        self.assertTrue(abs(self.portfolio.risk(period='month') - .021) < self.epsilon)
+        self.assertAlmostEqual(self.portfolio.risk(period='year'), .078, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.risk(period='month'), .021, delta=self.epsilon)
+        self.assertAlmostEqual(self.portfolio.risk(), .078, delta=self.epsilon)
