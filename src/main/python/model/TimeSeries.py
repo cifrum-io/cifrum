@@ -50,6 +50,11 @@ class TimeValue:
     def sqrt(self):
         return self.apply(lambda x: np.sqrt(x))
 
+    def __repr__(self):
+        return 'TimeSeries(start_period={}, end_period={}, derivative={}, values={}'.format(
+            self.start_period, self.end_period, self.derivative, self.value
+        )
+
 
 class TimeSeries:
     def __init__(self, values, start_period: pd.Period, end_period: pd.Period, derivative):
@@ -152,3 +157,8 @@ class TimeSeries:
 
     def cumprod(self):
         return self.apply(lambda x: x.cumprod())
+
+    def __repr__(self):
+        return 'TimeSeries(start_period={}, end_period={}, derivative={}, values={}'.format(
+            self.start_period, self.end_period, self.derivative, self.values
+        )
