@@ -12,6 +12,9 @@ from .FinancialSymbol import FinancialSymbol
 from .TimeSeries import TimeSeries, TimeValue
 
 
+import model.Settings
+
+
 def time_series(func):
     def is_sequence(arg):
         return (not isinstance(arg, TimeSeries) and
@@ -31,6 +34,9 @@ def time_series(func):
             return vals
 
     def f(self, raw=True, **kwargs):
+        if not model.Settings.return_raw_numpy:
+            raw = False
+
         vals = func(self, **kwargs)
         if isinstance(vals, np.ndarray):
             arr = map(lambda v: handle_time_series(v, raw), vals)
