@@ -22,7 +22,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
     def test_handle_related_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
 
-        self.assertAlmostEqual(self.asset.inflation(kind='accumulated'), 0.1046, delta=self.epsilon)
+        self.assertAlmostEqual(self.asset.inflation(kind='accumulated'), .1062, delta=self.epsilon)
         self.assertAlmostEqual(self.asset.inflation(kind='a_mean'), 0.0014, delta=self.epsilon)
         self.assertAlmostEqual(self.asset.inflation(kind='g_mean'), 0.0165, delta=self.epsilon)
 
@@ -51,7 +51,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertEqual(cagr_default, cagr_long_time)
 
         cagr_one_year = self.asset.compound_annual_growth_rate(years_ago=1, real=True)
-        self.assertAlmostEqual(cagr_one_year, -.01430, delta=self.epsilon)
+        self.assertAlmostEqual(cagr_one_year, -.0163, delta=self.epsilon)
 
         cagr_array = self.asset.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
         cagr_diff = np.abs(cagr_array - [cagr_default, cagr_long_time, cagr_one_year]) < self.epsilon
@@ -69,7 +69,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
     def test_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
 
-        self.assertAlmostEqual(self.asset.inflation(kind='accumulated'), .1046, delta=self.epsilon)
+        self.assertAlmostEqual(self.asset.inflation(kind='accumulated'), .1062, delta=self.epsilon)
         self.assertAlmostEqual(self.asset.inflation(kind='a_mean'), .0014, delta=self.epsilon)
         self.assertAlmostEqual(self.asset.inflation(kind='g_mean'), .0173, delta=self.epsilon)
 
