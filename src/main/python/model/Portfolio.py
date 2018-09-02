@@ -9,48 +9,7 @@ from contracts import contract
 
 from .Enums import Currency, Period
 from .FinancialSymbol import FinancialSymbol
-from .TimeSeries import TimeSeries, TimeValue
-
-
-import model.Settings
-
-
-def time_series(func):
-    def is_sequence(arg):
-        return (not isinstance(arg, TimeSeries) and
-                not hasattr(arg, "strip") and
-                hasattr(arg, "__getitem__") or
-                hasattr(arg, "__iter__"))
-
-    def handle_time_series(vals, raw):
-        if raw:
-            if isinstance(vals, TimeSeries):
-                return vals.values
-            elif isinstance(vals, TimeValue):
-                return vals.value
-            else:
-                raise ValueError('unexpected type of argument: {}'.format(vals))
-        else:
-            return vals
-
-    def f(self, raw=True, **kwargs):
-        if not model.Settings.return_raw_numpy:
-            raw = False
-
-        vals = func(self, **kwargs)
-        if isinstance(vals, np.ndarray):
-            arr = map(lambda v: handle_time_series(v, raw), vals)
-            vals = np.array(list(arr))
-            return vals
-        elif is_sequence(vals):
-            arr = map(lambda v: handle_time_series(v, raw), vals)
-            cls = vals.__class__
-            vals = cls(list(arr))
-            return vals
-        else:
-            return handle_time_series(vals, raw)
-
-    return f
+from .TimeSeries import TimeSeries
 
 
 class PortfolioInflation:
@@ -60,7 +19,6 @@ class PortfolioInflation:
         self.period_min = period_min
         self.period_max = period_max
 
-    @time_series
     @contract(
         kind='str',
         years_ago='int,>0|None',
@@ -100,7 +58,7 @@ class PortfolioInflation:
             return inflation_amean
         elif kind == 'g_mean':
             years_total = (self.period_max - self.period_min) / months_in_year
-            inflation_gmean = (self.inflation(kind='accumulated', raw=False) + 1.) ** (1 / years_total) - 1.
+            inflation_gmean = (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':
             return inflation
@@ -182,22 +140,19 @@ class PortfolioAsset(PortfolioInflation):
                                    derivative=0)
         self.values = self.values * currency_rate
 
-    @time_series
     def close(self):
         return self.values
 
-    @time_series
     def rate_of_return(self):
         return self.values.pct_change()
 
     def period(self):
         return pd.period_range(self.period_min, self.period_max, freq='M')
 
-    @time_series
     def accumulated_rate_of_return(self, real=False):
-        aror = (self.rate_of_return(raw=False) + 1.).cumprod() - 1.
+        aror = (self.rate_of_return() + 1.).cumprod() - 1.
         if real:
-            inflation = self.inflation(kind='values', raw=False)
+            inflation = self.inflation(kind='values')
             aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
         return aror
 
@@ -215,7 +170,6 @@ class PortfolioAsset(PortfolioInflation):
                       currency=self.currency)
         return p.risk(period=period)
 
-    @time_series
     @contract(
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
@@ -224,22 +178,22 @@ class PortfolioAsset(PortfolioInflation):
         months_in_year = 12
         if years_ago is None:
             years_total = (self.period_max - self.period_min) / months_in_year
-            cagr = (self.rate_of_return(raw=False) + 1.).prod() ** (1 / years_total) - 1.
+            cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
             if real:
-                cagr = (cagr + 1.) / (self.inflation(kind='accumulated', raw=False) + 1.) ** (1 / years_total) - 1.
+                cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
             return cagr
         elif isinstance(years_ago, list):
-            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real, raw=False)
+            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
                              for y in years_ago])
         elif isinstance(years_ago, int):
             months_count = years_ago * months_in_year
             if self.period_min > self.period_max - months_count:
-                return self.compound_annual_growth_rate(years_ago=None, real=real, raw=False)
+                return self.compound_annual_growth_rate(years_ago=None, real=real)
 
-            ror_series = self.rate_of_return(raw=False)[-months_count:]
+            ror_series = self.rate_of_return()[-months_count:]
             cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
             if real:
-                inflation = self.inflation(kind='accumulated', years_ago=years_ago, raw=False)
+                inflation = self.inflation(kind='accumulated', years_ago=years_ago)
                 cagr = (cagr + 1.) / (inflation + 1.) ** (1 / years_ago) - 1.
             return cagr
         else:
@@ -278,15 +232,13 @@ class Portfolio(PortfolioInflation):
     def assets_weighted(self):
         return list(zip(self.assets, self.weights))
 
-    @time_series
     def accumulated_rate_of_return(self, real=False):
-        aror = (self.rate_of_return(raw=False) + 1.).cumprod() - 1.
+        aror = (self.rate_of_return() + 1.).cumprod() - 1.
         if real:
-            inflation = self.inflation(kind='values', raw=False)
+            inflation = self.inflation(kind='values')
             aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
         return aror
 
-    @time_series
     def risk(self, period='year'):
         """
         Returns risk of the asset
@@ -297,14 +249,14 @@ class Portfolio(PortfolioInflation):
             year - returns risk approximated to yearly value
         """
         if period == 'month':
-            ror = self.rate_of_return(raw=False)
+            ror = self.rate_of_return()
             return ror.std()
         elif period == 'year':
             if self.period_max - self.period_min < 12:
                 raise Exception('year risk is request for less than 12 months')
 
-            mean = (1. + self.rate_of_return(raw=False)).mean()
-            risk_monthly = self.risk(period='month', raw=False)
+            mean = (1. + self.rate_of_return()).mean()
+            risk_monthly = self.risk(period='month')
             return np.sqrt((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24)
         else:
             raise Exception('unexpected value of `period` {}'.format(period))
@@ -321,9 +273,8 @@ class Portfolio(PortfolioInflation):
             cagrs = cagrs[0]
         return cagrs
 
-    @time_series
     def rate_of_return(self):
-        assets_rate_of_returns = np.array([a.rate_of_return(raw=False) for a in self.assets])
+        assets_rate_of_returns = np.array([a.rate_of_return() for a in self.assets])
         rate_of_return = (assets_rate_of_returns * self.weights).sum()
         return rate_of_return
 

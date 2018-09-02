@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from typing import List
 
 
 class TimeValue:
@@ -9,7 +10,7 @@ class TimeValue:
         self.end_period = end_period
         self.derivative = derivative
 
-    def __validate(self, time_value):
+    def _validate(self, time_value):
         if self.start_period != time_value.start_period:
             raise ValueError('start periods are incompatible')
         if self.end_period != time_value.end_period:
@@ -21,7 +22,7 @@ class TimeValue:
         args_raw = [self.value]
         for arg in args:
             if isinstance(arg, TimeValue):
-                self.__validate(arg)
+                self._validate(arg)
                 args_raw.append(arg.value)
             elif isinstance(arg, (int, float, complex)):
                 args_raw.append(arg)
@@ -63,6 +64,7 @@ class TimeSeries:
         if len(values) != end_period - start_period + 1:
             raise ValueError('values and period range are of different length')
         self.values = values
+        self.size = self.values.size
         self.start_period = start_period
         self.end_period = end_period
         self.derivative = derivative
@@ -74,6 +76,17 @@ class TimeSeries:
             raise ValueError('end periods are incompatible')
         if self.derivative != time_series.derivative:
             raise ValueError('derivatives are incompatible')
+
+    @classmethod
+    def from_values(cls, values: List[TimeValue]):
+        if len(values) == 0:
+            raise ValueError('empty values')
+        v0 = values[0]
+        for v in values[1:]:
+            v0._validate(v)
+        vs = np.array([x.value for x in values])
+        ts = TimeSeries(values=vs, start_period=v0.start_period, end_period=v0.end_period, derivative=v0.derivative)
+        return ts
 
     def pct_change(self):
         if len(self.values) < 2:
