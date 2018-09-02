@@ -13,10 +13,10 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         cls.epsilon = 1e-3
 
     def test_accumulated_rate_of_return(self):
-        arors = self.asset.accumulated_rate_of_return().values
+        arors = self.asset.rate_of_return(kind='accumulated').values
         self.assertTrue(np.all((.0014 < arors) & (arors < .2070)))
 
-        arors_real = self.asset.accumulated_rate_of_return(real=True).values
+        arors_real = self.asset.rate_of_return(kind='accumulated', real=True).values
         self.assertTrue(np.all((-.0134 < arors_real) & (arors_real < 0.1082)))
 
     def test_handle_related_inflation(self):

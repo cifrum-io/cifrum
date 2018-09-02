@@ -106,9 +106,9 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     def test_compute_accumulated_rate_of_return(self):
         for asset in self.portfolio.assets:
-            aror = asset.accumulated_rate_of_return().values
+            aror = asset.rate_of_return(kind='accumulated').values
             self.assertTrue(not np.all(np.isnan(aror)))
-        self.assertTrue(not np.all(np.isnan(self.portfolio.accumulated_rate_of_return().values)))
+        self.assertTrue(not np.all(np.isnan(self.portfolio.rate_of_return(kind='accumulated').values)))
 
     def test_close_and_its_change_should_preserve_ratio(self):
         for asset in self.portfolio.assets:

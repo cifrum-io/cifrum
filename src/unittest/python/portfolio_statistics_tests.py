@@ -18,10 +18,10 @@ class PortfolioStatisticsTest(unittest.TestCase):
         self.assertTrue(np.all(np.abs((self.portfolio.rate_of_return() - rate_of_return_naive).values) < self.epsilon))
 
     def test_accumulated_rate_of_return(self):
-        arors = self.portfolio.accumulated_rate_of_return().values
+        arors = self.portfolio.rate_of_return(kind='accumulated').values
         self.assertTrue(np.all((-.063 < arors) & (arors < .4796)))
 
-        arors_real = self.portfolio.accumulated_rate_of_return(real=True).values
+        arors_real = self.portfolio.rate_of_return(kind='accumulated', real=True).values
         self.assertTrue(np.all((-.0951 < arors_real) & (arors_real < .3394)))
 
     def test_handle_related_inflation(self):

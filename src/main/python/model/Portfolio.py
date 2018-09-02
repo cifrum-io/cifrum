@@ -143,18 +143,23 @@ class PortfolioAsset(PortfolioInflation):
     def close(self):
         return self.values
 
-    def rate_of_return(self):
-        return self.values.pct_change()
+    def rate_of_return(self, kind='values', real=False):
+        if kind not in ['values', 'accumulated']:
+            raise ValueError('`kind` is not in expected values')
+
+        ror = self.values.pct_change()
+
+        if kind == 'accumulated':
+            ror = (ror + 1.).cumprod() - 1.
+
+        if real:
+            inflation = self.inflation(kind='values')
+            ror = (ror + 1.) / (inflation + 1.).cumprod() - 1.
+
+        return ror
 
     def period(self):
         return pd.period_range(self.period_min, self.period_max, freq='M')
-
-    def accumulated_rate_of_return(self, real=False):
-        aror = (self.rate_of_return() + 1.).cumprod() - 1.
-        if real:
-            inflation = self.inflation(kind='values')
-            aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
-        return aror
 
     def risk(self, period='year'):
         """
@@ -232,13 +237,6 @@ class Portfolio(PortfolioInflation):
     def assets_weighted(self):
         return list(zip(self.assets, self.weights))
 
-    def accumulated_rate_of_return(self, real=False):
-        aror = (self.rate_of_return() + 1.).cumprod() - 1.
-        if real:
-            inflation = self.inflation(kind='values')
-            aror = (aror + 1.) / (inflation + 1.).cumprod() - 1.
-        return aror
-
     def risk(self, period='year'):
         """
         Returns risk of the asset
@@ -273,10 +271,21 @@ class Portfolio(PortfolioInflation):
             cagrs = cagrs[0]
         return cagrs
 
-    def rate_of_return(self):
-        assets_rate_of_returns = np.array([a.rate_of_return() for a in self.assets])
-        rate_of_return = (assets_rate_of_returns * self.weights).sum()
-        return rate_of_return
+    def rate_of_return(self, kind='values', real=False):
+        if kind not in ['values', 'accumulated']:
+            raise ValueError('`kind` is not in expected values')
+
+        ror_assets = np.array([a.rate_of_return() for a in self.assets])
+        ror = (ror_assets * self.weights).sum()
+
+        if kind == 'accumulated':
+            ror = (ror + 1.).cumprod() - 1.
+
+        if real:
+            inflation = self.inflation(kind='values')
+            ror = (ror + 1.) / (inflation + 1.).cumprod() - 1.
+
+        return ror
 
     def __repr__(self):
         assets_repr = ', '.join(asset.symbol.identifier.__repr__() for asset in self.assets)
