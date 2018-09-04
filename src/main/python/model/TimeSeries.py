@@ -52,7 +52,7 @@ class TimeValue:
         return self.apply(lambda x: np.sqrt(x))
 
     def __repr__(self):
-        return 'TimeSeries(start_period={}, end_period={}, derivative={}, values={}'.format(
+        return 'TimeValue(start_period={}, end_period={}, derivative={}, values={}'.format(
             self.start_period, self.end_period, self.derivative, self.value
         )
 
