@@ -237,6 +237,9 @@ class Portfolio(PortfolioInflation):
     def assets_weighted(self):
         return list(zip(self.assets, self.weights))
 
+    def period(self):
+        return pd.period_range(self.period_min, self.period_max, freq='M')
+
     def risk(self, period='year'):
         """
         Returns risk of the asset
