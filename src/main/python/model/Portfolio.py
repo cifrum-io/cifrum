@@ -6,7 +6,9 @@ import dateutil.relativedelta
 import numpy as np
 import pandas as pd
 from contracts import contract
+from serum import inject
 
+from .FinancialSymbolsSource import CurrencySymbolsRegistry
 from .Enums import Currency, Period
 from .FinancialSymbol import FinancialSymbol
 from .TimeSeries import TimeSeries
@@ -66,7 +68,10 @@ class PortfolioInflation:
             raise Exception('inflation kind is not supported: {}'.format(kind))
 
 
+@inject
 class PortfolioAsset(PortfolioInflation):
+
+    currency_symbols_registry: CurrencySymbolsRegistry
 
     def __init__(self, symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: Currency):
@@ -126,14 +131,12 @@ class PortfolioAsset(PortfolioInflation):
         return ts
 
     def __convert_currency(self, currency_to: Currency):
-        from .FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer as Fssc
-
         currency_from = self.symbol.currency
         if currency_from == currency_to:
             return
 
-        currency_rate = Fssc.currency_symbols_registry().convert(currency_from, currency_to,
-                                                                 self.period_min, self.period_max)
+        currency_rate = self.currency_symbols_registry \
+                            .convert(currency_from, currency_to, self.period_min, self.period_max)
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),

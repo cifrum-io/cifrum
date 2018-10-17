@@ -5,13 +5,15 @@ from model.Enums import Currency
 import pandas as pd
 import numpy as np
 import itertools
+from serum import inject
+
+from model.FinancialSymbolsSource import CurrencySymbolsRegistry
 
 
 class CurrencyConversionTest(unittest.TestCase):
 
-    def test_currency_should_not_be_converted_to_itself_inside_converter(self):
-        from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
-        csr = FinancialSymbolsSourceContainer.currency_symbols_registry()
+    @inject
+    def test_currency_should_not_be_converted_to_itself_inside_converter(self, csr: CurrencySymbolsRegistry):
         for cur in Currency:
             dt = csr.convert(currency_from=cur, currency_to=cur,
                              start_period=pd.Period('1991-1', freq='M'), end_period=pd.Period('2015-1', freq='M'))

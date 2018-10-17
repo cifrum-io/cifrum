@@ -1,6 +1,6 @@
 PyContracts>=1.8,<1.9
 numpy>=1.15,<1.16
 quandl>=3.4,<3.5
-dependency_injector>=3.13,<3.14
+serum>=5.1.0,<5.2.0
 pandas>=0.23,<0.24
 pybuilder>=0.11,<0.12

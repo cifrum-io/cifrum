@@ -1,13 +1,10 @@
 import unittest
 
-import pandas as pd
-import numpy as np
-import datetime as dtm
 from freezegun import freeze_time
+from serum import Context
 
 import yapo
-from model.Enums import Currency, Period, SecurityType
-from model.FinancialSymbolsSource import SingleFinancialSymbolSource, FinancialSymbolsRegistry
+from model.FinancialSymbolsSource import *
 
 
 class PortfolioAssetsTest(unittest.TestCase):
@@ -45,25 +42,29 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertGreaterEqual(pd.Period.now(freq='M'), portfolio.period_max)
 
     def test_last_month_period_should_be_dropped(self):
-        num_days = 60
-        date_start = dtm.datetime.now() - dtm.timedelta(days=num_days)
-        date_list = pd.date_range(date_start, periods=num_days, freq='D')
+        class TestSymbolSources(SymbolSources):
+            def __init__(self):
+                num_days = 60
+                date_start = dtm.datetime.now() - dtm.timedelta(days=num_days)
+                date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
-        np.random.seed(42)
-        values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
-                               'date': date_list})
+                np.random.seed(42)
+                self.values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                                            'date': date_list})
 
-        test_source = SingleFinancialSymbolSource(
-            namespace='test_ns', name='test',
-            values_fetcher=lambda: values,
-            security_type=SecurityType.STOCK_ETF,
-            start_period=values['date'].min(),
-            end_period=values['date'].max(),
-            period=Period.DAY,
-            currency=Currency.RUB
-        )
-        fin_sym_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
-        yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
+            @property
+            def sources(self):
+                return [SingleFinancialSymbolSource(
+                            namespace='test_ns', name='test',
+                            values_fetcher=lambda: self.values,
+                            security_type=SecurityType.STOCK_ETF,
+                            start_period=self.values['date'].min(),
+                            end_period=self.values['date'].max(),
+                            period=Period.DAY,
+                            currency=Currency.RUB)]
+
+        with Context(TestSymbolSources):
+            yapo_instance = yapo.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',
@@ -78,25 +79,29 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertEqual(set(asset.period()), {pd.Period('2017-11'), pd.Period('2017-12')})
 
     def test_drop_last_month_data_if_no_activity_within_30_days(self):
-        num_days = 60
-        date_start = dtm.datetime.now() - dtm.timedelta(days=num_days + 30)
-        date_list = pd.date_range(date_start, periods=num_days, freq='D')
+        class TestSymbolSources(SymbolSources):
+            def __init__(self):
+                num_days = 60
+                date_start = dtm.datetime.now() - dtm.timedelta(days=num_days + 30)
+                date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
-        np.random.seed(42)
-        values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
-                               'date': date_list})
+                np.random.seed(42)
+                self.values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                                            'date': date_list})
 
-        test_source = SingleFinancialSymbolSource(
-            namespace='test_ns', name='test',
-            values_fetcher=lambda: values,
-            security_type=SecurityType.STOCK_ETF,
-            start_period=values['date'].min(),
-            end_period=values['date'].max(),
-            period=Period.DAY,
-            currency=Currency.RUB
-        )
-        fin_sym_registry = FinancialSymbolsRegistry(symbol_sources=[test_source])
-        yapo_instance = yapo.Yapo(fin_syms_registry=fin_sym_registry)
+            @property
+            def sources(self):
+                return [SingleFinancialSymbolSource(
+                            namespace='test_ns', name='test',
+                            values_fetcher=lambda: self.values,
+                            security_type=SecurityType.STOCK_ETF,
+                            start_period=self.values['date'].min(),
+                            end_period=self.values['date'].max(),
+                            period=Period.DAY,
+                            currency=Currency.RUB)]
+
+        with Context(TestSymbolSources):
+            yapo_instance = yapo.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',

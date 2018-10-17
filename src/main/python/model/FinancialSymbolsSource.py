@@ -1,17 +1,58 @@
-import os
+import datetime as dtm
+from abc import ABCMeta, abstractmethod
 from itertools import groupby
 from pprint import pformat
-import datetime as dtm
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import quandl
+from serum import dependency, inject
 
+from model.Settings import *
 from . import Settings
 from .Enums import Currency, SecurityType, Period
 from .FinancialSymbol import FinancialSymbol
 from .FinancialSymbolId import FinancialSymbolId
 from .FinancialSymbolInfo import FinancialSymbolInfo
+
+
+def _load_inflation_values(inflation_country):
+    df = pd.read_csv('{}inflation_{}/data.csv'.format(rostsber_url, inflation_country), sep='\t')
+    df['period'] = pd.to_datetime(df['date']).dt.to_period('M')
+    df.sort_values(by='period', inplace=True)
+    df.rename(columns={'close': change_column_name}, inplace=True)
+    return df
+
+
+def _load_inflation_index(inflation_country):
+    dt = pd.read_csv('{}inflation_{}/__index.csv'.format(rostsber_url, inflation_country), sep='\t')
+    return dt
+
+
+def _load_inflation_date(inflation_country, kind):
+    index = _load_inflation_index(inflation_country)
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
+
+
+def _load_toprates():
+    dt = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(rostsber_url), sep='\t')
+    dt.sort_values(by='decade', inplace=True)
+    dt.rename(columns={'close': change_column_name, 'decade': 'date'},
+              inplace=True)
+    return dt
+
+
+def _load_cbr_deposit_rate_date(kind):
+    index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(rostsber_url), sep='\t')
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
+
+
+def _load_micex_mcftr_date(kind):
+    index = pd.read_csv(rostsber_url + 'moex/mcftr/__index.csv', sep='\t')
+    period_str = index[kind][0]
+    return pd.Period(period_str, freq='M')
 
 
 class FinancialSymbolsSource:
@@ -72,7 +113,93 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
         return [fin_sym_info]
 
 
-class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
+@dependency
+class CbrTopRatesSource(SingleFinancialSymbolSource):
+    def __init__(self):
+        super().__init__(
+            namespace='cbr',
+            name='TOP_rates',
+            values_fetcher=lambda: _load_toprates(),
+            start_period=_load_cbr_deposit_rate_date('date_start'),
+            end_period=_load_cbr_deposit_rate_date('date_end'),
+            long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях)',
+            currency=Currency.RUB,
+            security_type=SecurityType.RATES,
+            period=Period.DECADE,
+            adjusted_close=False,
+        )
+
+
+@dependency
+class MicexMcftrSource(SingleFinancialSymbolSource):
+    def __init__(self):
+        super().__init__(
+            namespace='micex',
+            name='MCFTR',
+            values_fetcher=lambda: pd.read_csv(rostsber_url + 'moex/mcftr/data.csv', sep='\t'),
+            start_period=_load_micex_mcftr_date('date_start'),
+            end_period=_load_micex_mcftr_date('date_end'),
+            short_name='MICEX Total Return',
+            currency=Currency.RUB,
+            security_type=SecurityType.INDEX,
+            period=Period.DAY,
+            adjusted_close=False,
+        )
+
+
+@dependency
+class InflationRuSource(SingleFinancialSymbolSource):
+    def __init__(self):
+        super().__init__(
+            namespace='infl',
+            name=Currency.RUB.name,
+            values_fetcher=lambda: _load_inflation_values('ru'),
+            start_period=_load_inflation_date(inflation_country='ru', kind='date_start'),
+            end_period=_load_inflation_date(inflation_country='ru', kind='date_end'),
+            short_name='Инфляция РФ',
+            currency=Currency.RUB,
+            security_type=SecurityType.INFLATION,
+            period=Period.MONTH,
+            adjusted_close=False,
+        )
+
+
+@dependency
+class InflationEuSource(SingleFinancialSymbolSource):
+    def __init__(self):
+        super().__init__(
+            namespace='infl',
+            name=Currency.EUR.name,
+            values_fetcher=lambda: _load_inflation_values('eu'),
+            start_period=_load_inflation_date(inflation_country='eu', kind='date_start'),
+            end_period=_load_inflation_date(inflation_country='eu', kind='date_end'),
+            short_name='Инфляция ЕС',
+            currency=Currency.EUR,
+            security_type=SecurityType.INFLATION,
+            period=Period.MONTH,
+            adjusted_close=False,
+        )
+
+
+@dependency
+class InflationUsSource(SingleFinancialSymbolSource):
+    def __init__(self):
+        super().__init__(
+            namespace='infl',
+            name=Currency.USD.name,
+            values_fetcher=lambda: _load_inflation_values('us'),
+            start_period=_load_inflation_date(inflation_country='us', kind='date_start'),
+            end_period=_load_inflation_date(inflation_country='us', kind='date_end'),
+            short_name='Инфляция США',
+            currency=Currency.USD,
+            security_type=SecurityType.INFLATION,
+            period=Period.MONTH,
+            adjusted_close=False,
+        )
+
+
+@dependency
+class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
         self.url_base = Settings.rostsber_url + 'currency/'
@@ -127,7 +254,8 @@ class CbrCurrencyFinancialSymbolsSource(FinancialSymbolsSource):
         ]
 
 
-class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
+@dependency
+class MicexStocksSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
         self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
@@ -148,7 +276,7 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         row = self.index.loc[name]
         symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                  values=lambda start_period, end_period:
-                                     self.__extract_values(name, start_period, end_period),
+                                 self.__extract_values(name, start_period, end_period),
                                  exchange='MICEX',
                                  start_period=row['date_start'],
                                  end_period=row['date_end'],
@@ -172,7 +300,8 @@ class MicexStocksFinancialSymbolsSource(FinancialSymbolsSource):
         return infos
 
 
-class NluFinancialSymbolsSource(FinancialSymbolsSource):
+@dependency
+class NluSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='nlu')
         self.url_base = Settings.rostsber_url + 'mut_rus/'
@@ -201,7 +330,7 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         row = self.index.loc[name_int]
         symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                  values=lambda start_period, end_period:
-                                     self.__extract_values(name, start_period, end_period),
+                                 self.__extract_values(name, start_period, end_period),
                                  short_name=row['short_name'],
                                  start_period=row['date_start'],
                                  end_period=row['date_end'],
@@ -222,7 +351,8 @@ class NluFinancialSymbolsSource(FinancialSymbolsSource):
         return infos
 
 
-class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
+@dependency
+class QuandlSource(FinancialSymbolsSource):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
     def __init__(self):
@@ -268,11 +398,49 @@ class QuandlFinancialSymbolsSource(FinancialSymbolsSource):
         return infos
 
 
-class FinancialSymbolsRegistry(object):
-    def __init__(self, symbol_sources):
+@dependency
+class SymbolSources(metaclass=ABCMeta):
+    @property
+    @abstractmethod
+    def sources(self):
+        raise NotImplementedError()
+
+
+@inject
+class AllSymbolSources(SymbolSources):
+    cbr_currencies_source: CbrCurrenciesSource
+    cbr_top_rates_source: CbrTopRatesSource
+    inflation_ru_source: InflationRuSource
+    inflation_eu_source: InflationEuSource
+    inflation_us_source: InflationUsSource
+    micex_mcftr_source: MicexMcftrSource
+    micex_stocks_source: MicexStocksSource
+    nlu_muts_source: NluSource
+    quandl_source: QuandlSource
+
+    @property
+    def sources(self):
+        return [
+            self.cbr_currencies_source,
+            self.cbr_top_rates_source,
+            self.inflation_ru_source,
+            self.inflation_eu_source,
+            self.inflation_us_source,
+            self.micex_mcftr_source,
+            self.micex_stocks_source,
+            self.nlu_muts_source,
+            self.quandl_source,
+        ]
+
+
+@dependency
+class FinancialSymbolsRegistry:
+
+    @inject
+    def __init__(self, symbol_sources: SymbolSources):
         def symbol_source_key(x): return x.namespace
 
-        symbol_sources = sorted(symbol_sources, key=symbol_source_key)
+        symbol_sources = sorted(symbol_sources.sources, key=symbol_source_key)
         self.symbol_sources = {}
         for k, v in groupby(symbol_sources, key=symbol_source_key):
             self.symbol_sources.update({k: list(v)})
@@ -307,7 +475,8 @@ class FinancialSymbolsRegistry(object):
             return None
 
 
-class CurrencySymbolsRegistry(object):
+@dependency
+class CurrencySymbolsRegistry:
     def __init__(self):
         self.url_base = Settings.rostsber_url + 'currency/'
 

@@ -3,16 +3,19 @@ from typing import List, Dict, Union
 import numpy as np
 import pandas as pd
 from contracts import contract
+from serum import inject, Context
 
 from model.Enums import Currency, SecurityType
 from model.FinancialSymbol import FinancialSymbol
 from model.FinancialSymbolId import FinancialSymbolId
-from model.FinancialSymbolsSourceContainer import FinancialSymbolsSourceContainer
+from model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSources
 from model.Portfolio import Portfolio, PortfolioAsset
 
 
 class Yapo:
-    def __init__(self, fin_syms_registry):
+
+    @inject
+    def __init__(self, fin_syms_registry: FinancialSymbolsRegistry):
         self.fin_syms_registry = fin_syms_registry
         self.__period_lowest = '1900-1'
         self.__period_highest = lambda: str(pd.Period.now(freq='M'))
@@ -140,7 +143,8 @@ class Yapo:
             return self.fin_syms_registry.namespaces()
 
 
-yapo_instance = Yapo(fin_syms_registry=FinancialSymbolsSourceContainer.financial_symbols_registry())
+with Context(AllSymbolSources):
+    yapo_instance = Yapo()
 information = yapo_instance.information
 portfolio = yapo_instance.portfolio
 portfolio_asset = yapo_instance.portfolio_asset
