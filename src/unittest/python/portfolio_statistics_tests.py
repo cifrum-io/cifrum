@@ -35,13 +35,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
-        self.assertAlmostEqual(cagr_default.value, .174, delta=self.epsilon)
+        self.assertAlmostEqual(cagr_default.value, .0665, delta=self.epsilon)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20)
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., delta=self.epsilon)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1)
-        self.assertAlmostEqual(cagr_one_year.value, .473, delta=self.epsilon)
+        self.assertAlmostEqual(cagr_one_year.value, .1455, delta=self.epsilon)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1])
@@ -51,13 +51,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, .1232, delta=self.epsilon)
+        self.assertAlmostEqual(cagr_default.value, .0490, delta=self.epsilon)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., delta=self.epsilon)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1, real=True)
-        self.assertAlmostEqual(cagr_one_year.value, .3808, delta=self.epsilon)
+        self.assertAlmostEqual(cagr_one_year.value, .1150, delta=self.epsilon)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)

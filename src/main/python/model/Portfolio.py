@@ -180,29 +180,10 @@ class PortfolioAsset(PortfolioInflation):
         real='bool',
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
-        months_in_year = 12
-        if years_ago is None:
-            years_total = (self.period_max - self.period_min) / months_in_year
-            cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
-            if real:
-                cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
-            return cagr
-        elif isinstance(years_ago, list):
-            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
-                             for y in years_ago])
-        elif isinstance(years_ago, int):
-            months_count = years_ago * months_in_year
-            if self.period_min > self.period_max - months_count:
-                return self.compound_annual_growth_rate(years_ago=None, real=real)
-
-            ror_series = self.rate_of_return()[-months_count:]
-            cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
-            if real:
-                inflation = self.inflation(kind='accumulated', years_ago=years_ago)
-                cagr = (cagr + 1.) / (inflation + 1.) ** (1 / years_ago) - 1.
-            return cagr
-        else:
-            raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
+        p = Portfolio(assets=[self], weights=np.array([1.0]),
+                      start_period=self.period_min, end_period=self.period_max,
+                      currency=self.currency)
+        return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
 
     def __repr__(self):
         asset_repr = """\
@@ -267,12 +248,29 @@ class Portfolio(PortfolioInflation):
         real='bool',
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
-        cagrs_per_asset = np.vstack([a.compound_annual_growth_rate(years_ago=years_ago, real=real)
-                                     for a in self.assets])
-        cagrs = cagrs_per_asset.sum(axis=0)
-        if cagrs.shape == (1,):
-            cagrs = cagrs[0]
-        return cagrs
+        months_in_year = 12
+        if years_ago is None:
+            years_total = (self.period_max - self.period_min) / months_in_year
+            cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
+            if real:
+                cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
+            return cagr
+        elif isinstance(years_ago, list):
+            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
+                             for y in years_ago])
+        elif isinstance(years_ago, int):
+            months_count = years_ago * months_in_year
+            if self.period_min > self.period_max - months_count:
+                return self.compound_annual_growth_rate(years_ago=None, real=real)
+
+            ror_series = self.rate_of_return()[-months_count:]
+            cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
+            if real:
+                inflation = self.inflation(kind='accumulated', years_ago=years_ago)
+                cagr = (cagr + 1.) / (inflation + 1.) ** (1 / years_ago) - 1.
+            return cagr
+        else:
+            raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
     def rate_of_return(self, kind='values', real=False):
         if kind not in ['values', 'accumulated']:
