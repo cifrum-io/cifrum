@@ -3,7 +3,7 @@ from typing import List, Dict, Union
 import numpy as np
 import pandas as pd
 from contracts import contract
-from serum import inject, Context
+from serum import inject, dependency, Context
 
 from model.Enums import Currency, SecurityType
 from model.FinancialSymbol import FinancialSymbol
@@ -12,6 +12,7 @@ from model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSour
 from model.Portfolio import Portfolio, PortfolioAsset
 
 
+@dependency
 class Yapo:
 
     @inject

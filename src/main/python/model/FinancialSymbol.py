@@ -1,4 +1,51 @@
+from collections import namedtuple
+
 import pandas as pd
+
+
+class ValuesFetcher:
+
+    _PeriodRange = namedtuple('PeriodRange', 'start, end')
+
+    def __init__(self, values_fun, period_min, period_max):
+        self._values_fetcher = values_fun
+        self._period_min = period_min
+        self._period_max = period_max
+        self._current_period_start = None
+        self._current_period_end = None
+        self._values = None
+
+    @property
+    def _period_range(self):
+        return self._PeriodRange(self._current_period_start, self._current_period_end)
+
+    def _fetch(self, start_period: pd.Period, end_period: pd.Period):
+        start_period = max(start_period, self._period_min)
+        end_period = min(end_period, self._period_max)
+
+        if self._current_period_start is None or \
+                (start_period < self._current_period_start and end_period > self._current_period_end):
+            self._current_period_start = start_period
+            self._current_period_end = end_period
+            self._values = self._values_fetcher(start_period, end_period)
+
+        elif start_period >= self._current_period_start and end_period <= self._current_period_end:
+            pass
+
+        elif start_period < self._current_period_start:
+            self._values = self._values_fetcher(start_period, self._current_period_start - 1).append(self._values)
+            self._current_period_start = start_period
+
+        elif end_period > self._current_period_end:
+            self._values = self._values.append(self._values_fetcher(self._current_period_end + 1, end_period))
+            self._current_period_end = end_period
+
+        else:
+            pass
+
+        periods = self._values.date.dt.to_period(freq='M')
+        df = self._values[(start_period <= periods) & (periods <= end_period)]
+        return df.copy()
 
 
 class FinancialSymbol:
@@ -16,7 +63,10 @@ class FinancialSymbol:
                  period=None,
                  adjusted_close=None):
         self.identifier = identifier
-        self.__values = values
+        self.__values_fetcher = ValuesFetcher(
+            values_fun=values,
+            period_min=pd.Period(start_period, freq='M'),
+            period_max=pd.Period(end_period, freq='M'))
         self.isin = isin
         self.short_name = short_name
         self.long_name = long_name
@@ -31,7 +81,11 @@ class FinancialSymbol:
     def values(self, start_period, end_period):
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
-        return self.__values(start_period=start_period, end_period=end_period)
+        return self.values_fetcher._fetch(start_period=start_period, end_period=end_period)
+
+    @property
+    def values_fetcher(self):
+        return self.__values_fetcher
 
     @property
     def name(self):
