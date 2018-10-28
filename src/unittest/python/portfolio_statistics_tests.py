@@ -44,7 +44,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., places=self.places)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1)
-        self.assertAlmostEqual(cagr_one_year.value, .1718, places=self.places)
+        self.assertAlmostEqual(cagr_one_year.value, .1709, places=self.places)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1])
@@ -54,13 +54,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, .1077, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1076, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual(cagr_default.value, cagr_long_time.value, places=self.places)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1, real=True)
-        self.assertAlmostEqual(cagr_one_year.value, .1502, places=self.places)
+        self.assertAlmostEqual(cagr_one_year.value, .1494, places=self.places)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
@@ -73,6 +73,6 @@ class PortfolioStatisticsTest(unittest.TestCase):
                                          start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_portfolio, period='year')
-        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1591, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1592, places=self.places)
         self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0407, places=self.places)
-        self.assertAlmostEqual(self.portfolio.risk().value, .1591, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk().value, .1592, places=self.places)

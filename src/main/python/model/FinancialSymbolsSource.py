@@ -268,6 +268,10 @@ class MicexStocksSource(FinancialSymbolsSource):
         df['date'] = pd.to_datetime(df['date'])
         period = df['date'].dt.to_period('M')
         df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        df_new['legal_close'].fillna(df_new['close'], inplace=True)
+        del df_new['close']
+        df_new.rename(columns={'legal_close': 'close'}, inplace=True)
+        df_new.dropna(inplace=True)
         return df_new
 
     def fetch_financial_symbol(self, name: str):
