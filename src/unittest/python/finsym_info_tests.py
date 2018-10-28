@@ -10,7 +10,7 @@ from model.Settings import change_column_name
 class FinancialSymbolInformationTest(unittest.TestCase):
 
     def test_returns_sym_info(self):
-        info = yapo.information(name='micex/SBER')
+        info = yapo.information(name='micex/FXRU')
         self.assertIsInstance(info, FinancialSymbol)
 
         info = yapo.information(names=[])
@@ -21,7 +21,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 1)
 
-        info = yapo.information(names=['micex/SBER', 'infl/RUB'])
+        info = yapo.information(names=['micex/FXRU', 'infl/RUB'])
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 2)
 
@@ -98,8 +98,8 @@ class FinancialSymbolInformationTest(unittest.TestCase):
 
     def test_all_data_should_be_available(self):
         self.assertIsNotNone(yapo.information(name='quandl/MSFT'))
-        self.assertIsNotNone(yapo.information(name='micex/SBER'))
-        self.assertIsNotNone(yapo.information(name='micex/SBERP'))
+        self.assertIsNotNone(yapo.information(name='micex/FXRU'))
+        self.assertIsNotNone(yapo.information(name='micex/FXMM'))
         self.assertIsNotNone(yapo.information(name='micex/MCFTR'))
         self.assertIsNotNone(yapo.information(name='nlu/449'))
         self.assertIsNotNone(yapo.information(name='cbr/USD'))
@@ -117,7 +117,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsNone(infos[1])
 
     def test_return_same_infos_count_as_provided(self):
-        ids_arr = ['infl/RUB', 'infl/EUR', 'micex/MCFTR', 'micex/SBER']
+        ids_arr = ['infl/RUB', 'infl/EUR', 'micex/MCFTR', 'micex/FXRU']
         infos = yapo.information(names=ids_arr)
         self.assertEqual(len(infos), len(ids_arr))
 

@@ -11,12 +11,9 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.portfolio = yapo.portfolio(assets={'quandl/MSFT': 1.,
-                                               'micex/SBER': 1., 'micex/SBERP': 1.,
-                                               'nlu/449': 1.,
+        cls.portfolio = yapo.portfolio(assets={'nlu/922': 1., 'micex/FXRU': 1., 'micex/FXMM': 1.,
                                                'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
-                                       start_period='2011-3', end_period='2015-5', currency='USD')
-        cls.epsilon = 1e-3
+                                       start_period='2015-3', end_period='2017-5', currency='USD')
 
     def test_fail_if_asset_security_type_is_not_supported(self):
         unsupported_ids = ['infl/RUB', 'infl/USD', 'infl/EUR', 'cbr/TOP_rates', 'micex/MCFTR']
@@ -119,4 +116,4 @@ class PortfolioAssetsTest(unittest.TestCase):
         for asset in self.portfolio.assets:
             rate_of_return_given = asset.rate_of_return().values
             rate_of_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
-            self.assertTrue(np.all(np.abs(rate_of_return_given - rate_of_return_expected) < self.epsilon))
+            np.testing.assert_almost_equal(rate_of_return_given, rate_of_return_expected)
