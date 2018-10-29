@@ -1,15 +1,20 @@
 import unittest
 import yapo
 import numpy as np
+import pandas as pd
 
 
 class PortfolioStatisticsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.portfolio_period_start = pd.Period('2015-3', freq='M')
+        cls.portfolio_period_end = pd.Period('2017-5', freq='M')
         cls.asset_names = {'nlu/922': .4, 'micex/FXRU': .4, 'micex/FXMM': .2}
         cls.portfolio = yapo.portfolio(assets=cls.asset_names,
-                                       start_period='2015-3', end_period='2017-5', currency='USD')
+                                       start_period=str(cls.portfolio_period_start),
+                                       end_period=str(cls.portfolio_period_end),
+                                       currency='USD')
         cls.places = 4
 
     def test_rate_of_return(self):
@@ -27,6 +32,18 @@ class PortfolioStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(arors_real.min(), -.0326, places=self.places)
         self.assertAlmostEqual(arors_real.max(), .2577, places=self.places)
 
+    def test_ytd_rate_of_return(self):
+        ror_ytd = self.portfolio.rate_of_return(kind='ytd')
+        self.assertEqual(ror_ytd.start_period,
+                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
+        self.assertEqual(ror_ytd.end_period, self.portfolio_period_end)
+        self.assertAlmostEqual(ror_ytd.values[-1], .0095, places=self.places)
+
+        ror_ytd_real = self.portfolio.rate_of_return(kind='ytd', real=True)
+        self.assertEqual(ror_ytd_real.start_period,
+                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, self.portfolio_period_end)
+        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0405, places=self.places)
 
     def test_handle_related_inflation(self):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
