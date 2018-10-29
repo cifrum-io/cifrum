@@ -20,12 +20,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test_accumulated_rate_of_return(self):
         arors = self.portfolio.rate_of_return(kind='accumulated').values
-        self.assertGreater(arors.min(), -.0294)
-        self.assertLess(arors.max(), .3026)
+        self.assertAlmostEqual(arors.min(), -.0294, places=self.places)
+        self.assertAlmostEqual(arors.max(), .3024, places=self.places)
 
         arors_real = self.portfolio.rate_of_return(kind='accumulated', real=True).values
-        self.assertGreater(arors_real.min(), -.3026)
-        self.assertLess(arors_real.max(), .2578)
+        self.assertAlmostEqual(arors_real.min(), -.0326, places=self.places)
+        self.assertAlmostEqual(arors_real.max(), .2577, places=self.places)
+
 
     def test_handle_related_inflation(self):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
