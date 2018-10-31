@@ -38,15 +38,15 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertGreaterEqual(portfolio.period_min, pd.Period('1900-1', freq='M'))
         self.assertGreaterEqual(pd.Period.now(freq='M'), portfolio.period_max)
 
-    def test_last_month_period_should_be_dropped(self):
+    @freeze_time('2018-10-31 1:0:0')
+    def test_data_for_last_month_period_should_be_dropped(self):
         class TestSymbolSources(SymbolSources):
             def __init__(self):
-                num_days = 60
+                num_days = 70
                 date_start = dtm.datetime.now() - dtm.timedelta(days=num_days)
                 date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
-                np.random.seed(42)
-                self.values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                self.values = pd.DataFrame({'close': np.linspace(start=1., stop=100., num=num_days),
                                             'date': date_list})
 
             @property
@@ -75,15 +75,15 @@ class PortfolioAssetsTest(unittest.TestCase):
                                      start_period='2017-11', end_period='2018-2', currency='usd')
         self.assertEqual(set(asset.period()), {pd.Period('2017-11'), pd.Period('2017-12')})
 
-    def test_drop_last_month_data_if_no_activity_within_30_days(self):
+    @freeze_time('2018-10-31 1:0:0')
+    def test_drop_last_month_data_if_no_activity_within_last_full_month(self):
         class TestSymbolSources(SymbolSources):
             def __init__(self):
-                num_days = 60
-                date_start = dtm.datetime.now() - dtm.timedelta(days=num_days + 30)
+                num_days = 58
+                date_start = dtm.datetime.now() - dtm.timedelta(days=num_days + 32)
                 date_list = pd.date_range(date_start, periods=num_days, freq='D')
 
-                np.random.seed(42)
-                self.values = pd.DataFrame({'close': np.random.uniform(10., 100., num_days),
+                self.values = pd.DataFrame({'close': np.linspace(start=10., stop=100., num=num_days),
                                             'date': date_list})
 
             @property
