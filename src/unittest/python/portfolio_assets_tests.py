@@ -71,7 +71,7 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     @freeze_time('2018-1-30 1:0:0')
     def test_quandl_values(self):
-        asset = yapo.portfolio_asset(name='quandl/SPY',
+        asset = yapo.portfolio_asset(name='nlu/922',
                                      start_period='2017-11', end_period='2018-2', currency='usd')
         self.assertEqual(set(asset.period()), {pd.Period('2017-11'), pd.Period('2017-12')})
 
