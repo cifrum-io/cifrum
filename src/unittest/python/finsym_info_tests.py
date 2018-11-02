@@ -9,7 +9,7 @@ from model.Settings import change_column_name
 
 class FinancialSymbolInformationTest(unittest.TestCase):
 
-    def test_returns_sym_info(self):
+    def test__returns_sym_info(self):
         info = yapo.information(name='micex/FXRU')
         self.assertIsInstance(info, FinancialSymbol)
 
@@ -25,7 +25,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsInstance(info, list)
         self.assertEqual(len(info), 2)
 
-    def test_micex_stocks_should_have_correct_fields(self):
+    def test__micex_stocks_should_have_correct_fields(self):
         info = yapo.information(name='micex/SBER')
         self.assertEqual(info.namespace, 'micex')
         self.assertEqual(info.name, 'SBER')
@@ -38,7 +38,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.period, Period.DAY)
         self.assertEqual(info.adjusted_close, True)
 
-    def test_quandl_stocks_should_have_correct_fields(self):
+    def test__quandl_stocks_should_have_correct_fields(self):
         info = yapo.information(name='quandl/VNQ')
         self.assertEqual(info.namespace, 'quandl')
         self.assertEqual(info.name, 'VNQ')
@@ -51,7 +51,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.period, Period.DAY)
         self.assertEqual(info.adjusted_close, True)
 
-    def test_currency_usd__should_have_correct_fields(self):
+    def test__currency_usd__should_have_correct_fields(self):
         info = yapo.information(name='cbr/USD')
         self.assertEqual(info.namespace, 'cbr')
         self.assertEqual(info.name, 'USD')
@@ -64,7 +64,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.period, Period.DAY)
         self.assertEqual(info.adjusted_close, True)
 
-    def test_inflation_ru__should_have_correct_fields(self):
+    def test__inflation_ru__should_have_correct_fields(self):
         info = yapo.information(name='infl/RUB')
         self.assertEqual(info.namespace, 'infl')
         self.assertEqual(info.name, 'RUB')
@@ -80,7 +80,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
                                         end_period=str(pd.Period.now(freq='M'))).columns),
                         {'date', change_column_name})
 
-    def test_top_rates__should_have_correct_fields(self):
+    def test__top_rates__should_have_correct_fields(self):
         info = yapo.information(name='cbr/TOP_rates')
         self.assertEqual(info.namespace, 'cbr')
         self.assertEqual(info.name, 'TOP_rates')
@@ -96,7 +96,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
                                         end_period=str(pd.Period.now(freq='M'))).columns),
                         {'date', change_column_name})
 
-    def test_all_data_should_be_available(self):
+    def test__all_data_should_be_available(self):
         self.assertIsNotNone(yapo.information(name='quandl/MSFT'))
         self.assertIsNotNone(yapo.information(name='micex/FXRU'))
         self.assertIsNotNone(yapo.information(name='micex/FXMM'))
@@ -109,19 +109,19 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsNotNone(yapo.information(name='infl/EUR'))
         self.assertIsNotNone(yapo.information(name='cbr/TOP_rates'))
 
-    def test_return_none_if_no_finsym_is_found(self):
+    def test__return_none_if_no_finsym_is_found(self):
         not_existing_id = 'micex/MCFTR_doesntexist'
         self.assertIsNone(yapo.information(name=not_existing_id))
         infos = yapo.information(names=['infl/RUB', not_existing_id])
         self.assertIsNotNone(infos[0])
         self.assertIsNone(infos[1])
 
-    def test_return_same_infos_count_as_provided(self):
+    def test__return_same_infos_count_as_provided(self):
         ids_arr = ['infl/RUB', 'infl/EUR', 'micex/MCFTR', 'micex/FXRU']
         infos = yapo.information(names=ids_arr)
         self.assertEqual(len(infos), len(ids_arr))
 
-    def test_be_invariant_in_respect_to_order(self):
+    def test__be_invariant_in_respect_to_order(self):
         infos1 = yapo.information(names=['infl/RUB', 'infl/EUR'])
         infos2 = yapo.information(names=['infl/EUR', 'infl/RUB'])
         self.assertCountEqual(infos1, infos2)

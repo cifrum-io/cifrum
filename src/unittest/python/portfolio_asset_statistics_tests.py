@@ -12,7 +12,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
                                          start_period='2011-1', end_period='2017-2', currency='USD')
         cls.places = 4
 
-    def test_accumulated_rate_of_return(self):
+    def test__accumulated_rate_of_return(self):
         arors = self.asset.rate_of_return(kind='accumulated').values
         self.assertAlmostEqual(arors.max(), .0924, places=self.places)
         self.assertAlmostEqual(arors.min(), -.5464, places=self.places)
@@ -21,7 +21,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(arors_real.max(), .0765, places=self.places)
         self.assertAlmostEqual(arors_real.min(), -.5725, places=self.places)
 
-    def test_handle_related_inflation(self):
+    def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
 
         self.assertAlmostEqual(self.asset.inflation(kind='accumulated').value, .1062, places=self.places)
@@ -31,7 +31,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertEqual(self.asset.inflation(kind='values').size,
                          self.asset.rate_of_return().size)
 
-    def test_compound_annual_growth_rate(self):
+    def test__compound_annual_growth_rate(self):
         cagr_default = self.asset.compound_annual_growth_rate()
         self.assertAlmostEqual(cagr_default.value, -.0562, places=self.places)
 
@@ -47,7 +47,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(cagr_long_time1.value, cagr_long_time.value, places=self.places)
         self.assertAlmostEqual(cagr_one_year1.value, cagr_one_year.value, places=self.places)
 
-    def test_compound_annual_growth_rate_real(self):
+    def test__compound_annual_growth_rate_real(self):
         cagr_default = self.asset.compound_annual_growth_rate(real=True)
         self.assertAlmostEqual(cagr_default.value, -.0717, places=self.places)
 
@@ -63,7 +63,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(cagr_long_time1.value, cagr_long_time.value, places=self.places)
         self.assertAlmostEqual(cagr_one_year1.value, cagr_one_year.value, places=self.places)
 
-    def test_risk(self):
+    def test__risk(self):
         short_asset = yapo.portfolio_asset(name=self.asset_name,
                                            start_period='2016-8', end_period='2016-12', currency='USD')
 
@@ -72,7 +72,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(self.asset.risk(period='year').value, .2950, places=self.places)
         self.assertAlmostEqual(self.asset.risk(period='month').value, .0846, places=self.places)
 
-    def test_inflation(self):
+    def test__inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
 
         self.assertAlmostEqual(self.asset.inflation(kind='accumulated').value, .1062, places=self.places)

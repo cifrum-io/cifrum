@@ -15,7 +15,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                                'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
                                        start_period='2015-3', end_period='2017-5', currency='USD')
 
-    def test_fail_if_asset_security_type_is_not_supported(self):
+    def test__fail_if_asset_security_type_is_not_supported(self):
         unsupported_ids = ['infl/RUB', 'infl/USD', 'infl/EUR', 'cbr/TOP_rates', 'micex/MCFTR']
 
         for unsupported_id in unsupported_ids:
@@ -23,12 +23,12 @@ class PortfolioAssetsTest(unittest.TestCase):
                               lambda: yapo.portfolio_asset(name=unsupported_id,
                                                            start_period='2011-3', end_period='2015-5', currency='USD'))
 
-    def test_period_should_be_sorted(self):
+    def test__period_should_be_sorted(self):
         for asset in self.portfolio.assets:
             self.assertTrue(all(asset.period()[i] <= asset.period()[i + 1]
                                 for i in range(len(asset.period()) - 1)))
 
-    def test_default_periods(self):
+    def test__default_periods(self):
         asset = yapo.portfolio_asset(name='micex/SBER')
         self.assertGreaterEqual(asset.period_min, pd.Period('1900-1', freq='M'))
         self.assertGreaterEqual(pd.Period.now(freq='M'), asset.period_max)
@@ -39,7 +39,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertGreaterEqual(pd.Period.now(freq='M'), portfolio.period_max)
 
     @freeze_time('2018-10-31 1:0:0')
-    def test_data_for_last_month_period_should_be_dropped(self):
+    def test__data_for_last_month_period_should_be_dropped(self):
         class TestSymbolSources(SymbolSources):
             def __init__(self):
                 num_days = 70
@@ -70,13 +70,13 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertEqual(set(asset.period()), {end_period - 1, end_period - 2})
 
     @freeze_time('2018-1-30 1:0:0')
-    def test_quandl_values(self):
+    def test__quandl_values(self):
         asset = yapo.portfolio_asset(name='nlu/922',
                                      start_period='2017-11', end_period='2018-2', currency='usd')
         self.assertEqual(set(asset.period()), {pd.Period('2017-11'), pd.Period('2017-12')})
 
     @freeze_time('2018-10-31 1:0:0')
-    def test_drop_last_month_data_if_no_activity_within_last_full_month(self):
+    def test__drop_last_month_data_if_no_activity_within_last_full_month(self):
         class TestSymbolSources(SymbolSources):
             def __init__(self):
                 num_days = 58
@@ -106,13 +106,13 @@ class PortfolioAssetsTest(unittest.TestCase):
                                               currency='USD')
         self.assertEqual(set(asset.period()), {end_period - 2})
 
-    def test_compute_accumulated_rate_of_return(self):
+    def test__compute_accumulated_rate_of_return(self):
         for asset in self.portfolio.assets:
             aror = asset.rate_of_return(kind='accumulated').values
             self.assertTrue(not np.all(np.isnan(aror)))
         self.assertTrue(not np.all(np.isnan(self.portfolio.rate_of_return(kind='accumulated').values)))
 
-    def test_close_and_its_change_should_preserve_ratio(self):
+    def test__close_and_its_change_should_preserve_ratio(self):
         for asset in self.portfolio.assets:
             rate_of_return_given = asset.rate_of_return().values
             rate_of_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
