@@ -9,6 +9,35 @@ class AvailableNamesTest(unittest.TestCase):
         self.assertEqual(set(yapo.available_names()),
                          {'infl', 'cbr', 'micex', 'nlu', 'quandl'})
 
+    def test__return_empty_list_or_none_if_symbol_doesnt_exist(self):
+        nonexisting_id = 'nlu/xxx'
+
+        asset = yapo.portfolio_asset(name=nonexisting_id)
+        self.assertIsNone(asset)
+
+        assets = yapo.portfolio_asset(names=[nonexisting_id])
+        self.assertEqual(len(assets), 0)
+
+        assets = yapo.portfolio_asset(names=['micex/FXRU', nonexisting_id])
+        self.assertEqual(len(assets), 1)
+
+        portfolio = yapo.portfolio(assets={'micex/FXRU': 1., nonexisting_id: 1.}, currency='USD')
+        self.assertEqual(len(portfolio.assets), 1)
+
+        nonexisting_ns = 'yyy/xxx'
+
+        asset = yapo.portfolio_asset(name=nonexisting_ns)
+        self.assertIsNone(asset)
+
+        assets = yapo.portfolio_asset(names=[nonexisting_ns])
+        self.assertEqual(len(assets), 0)
+
+        assets = yapo.portfolio_asset(names=['micex/FXRU', nonexisting_ns])
+        self.assertEqual(len(assets), 1)
+
+        portfolio = yapo.portfolio(assets={'micex/FXRU': 1., nonexisting_ns: 1.}, currency='USD')
+        self.assertEqual(len(portfolio.assets), 1)
+
     def test__get_names_for_individual_namespace(self):
         def __fin_sim_ids(namespace):
             return set(available_name.fin_sym_id.format()

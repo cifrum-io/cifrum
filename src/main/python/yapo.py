@@ -51,7 +51,7 @@ class Yapo:
     def portfolio_asset(self,
                         currency: str=None,
                         start_period: str=None, end_period: str=None,
-                        **kwargs) -> Union[PortfolioAsset, List[PortfolioAsset]]:
+                        **kwargs) -> Union[PortfolioAsset, List[PortfolioAsset], None]:
         if start_period is None:
             start_period = self.__period_lowest
         if end_period is None:
@@ -63,6 +63,10 @@ class Yapo:
 
             name = kwargs['name']
             finsym_info = self.information(name=name)
+
+            if finsym_info is None:
+                return None
+
             currency = finsym_info.currency if currency is None else Currency.__dict__[currency.upper()]
 
             allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT, SecurityType.CURRENCY}
@@ -71,10 +75,11 @@ class Yapo:
                                   start_period=start_period, end_period=end_period, currency=currency)
         elif 'names' in kwargs:
             names = kwargs['names']
-            asset = [self.portfolio_asset(name=name,
-                                          start_period=start_period, end_period=end_period,
-                                          currency=currency) for name in names]
-            return asset
+            assets = [self.portfolio_asset(name=name,
+                                           start_period=start_period, end_period=end_period,
+                                           currency=currency) for name in names]
+            assets = list(filter(None.__ne__, assets))
+            return assets
         else:
             raise Exception('Unexpected state of kwargs')
         pass
