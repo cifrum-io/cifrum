@@ -2,6 +2,7 @@ import unittest
 import yapo
 import numpy as np
 import pandas as pd
+import itertools as it
 
 
 class PortfolioStatisticsTest(unittest.TestCase):
@@ -10,12 +11,51 @@ class PortfolioStatisticsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.portfolio_period_start = pd.Period('2015-3', freq='M')
         cls.portfolio_period_end = pd.Period('2017-5', freq='M')
-        cls.asset_names = {'nlu/922': .4, 'micex/FXRU': .4, 'micex/FXMM': .2}
+        cls.asset_names = {'nlu/922': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
         cls.portfolio = yapo.portfolio(assets=cls.asset_names,
                                        start_period=str(cls.portfolio_period_start),
                                        end_period=str(cls.portfolio_period_end),
                                        currency='USD')
         cls.places = 4
+
+    def test__compute_statistics_for_partially_incomplete_portfolio(self):
+        asset_names = {'nlu/92': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
+        portfolio = yapo.portfolio(assets=asset_names,
+                                   start_period=str(self.portfolio_period_start),
+                                   end_period=str(self.portfolio_period_end),
+                                   currency='USD')
+
+        for kind, real in it.product(['values', 'accumulated', 'ytd'],
+                                     [True, False]):
+            self.assertIsNotNone(portfolio.rate_of_return(kind=kind, real=real))
+
+        for years_ago, real in it.product([None, 1, 5, 20, 50], [True, False]):
+            self.assertIsNotNone(portfolio.compound_annual_growth_rate(years_ago=years_ago, real=real))
+
+        for period in ['year', 'month']:
+            self.assertIsNotNone(portfolio.risk(period=period))
+
+    def test__normalize_weights(self):
+        self.assertAlmostEqual(np.sum(self.portfolio.weights), 1., places=self.places)
+
+        portfolio_assets = {
+            k.symbol.identifier.format(): v for k, v in self.portfolio.assets_weighted()
+        }
+        self.assertAlmostEqual(portfolio_assets['nlu/922'], .4444, places=self.places)
+        self.assertAlmostEqual(portfolio_assets['micex/FXRU'], .3333, places=self.places)
+        self.assertAlmostEqual(portfolio_assets['micex/FXMM'], .2222, places=self.places)
+
+        asset_names = {'nlu/92': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
+        portfolio_misprint = yapo.portfolio(assets=asset_names,
+                                            start_period=str(self.portfolio_period_start),
+                                            end_period=str(self.portfolio_period_end),
+                                            currency='USD')
+        self.assertAlmostEqual(np.sum(portfolio_misprint.weights), 1., places=self.places)
+        portfolio_assets = {
+            k.symbol.identifier.format(): v for k, v in portfolio_misprint.assets_weighted()
+        }
+        self.assertAlmostEqual(portfolio_assets['micex/FXRU'], .4, places=self.places)
+        self.assertAlmostEqual(portfolio_assets['micex/FXMM'], .6, places=self.places)
 
     def test__rate_of_return(self):
         rate_of_return_definition = \
@@ -25,25 +65,25 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__accumulated_rate_of_return(self):
         arors = self.portfolio.rate_of_return(kind='accumulated').values
-        self.assertAlmostEqual(arors.min(), -.0294, places=self.places)
-        self.assertAlmostEqual(arors.max(), .3024, places=self.places)
+        self.assertAlmostEqual(arors.min(), -.0446, places=self.places)
+        self.assertAlmostEqual(arors.max(), .3080, places=self.places)
 
         arors_real = self.portfolio.rate_of_return(kind='accumulated', real=True).values
-        self.assertAlmostEqual(arors_real.min(), -.0326, places=self.places)
-        self.assertAlmostEqual(arors_real.max(), .2577, places=self.places)
+        self.assertAlmostEqual(arors_real.min(), -.0478, places=self.places)
+        self.assertAlmostEqual(arors_real.max(), .2630, places=self.places)
 
     def test__ytd_rate_of_return(self):
         ror_ytd = self.portfolio.rate_of_return(kind='ytd')
         self.assertEqual(ror_ytd.start_period,
                          pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
         self.assertEqual(ror_ytd.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd.values[-1], .0095, places=self.places)
+        self.assertAlmostEqual(ror_ytd.values[-1], .0046, places=self.places)
 
         ror_ytd_real = self.portfolio.rate_of_return(kind='ytd', real=True)
         self.assertEqual(ror_ytd_real.start_period,
                          pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
         self.assertEqual(ror_ytd_real.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0405, places=self.places)
+        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0452, places=self.places)
 
     def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
@@ -56,13 +96,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
-        self.assertAlmostEqual(cagr_default.value, .1261, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1266, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20)
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., places=self.places)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1)
-        self.assertAlmostEqual(cagr_one_year.value, .1709, places=self.places)
+        self.assertAlmostEqual(cagr_one_year.value, .1814, places=self.places)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1])
@@ -72,13 +112,13 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, .1076, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1082, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual(cagr_default.value, cagr_long_time.value, places=self.places)
 
         cagr_one_year = self.portfolio.compound_annual_growth_rate(years_ago=1, real=True)
-        self.assertAlmostEqual(cagr_one_year.value, .1494, places=self.places)
+        self.assertAlmostEqual(cagr_one_year.value, .1597, places=self.places)
 
         cagr_default1, cagr_long_time1, cagr_one_year1 = \
             self.portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
@@ -91,6 +131,6 @@ class PortfolioStatisticsTest(unittest.TestCase):
                                          start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_portfolio, period='year')
-        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1592, places=self.places)
-        self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0407, places=self.places)
-        self.assertAlmostEqual(self.portfolio.risk().value, .1592, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1722, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0439, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk().value, .1722, places=self.places)

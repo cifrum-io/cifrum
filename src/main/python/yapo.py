@@ -85,7 +85,7 @@ class Yapo:
         pass
 
     @contract(
-        assets='dict[N](str: float,>0), N>0',
+        assets='dict[N](str: float|int,>0), N>0',
     )
     def portfolio(self,
                   assets: Dict[str, float],
@@ -104,19 +104,20 @@ class Yapo:
             end_period = self.__period_highest()
 
         names = list(assets.keys())
-        weights = np.fromiter(assets.values(), dtype=float, count=len(names))
-        if np.abs(weights.sum() - 1.) > 1e-3:
-            weights /= np.abs(weights.sum())
-
-        assets = self.portfolio_asset(names=names,
-                                      start_period=start_period, end_period=end_period,
-                                      currency=currency)
+        assets_resolved = self.portfolio_asset(names=names,
+                                               start_period=start_period, end_period=end_period,
+                                               currency=currency)
+        assets = {a: assets[a.symbol.identifier.format()] for a in assets_resolved}
+        weights_sum = np.abs(np.fromiter(assets.values(), dtype=float, count=len(assets)).sum())
+        if np.abs(weights_sum - 1.) > 1e-3:
+            assets = {a: (w / weights_sum) for a, w in assets.items()}
 
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
         currency = Currency.__dict__[currency.upper()]
 
-        portfolio_instance = Portfolio(assets=assets, weights=weights,
+        portfolio_instance = Portfolio(assets=list(assets.keys()),
+                                       weights=list(assets.values()),
                                        start_period=start_period, end_period=end_period,
                                        currency=currency)
         return portfolio_instance
