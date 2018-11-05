@@ -147,10 +147,17 @@ class PortfolioAsset(PortfolioInflation):
         return self.values
 
     def rate_of_return(self, kind='values', real=False):
-        if kind not in ['values', 'accumulated']:
+        if kind not in ['values', 'accumulated', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
         ror = self.values.pct_change()
+
+        if kind == 'ytd':
+            ror_ytd = ror[-self.period_max.month:]
+            if real:
+                inflation = self.inflation(kind='values')[-self.period_max.month:]
+                ror_ytd = (ror_ytd + 1.) / (inflation + 1).cumprod() - 1.
+            return (ror_ytd + 1.).cumprod() - 1.
 
         if kind == 'accumulated':
             ror = (ror + 1.).cumprod() - 1.

@@ -1,6 +1,7 @@
 import unittest
 import yapo
 import numpy as np
+import pandas as pd
 
 
 class PortfolioAssetStatisticsTest(unittest.TestCase):
@@ -8,8 +9,12 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.asset_name = 'nlu/922'
+        cls.portfolio_period_start = pd.Period('2011-1', freq='M')
+        cls.portfolio_period_end = pd.Period('2017-2', freq='M')
         cls.asset = yapo.portfolio_asset(name=cls.asset_name,
-                                         start_period='2011-1', end_period='2017-2', currency='USD')
+                                         start_period=str(cls.portfolio_period_start),
+                                         end_period=str(cls.portfolio_period_end),
+                                         currency='USD')
         cls.places = 4
 
     def test__accumulated_rate_of_return(self):
@@ -20,6 +25,19 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         arors_real = self.asset.rate_of_return(kind='accumulated', real=True).values
         self.assertAlmostEqual(arors_real.max(), .0765, places=self.places)
         self.assertAlmostEqual(arors_real.min(), -.5725, places=self.places)
+
+    def test__ytd_rate_of_return(self):
+        ror_ytd = self.asset.rate_of_return(kind='ytd')
+        self.assertEqual(ror_ytd.start_period,
+                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
+        self.assertEqual(ror_ytd.end_period, self.portfolio_period_end)
+        self.assertAlmostEqual(ror_ytd.values[-1], -.0434, places=self.places)
+
+        ror_ytd_real = self.asset.rate_of_return(kind='ytd', real=True)
+        self.assertEqual(ror_ytd_real.start_period,
+                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, self.portfolio_period_end)
+        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0574, places=self.places)
 
     def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
