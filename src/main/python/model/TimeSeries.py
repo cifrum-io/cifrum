@@ -27,7 +27,7 @@ class TimeValue:
             elif isinstance(arg, (int, float, complex)):
                 args_raw.append(arg)
             else:
-                raise ValueError('argument is of incompatible type')
+                raise ValueError('argument type is incompatible')
         ts = TimeValue(value=fun(*args_raw),
                        start_period=self.start_period, end_period=self.end_period,
                        derivative=self.derivative)
@@ -62,7 +62,7 @@ class TimeSeries:
         if not isinstance(values, np.ndarray):
             raise ValueError('values should be numpy array')
         if len(values) != end_period - start_period + 1:
-            raise ValueError('values and period range are of different length')
+            raise ValueError('values and period range have different lengths')
         self.values = values
         self.size = self.values.size
         self.start_period = start_period
@@ -90,7 +90,7 @@ class TimeSeries:
 
     def pct_change(self):
         if len(self.values) < 2:
-            raise ValueError("Can't compute because of `value` length")
+            raise ValueError('`value` length should be >= 2')
         vals = np.diff(self.values) / self.values[:-1]
         return TimeSeries(values=vals,
                           start_period=self.start_period + 1, end_period=self.end_period,
@@ -116,7 +116,7 @@ class TimeSeries:
                                 derivative=self.derivative)
                 return ts
             else:
-                raise ValueError('argument is of incompatible type')
+                raise ValueError('argument has incompatible type')
 
     def reduce(self, fun):
         return TimeValue(value=fun(self.values),
