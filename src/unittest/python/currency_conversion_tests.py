@@ -1,13 +1,13 @@
 import unittest
 
-import yapo
-from model.Enums import Currency
 import pandas as pd
 import numpy as np
 import itertools
 from serum import inject
 
-from model.FinancialSymbolsSource import CurrencySymbolsRegistry
+import yapo
+from yapo.model.Enums import Currency
+from yapo.model.FinancialSymbolsSource import CurrencySymbolsRegistry
 
 
 class CurrencyConversionTest(unittest.TestCase):

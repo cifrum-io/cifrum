@@ -4,7 +4,7 @@ from freezegun import freeze_time
 from serum import Context
 
 import yapo
-from model.FinancialSymbolsSource import *
+from yapo.model.FinancialSymbolsSource import *
 
 
 class PortfolioAssetsTest(unittest.TestCase):
@@ -61,7 +61,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                             currency=Currency.RUB)]
 
         with Context(TestSymbolSources):
-            yapo_instance = yapo.Yapo()
+            yapo_instance = yapo.instance.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',
@@ -98,7 +98,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                             currency=Currency.RUB)]
 
         with Context(TestSymbolSources):
-            yapo_instance = yapo.Yapo()
+            yapo_instance = yapo.instance.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',

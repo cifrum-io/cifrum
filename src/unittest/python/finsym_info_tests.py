@@ -2,9 +2,9 @@ import unittest
 
 import yapo
 import pandas as pd
-from model.Enums import Currency, SecurityType, Period
-from model.FinancialSymbol import FinancialSymbol
-from model.Settings import change_column_name
+from yapo.model.Enums import Currency, SecurityType, Period
+from yapo.model.FinancialSymbol import FinancialSymbol
+from yapo.model.Settings import change_column_name
 
 
 class FinancialSymbolInformationTest(unittest.TestCase):

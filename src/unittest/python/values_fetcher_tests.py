@@ -1,6 +1,6 @@
 import unittest
 
-from model.FinancialSymbol import ValuesFetcher
+from yapo.model.FinancialSymbol import ValuesFetcher
 from serum import inject
 import pandas as pd
 import numpy as np

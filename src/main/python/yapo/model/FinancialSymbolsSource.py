@@ -8,8 +8,7 @@ import pandas as pd
 import quandl
 from serum import dependency, inject
 
-from model.Settings import *
-from . import Settings
+from .Settings import *
 from .Enums import Currency, SecurityType, Period
 from .FinancialSymbol import FinancialSymbol
 from .FinancialSymbolId import FinancialSymbolId
@@ -202,7 +201,7 @@ class InflationUsSource(SingleFinancialSymbolSource):
 class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
-        self.url_base = Settings.rostsber_url + 'currency/'
+        self.url_base = rostsber_url + 'currency/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.__short_names = {
             Currency.RUB: 'Рубль РФ',
@@ -258,7 +257,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
 class MicexStocksSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
-        self.url_base = Settings.rostsber_url + 'moex/stock_etf/'
+        self.url_base = rostsber_url + 'moex/stock_etf/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])
         self.index['date_end'] = pd.to_datetime(self.index['date_end'])
@@ -308,7 +307,7 @@ class MicexStocksSource(FinancialSymbolsSource):
 class NluSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='nlu')
-        self.url_base = Settings.rostsber_url + 'mut_rus/'
+        self.url_base = rostsber_url + 'mut_rus/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
@@ -361,7 +360,7 @@ class QuandlSource(FinancialSymbolsSource):
 
     def __init__(self):
         super().__init__(namespace='quandl')
-        self.url_base = Settings.rostsber_url + 'quandl/'
+        self.url_base = rostsber_url + 'quandl/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])
         self.index['date_end'] = pd.to_datetime(self.index['date_end'])
@@ -482,7 +481,7 @@ class FinancialSymbolsRegistry:
 @dependency
 class CurrencySymbolsRegistry:
     def __init__(self):
-        self.url_base = Settings.rostsber_url + 'currency/'
+        self.url_base = rostsber_url + 'currency/'
 
     def convert(self, currency_from: Currency, currency_to: Currency,
                 start_period: pd.Period, end_period: pd.Period):

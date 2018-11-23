@@ -5,11 +5,11 @@ import pandas as pd
 from contracts import contract
 from serum import inject, dependency, Context
 
-from model.Enums import Currency, SecurityType
-from model.FinancialSymbol import FinancialSymbol
-from model.FinancialSymbolId import FinancialSymbolId
-from model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSources
-from model.Portfolio import Portfolio, PortfolioAsset
+from .model.Enums import Currency, SecurityType
+from .model.FinancialSymbol import FinancialSymbol
+from .model.FinancialSymbolId import FinancialSymbolId
+from .model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSources
+from .model.Portfolio import Portfolio, PortfolioAsset
 
 
 @dependency
