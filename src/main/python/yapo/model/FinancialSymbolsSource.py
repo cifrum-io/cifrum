@@ -6,7 +6,7 @@ from pprint import pformat
 import numpy as np
 import pandas as pd
 import quandl
-from serum import dependency, inject
+from serum import inject, singleton
 
 from .Settings import *
 from .Enums import Currency, SecurityType, Period
@@ -112,7 +112,7 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
         return [fin_sym_info]
 
 
-@dependency
+@singleton
 class CbrTopRatesSource(SingleFinancialSymbolSource):
     def __init__(self):
         super().__init__(
@@ -129,7 +129,7 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
         )
 
 
-@dependency
+@singleton
 class MicexMcftrSource(SingleFinancialSymbolSource):
     def __init__(self):
         super().__init__(
@@ -146,7 +146,7 @@ class MicexMcftrSource(SingleFinancialSymbolSource):
         )
 
 
-@dependency
+@singleton
 class InflationRuSource(SingleFinancialSymbolSource):
     def __init__(self):
         super().__init__(
@@ -163,7 +163,7 @@ class InflationRuSource(SingleFinancialSymbolSource):
         )
 
 
-@dependency
+@singleton
 class InflationEuSource(SingleFinancialSymbolSource):
     def __init__(self):
         super().__init__(
@@ -180,7 +180,7 @@ class InflationEuSource(SingleFinancialSymbolSource):
         )
 
 
-@dependency
+@singleton
 class InflationUsSource(SingleFinancialSymbolSource):
     def __init__(self):
         super().__init__(
@@ -197,7 +197,7 @@ class InflationUsSource(SingleFinancialSymbolSource):
         )
 
 
-@dependency
+@singleton
 class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
@@ -253,7 +253,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
         ]
 
 
-@dependency
+@singleton
 class MicexStocksSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')
@@ -303,7 +303,7 @@ class MicexStocksSource(FinancialSymbolsSource):
         return infos
 
 
-@dependency
+@singleton
 class NluSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='nlu')
@@ -354,7 +354,7 @@ class NluSource(FinancialSymbolsSource):
         return infos
 
 
-@dependency
+@singleton
 class QuandlSource(FinancialSymbolsSource):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
@@ -401,7 +401,7 @@ class QuandlSource(FinancialSymbolsSource):
         return infos
 
 
-@dependency
+@singleton
 class SymbolSources(metaclass=ABCMeta):
     @property
     @abstractmethod
@@ -436,7 +436,7 @@ class AllSymbolSources(SymbolSources):
         ]
 
 
-@dependency
+@singleton
 class FinancialSymbolsRegistry:
 
     @inject
@@ -478,7 +478,7 @@ class FinancialSymbolsRegistry:
             return None
 
 
-@dependency
+@singleton
 class CurrencySymbolsRegistry:
     def __init__(self):
         self.url_base = rostsber_url + 'currency/'
