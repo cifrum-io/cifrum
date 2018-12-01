@@ -482,27 +482,30 @@ class FinancialSymbolsRegistry:
 class CurrencySymbolsRegistry:
     def __init__(self):
         self.url_base = rostsber_url + 'currency/'
+        currency_index = pd.read_csv('{}__index.csv'.format(self.url_base),
+                                     sep='\t', parse_dates=['date_start', 'date_end'])
+        self.__f_currency_data = {}
+        for supported_currency_pair in currency_index['name']:
+            url = '{}{}.csv'.format(self.url_base, supported_currency_pair)
+            df = pd.read_csv(url, sep='\t', parse_dates=['date'])
+            df['period'] = df['date'].dt.to_period('M')
+            vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
+            df = df[vals_lastdate_indices].copy()
+            df['close'] = df['close'] * df['nominal']
+            del df['date'], df['nominal']
+            supported_currency_pair = tuple(str.split(supported_currency_pair, '-'))
+            self.__f_currency_data.update({supported_currency_pair: df})
+
+    def __currency_data(self, currency_pair):
+        return self.__f_currency_data[currency_pair].copy()
 
     def convert(self, currency_from: Currency, currency_to: Currency,
                 start_period: pd.Period, end_period: pd.Period):
         if currency_to == currency_from:
-            url = '{}{}-{}.csv'.format(self.url_base, 'USD', 'RUB')
-            df = pd.read_csv(url, sep='\t', parse_dates=['date'])
+            df = self.__currency_data(('USD', 'RUB'))
             df['close'] = 1.0
-            df['period'] = df['date'].dt.to_period('M')
-            vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
-            df = df[vals_lastdate_indices]
-            del df['date'], df['nominal']
         elif currency_to == Currency.RUB:
-            url = '{}{}-{}.csv'.format(self.url_base,
-                                       currency_from.name,
-                                       currency_to.name)
-            df = pd.read_csv(url, sep='\t', parse_dates=['date'])
-            df['close'] = df['close'] * df['nominal']
-            df['period'] = df['date'].dt.to_period('M')
-            vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
-            df = df[vals_lastdate_indices]
-            del df['date'], df['nominal']
+            df = self.__currency_data((currency_from.name, currency_to.name))
         elif currency_from == Currency.RUB:
             df = self.convert(currency_to, currency_from, start_period, end_period)
             df['close'] = 1.0 / df['close']
