@@ -107,12 +107,13 @@ class PortfolioAsset(PortfolioInflation):
             # - we drop data for the period of the current month
             # - for every period we take the value that is last in each month
 
-            vals['period'] = vals['date'].dt.to_period('M')
+            if 'period' not in vals.columns:
+                vals['period'] = vals['date'].dt.to_period('M')
             if self.symbol.end_period < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
                 vals = vals[vals['period'] < pd.Period(self.symbol.end_period, freq='M')]
             indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
-            indicator__lastdate_indices = vals.groupby(['period'])['date'].transform(max) == vals['date']
-            vals = vals[indicator__lastdate_indices & indicator__not_current_period]
+            indicator__lastdate_indices = vals['period'] != vals['period'].shift(1)
+            vals = vals[indicator__lastdate_indices & indicator__not_current_period].copy()
             del vals['date']
 
             self.period_max = min(self.period_max, vals['period'].max())

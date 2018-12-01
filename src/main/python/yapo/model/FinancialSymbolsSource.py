@@ -132,10 +132,12 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 @singleton
 class MicexMcftrSource(SingleFinancialSymbolSource):
     def __init__(self):
+        df = pd.read_csv(rostsber_url + 'moex/mcftr/data.csv', sep='\t')
+
         super().__init__(
             namespace='micex',
             name='MCFTR',
-            values_fetcher=lambda: pd.read_csv(rostsber_url + 'moex/mcftr/data.csv', sep='\t'),
+            values_fetcher=lambda: df.copy(),
             start_period=_load_micex_mcftr_date('date_start'),
             end_period=_load_micex_mcftr_date('date_end'),
             short_name='MICEX Total Return',
@@ -222,8 +224,8 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
                                    freq='D')
         df = pd.DataFrame({'date': date_range, 'close': 1.0})
 
-        period = df['date'].dt.to_period('M')
-        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        df['period'] = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         return df_new
 
     def fetch_financial_symbol(self, name: str):
@@ -265,8 +267,8 @@ class MicexStocksSource(FinancialSymbolsSource):
     def __extract_values(self, secid, start_period, end_period):
         df = pd.read_csv(self.url_base + secid + '.csv', sep='\t')
         df['date'] = pd.to_datetime(df['date'])
-        period = df['date'].dt.to_period('M')
-        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        df['period'] = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         df_new['legal_close'].fillna(df_new['close'], inplace=True)
         del df_new['close']
         df_new.rename(columns={'legal_close': 'close'}, inplace=True)
@@ -317,10 +319,9 @@ class NluSource(FinancialSymbolsSource):
 
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
-        df = pd.read_csv(url, sep='\t')
-        df['date'] = pd.to_datetime(df['date'])
-        period = df['date'].dt.to_period('M')
-        df_new = df[(start_period <= period) & (period <= end_period)].copy()
+        df = pd.read_csv(url, sep='\t', parse_dates=['date'])
+        df['period'] = df['date'].dt.to_period('M')
+        df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         return df_new
 
     def fetch_financial_symbol(self, name: str):
