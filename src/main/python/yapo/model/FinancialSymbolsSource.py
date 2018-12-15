@@ -306,16 +306,15 @@ class MicexStocksSource(FinancialSymbolsSource):
 
 
 @singleton
-class NluSource(FinancialSymbolsSource):
+class MutualFundsRuSource(FinancialSymbolsSource):
     def __init__(self):
-        super().__init__(namespace='nlu')
-        self.url_base = rostsber_url + 'mut_rus/'
+        super().__init__(namespace='mut_ru')
+        self.url_base = rostsber_url + 'mut_ru/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])
         self.index['date_end'] = pd.to_datetime(self.index['date_end'])
-        assert self.index.index.dtype == np.int64
 
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
@@ -325,13 +324,9 @@ class NluSource(FinancialSymbolsSource):
         return df_new
 
     def fetch_financial_symbol(self, name: str):
-        try:
-            name_int = int(name)
-        except ValueError:
+        if name not in self.index.index:
             return None
-        if name_int not in self.index.index:
-            return None
-        row = self.index.loc[name_int]
+        row = self.index.loc[name]
         symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                  values=lambda start_period, end_period:
                                  self.__extract_values(name, start_period, end_period),
@@ -419,7 +414,7 @@ class AllSymbolSources(SymbolSources):
     inflation_us_source: InflationUsSource
     micex_mcftr_source: MicexMcftrSource
     micex_stocks_source: MicexStocksSource
-    nlu_muts_source: NluSource
+    mut_ru_source: MutualFundsRuSource
     quandl_source: QuandlSource
 
     @property
@@ -432,7 +427,7 @@ class AllSymbolSources(SymbolSources):
             self.inflation_us_source,
             self.micex_mcftr_source,
             self.micex_stocks_source,
-            self.nlu_muts_source,
+            self.mut_ru_source,
             self.quandl_source,
         ]
 
