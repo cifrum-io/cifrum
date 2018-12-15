@@ -8,7 +8,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.asset_name = 'nlu/922'
+        cls.asset_name = 'mut_ru/0890-94127385'
         cls.portfolio_period_start = pd.Period('2011-1', freq='M')
         cls.portfolio_period_end = pd.Period('2017-2', freq='M')
         cls.asset = yapo.portfolio_asset(name=cls.asset_name,
@@ -86,9 +86,9 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
                                            start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_asset.risk, period='year')
-        self.assertAlmostEqual(self.asset.risk().value, .2950, places=self.places)
-        self.assertAlmostEqual(self.asset.risk(period='year').value, .2950, places=self.places)
-        self.assertAlmostEqual(self.asset.risk(period='month').value, .0846, places=self.places)
+        self.assertAlmostEqual(self.asset.risk().value, .2860, places=self.places)
+        self.assertAlmostEqual(self.asset.risk(period='year').value, .2860, places=self.places)
+        self.assertAlmostEqual(self.asset.risk(period='month').value, .0823, places=self.places)
 
     def test__inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')

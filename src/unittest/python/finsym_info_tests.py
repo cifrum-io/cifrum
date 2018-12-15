@@ -101,7 +101,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertIsNotNone(yapo.information(name='micex/FXRU'))
         self.assertIsNotNone(yapo.information(name='micex/FXMM'))
         self.assertIsNotNone(yapo.information(name='micex/MCFTR'))
-        self.assertIsNotNone(yapo.information(name='nlu/449'))
+        self.assertIsNotNone(yapo.information(name='mut_ru/0890-94127385'))
         self.assertIsNotNone(yapo.information(name='cbr/USD'))
         self.assertIsNotNone(yapo.information(name='cbr/EUR'))
         self.assertIsNotNone(yapo.information(name='infl/RUB'))

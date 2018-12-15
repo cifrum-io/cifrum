@@ -57,11 +57,11 @@ class CurrencyConversionTest(unittest.TestCase):
             self.assertTrue(np.all(np.abs((vs1 * vs2 - 1.).values) < 1e-3))
 
     def test__asset_should_be_converted_correctly(self):
-        vs_eur = yapo.portfolio_asset(name='nlu/630',
+        vs_eur = yapo.portfolio_asset(name='mut_ru/0890-94127385',
                                       start_period='2011-1', end_period='2017-2',
                                       currency='EUR').close()
 
-        vs_usd = yapo.portfolio_asset(name='nlu/630',
+        vs_usd = yapo.portfolio_asset(name='mut_ru/0890-94127385',
                                       start_period='2011-1', end_period='2017-2',
                                       currency='USD').close()
 

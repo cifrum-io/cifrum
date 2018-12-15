@@ -7,7 +7,7 @@ class AvailableNamesTest(unittest.TestCase):
 
     def test__return_namespaces_list_by_default(self):
         self.assertEqual(set(yapo.available_names()),
-                         {'infl', 'cbr', 'micex', 'nlu', 'quandl'})
+                         {'infl', 'cbr', 'micex', 'mut_ru', 'quandl'})
 
     def test__return_empty_list_or_none_if_symbol_doesnt_exist(self):
         nonexisting_id = 'nlu/xxx'
@@ -48,8 +48,8 @@ class AvailableNamesTest(unittest.TestCase):
         self.assertTrue(__fin_sim_ids(namespace='micex').issuperset(
             {'micex/MCFTR', 'micex/MRKY', 'micex/URKZ', 'micex/VSMO', 'micex/ROSN'}
         ))
-        self.assertTrue(__fin_sim_ids(namespace='nlu').issuperset(
-            {'nlu/1129', 'nlu/630', 'nlu/6', 'nlu/617'}
+        self.assertTrue(__fin_sim_ids(namespace='mut_ru').issuperset(
+            {'mut_ru/2277', 'mut_ru/0164-70287842', 'mut_ru/0890-94127385', 'mut_ru/2569'}
         ))
         self.assertTrue(__fin_sim_ids(namespace='quandl').issuperset(
             {'quandl/T', 'quandl/MSFT', 'quandl/GOOG', 'quandl/AAPL'}

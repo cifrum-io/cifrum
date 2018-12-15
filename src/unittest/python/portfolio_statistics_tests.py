@@ -11,7 +11,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
     def setUpClass(cls):
         cls.portfolio_period_start = pd.Period('2015-3', freq='M')
         cls.portfolio_period_end = pd.Period('2017-5', freq='M')
-        cls.asset_names = {'nlu/922': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
+        cls.asset_names = {'mut_ru/0890-94127385': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
         cls.portfolio = yapo.portfolio(assets=cls.asset_names,
                                        start_period=str(cls.portfolio_period_start),
                                        end_period=str(cls.portfolio_period_end),
@@ -41,11 +41,11 @@ class PortfolioStatisticsTest(unittest.TestCase):
         portfolio_assets = {
             k.symbol.identifier.format(): v for k, v in self.portfolio.assets_weighted()
         }
-        self.assertAlmostEqual(portfolio_assets['nlu/922'], .4444, places=self.places)
+        self.assertAlmostEqual(portfolio_assets['mut_ru/0890-94127385'], .4444, places=self.places)
         self.assertAlmostEqual(portfolio_assets['micex/FXRU'], .3333, places=self.places)
         self.assertAlmostEqual(portfolio_assets['micex/FXMM'], .2222, places=self.places)
 
-        asset_names = {'nlu/92': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
+        asset_names = {'mut_ru/xxxx-xxxxxxxx': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
         portfolio_misprint = yapo.portfolio(assets=asset_names,
                                             start_period=str(self.portfolio_period_start),
                                             end_period=str(self.portfolio_period_end),
@@ -65,12 +65,12 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__accumulated_rate_of_return(self):
         arors = self.portfolio.rate_of_return(kind='accumulated').values
-        self.assertAlmostEqual(arors.min(), -.0446, places=self.places)
-        self.assertAlmostEqual(arors.max(), .3080, places=self.places)
+        self.assertAlmostEqual(arors.min(), -.0492, places=self.places)
+        self.assertAlmostEqual(arors.max(), .3015, places=self.places)
 
         arors_real = self.portfolio.rate_of_return(kind='accumulated', real=True).values
-        self.assertAlmostEqual(arors_real.min(), -.0478, places=self.places)
-        self.assertAlmostEqual(arors_real.max(), .2630, places=self.places)
+        self.assertAlmostEqual(arors_real.min(), -.0524, places=self.places)
+        self.assertAlmostEqual(arors_real.max(), .2568, places=self.places)
 
     def test__ytd_rate_of_return(self):
         ror_ytd = self.portfolio.rate_of_return(kind='ytd')
@@ -96,7 +96,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
-        self.assertAlmostEqual(cagr_default.value, .1266, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1241, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20)
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., places=self.places)
@@ -112,7 +112,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, .1082, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1056, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual(cagr_default.value, cagr_long_time.value, places=self.places)
@@ -131,6 +131,6 @@ class PortfolioStatisticsTest(unittest.TestCase):
                                          start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_portfolio, period='year')
-        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1722, places=self.places)
-        self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0439, places=self.places)
-        self.assertAlmostEqual(self.portfolio.risk().value, .1722, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1689, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0432, places=self.places)
+        self.assertAlmostEqual(self.portfolio.risk().value, .1689, places=self.places)
