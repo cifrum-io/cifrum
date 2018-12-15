@@ -49,7 +49,7 @@ def _load_cbr_deposit_rate_date(kind):
 
 
 def _load_micex_mcftr_date(kind):
-    index = pd.read_csv(rostsber_url + 'moex/mcftr/__index.csv', sep='\t')
+    index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t')
     period_str = index[kind][0]
     return pd.Period(period_str, freq='M')
 
@@ -132,7 +132,7 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 @singleton
 class MicexMcftrSource(SingleFinancialSymbolSource):
     def __init__(self):
-        df = pd.read_csv(rostsber_url + 'moex/mcftr/data.csv', sep='\t')
+        df = pd.read_csv(rostsber_url + 'index/moex/mcftr.csv', sep='\t')
 
         super().__init__(
             namespace='micex',
