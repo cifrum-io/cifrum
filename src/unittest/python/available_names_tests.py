@@ -7,7 +7,7 @@ class AvailableNamesTest(unittest.TestCase):
 
     def test__return_namespaces_list_by_default(self):
         self.assertEqual(set(yapo.available_names()),
-                         {'infl', 'cbr', 'micex', 'mut_ru', 'quandl'})
+                         {'infl', 'cbr', 'micex', 'mut_ru', 'ny'})
 
     def test__return_empty_list_or_none_if_symbol_doesnt_exist(self):
         nonexisting_id = 'nlu/xxx'
@@ -51,15 +51,15 @@ class AvailableNamesTest(unittest.TestCase):
         self.assertTrue(__fin_sim_ids(namespace='mut_ru').issuperset(
             {'mut_ru/2277', 'mut_ru/0164-70287842', 'mut_ru/0890-94127385', 'mut_ru/2569'}
         ))
-        self.assertTrue(__fin_sim_ids(namespace='quandl').issuperset(
-            {'quandl/T', 'quandl/MSFT', 'quandl/GOOG', 'quandl/AAPL'}
+        self.assertTrue(__fin_sim_ids(namespace='ny').issuperset(
+            {'ny/T', 'ny/MSFT', 'ny/GOOG', 'ny/AAPL'}
         ))
 
     def test__return_several_namespaces(self):
         available_name_ids = set(available_name.fin_sym_id.format()
-                                 for available_name in yapo.available_names(namespaces=['infl', 'quandl']))
+                                 for available_name in yapo.available_names(namespaces=['infl', 'ny']))
 
         self.assertTrue(available_name_ids.issuperset(
             {'infl/RUB', 'infl/EUR', 'infl/USD',
-             'quandl/T', 'quandl/MSFT', 'quandl/GOOG', 'quandl/AAPL'}
+             'ny/T', 'ny/MSFT', 'ny/GOOG', 'ny/AAPL'}
         ))

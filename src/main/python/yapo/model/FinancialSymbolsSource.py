@@ -355,7 +355,7 @@ class QuandlSource(FinancialSymbolsSource):
     quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
 
     def __init__(self):
-        super().__init__(namespace='quandl')
+        super().__init__(namespace='ny')
         self.url_base = rostsber_url + 'quandl/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])

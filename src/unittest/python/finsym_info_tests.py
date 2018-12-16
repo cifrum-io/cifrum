@@ -39,8 +39,8 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(info.adjusted_close, True)
 
     def test__quandl_stocks_should_have_correct_fields(self):
-        info = yapo.information(name='quandl/VNQ')
-        self.assertEqual(info.namespace, 'quandl')
+        info = yapo.information(name='ny/VNQ')
+        self.assertEqual(info.namespace, 'ny')
         self.assertEqual(info.name, 'VNQ')
         self.assertIsNone(info.isin)
         self.assertEqual(info.short_name, 'Vanguard Real Estate')
@@ -97,7 +97,7 @@ class FinancialSymbolInformationTest(unittest.TestCase):
                         {'date', change_column_name})
 
     def test__all_data_should_be_available(self):
-        self.assertIsNotNone(yapo.information(name='quandl/MSFT'))
+        self.assertIsNotNone(yapo.information(name='ny/MSFT'))
         self.assertIsNotNone(yapo.information(name='micex/FXRU'))
         self.assertIsNotNone(yapo.information(name='micex/FXMM'))
         self.assertIsNotNone(yapo.information(name='micex/MCFTR'))
