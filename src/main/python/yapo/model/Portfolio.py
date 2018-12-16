@@ -11,7 +11,9 @@ from serum import inject
 from .FinancialSymbolsSource import CurrencySymbolsRegistry
 from .Enums import Currency, Period
 from .FinancialSymbol import FinancialSymbol
-from .TimeSeries import TimeSeries
+from .TimeSeries import TimeSeries, TimeSeriesKind
+
+_MONTHS_PER_YEAR = 12
 
 
 class PortfolioInflation:
@@ -42,16 +44,15 @@ class PortfolioInflation:
             values - raw values of inflation
         :return:
         """
-        months_in_year = 12
         inflation = self.currency.inflation()
         inflation_values = inflation.values(start_period=self.period_min + 1, end_period=self.period_max)
 
         inflation = TimeSeries(values=inflation_values.value.values,
                                start_period=inflation_values.period.min(),
                                end_period=inflation_values.period.max(),
-                               derivative=1)
+                               kind=[TimeSeriesKind.VALUES, TimeSeriesKind.DIFF])
         if isinstance(years_ago, int):
-            inflation = inflation[-years_ago * months_in_year:]
+            inflation = inflation[-years_ago * _MONTHS_PER_YEAR:]
 
         if kind == 'accumulated':
             return (inflation + 1.).prod() - 1.
@@ -59,7 +60,7 @@ class PortfolioInflation:
             inflation_amean = inflation.mean()
             return inflation_amean
         elif kind == 'g_mean':
-            years_total = (self.period_max - self.period_min) / months_in_year
+            years_total = (self.period_max - self.period_min) / _MONTHS_PER_YEAR
             inflation_gmean = (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':
@@ -128,7 +129,7 @@ class PortfolioAsset(PortfolioInflation):
         vals.sort_values(by='period', ascending=True, inplace=True)
         ts = TimeSeries(values=vals['close'].values,
                         start_period=self.period_min, end_period=self.period_max,
-                        derivative=0)
+                        kind=[TimeSeriesKind.VALUES])
         return ts
 
     def __convert_currency(self, currency_to: Currency):
@@ -141,7 +142,7 @@ class PortfolioAsset(PortfolioInflation):
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
-                                   derivative=0)
+                                   kind=[TimeSeriesKind.VALUES])
         self.values = self.values * currency_rate
 
     def close(self):
@@ -250,7 +251,7 @@ class Portfolio(PortfolioInflation):
 
             mean = (1. + self.rate_of_return()).mean()
             risk_monthly = self.risk(period='month')
-            return np.sqrt((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24)
+            return ((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24).sqrt()
         else:
             raise Exception('unexpected value of `period` {}'.format(period))
 
@@ -259,9 +260,8 @@ class Portfolio(PortfolioInflation):
         real='bool',
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
-        months_in_year = 12
         if years_ago is None:
-            years_total = (self.period_max - self.period_min) / months_in_year
+            years_total = (self.period_max - self.period_min) / _MONTHS_PER_YEAR
             cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
             if real:
                 cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
@@ -270,7 +270,7 @@ class Portfolio(PortfolioInflation):
             return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
                              for y in years_ago])
         elif isinstance(years_ago, int):
-            months_count = years_ago * months_in_year
+            months_count = years_ago * _MONTHS_PER_YEAR
             if self.period_min > self.period_max - months_count:
                 return self.compound_annual_growth_rate(years_ago=None, real=real)
 

@@ -2,6 +2,7 @@ import unittest
 import yapo
 import numpy as np
 import pandas as pd
+from yapo.model.TimeSeries import TimeSeriesKind
 
 
 class PortfolioAssetStatisticsTest(unittest.TestCase):
@@ -86,6 +87,10 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
                                            start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_asset.risk, period='year')
+        self.assertEqual(self.asset.risk().kind, TimeSeriesKind.REDUCED_VALUE)
+        self.assertEqual(self.asset.risk(period='year').kind, TimeSeriesKind.REDUCED_VALUE)
+        self.assertEqual(self.asset.risk(period='month').kind, TimeSeriesKind.REDUCED_VALUE)
+
         self.assertAlmostEqual(self.asset.risk().value, .2860, places=self.places)
         self.assertAlmostEqual(self.asset.risk(period='year').value, .2860, places=self.places)
         self.assertAlmostEqual(self.asset.risk(period='month').value, .0823, places=self.places)
