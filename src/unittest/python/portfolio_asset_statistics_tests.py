@@ -29,16 +29,17 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
 
     def test__ytd_rate_of_return(self):
         ror_ytd = self.asset.rate_of_return(kind='ytd')
-        self.assertEqual(ror_ytd.start_period,
-                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
-        self.assertEqual(ror_ytd.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd.values[-1], -.0434, places=self.places)
+        self.assertEqual(ror_ytd.start_period, pd.Period('2012-1', freq='M'))
+        self.assertEqual(ror_ytd.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd.kind, TimeSeriesKind.YTD)
+        np.testing.assert_almost_equal(ror_ytd.values, [0.2041, -0.0344, -0.4531, 0.0046, 0.5695], decimal=self.places)
 
         ror_ytd_real = self.asset.rate_of_return(kind='ytd', real=True)
-        self.assertEqual(ror_ytd_real.start_period,
-                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
-        self.assertEqual(ror_ytd_real.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0574, places=self.places)
+        self.assertEqual(ror_ytd_real.start_period, pd.Period('2012-1', freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd_real.kind, TimeSeriesKind.YTD)
+        np.testing.assert_almost_equal(ror_ytd_real.values,
+                                       [-0.2696, -0.5081, -0.7703, -0.5840, -0.4408], decimal=self.places)
 
     def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
