@@ -296,15 +296,13 @@ class Portfolio(PortfolioInflation):
         if kind not in ['values', 'accumulated', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
+        if kind == 'ytd':
+            ror_assets = np.array([a.rate_of_return(kind='ytd', real=real) for a in self.assets])
+            ror = (ror_assets * self.weights).sum()
+            return ror
+
         ror_assets = np.array([a.rate_of_return() for a in self.assets])
         ror = (ror_assets * self.weights).sum()
-
-        if kind == 'ytd':
-            ror_ytd = ror[-self.period_max.month:]
-            if real:
-                inflation = self.inflation(kind='values')[-self.period_max.month:]
-                ror_ytd = (ror_ytd + 1.) / (inflation + 1).cumprod() - 1.
-            return (ror_ytd + 1.).cumprod() - 1.
 
         if kind == 'accumulated':
             ror = (ror + 1.).cumprod() - 1.

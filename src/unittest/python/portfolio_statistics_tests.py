@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import itertools as it
 
+from yapo.model.TimeSeries import TimeSeriesKind
+
 
 class PortfolioStatisticsTest(unittest.TestCase):
 
@@ -74,16 +76,14 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__ytd_rate_of_return(self):
         ror_ytd = self.portfolio.rate_of_return(kind='ytd')
-        self.assertEqual(ror_ytd.start_period,
-                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
-        self.assertEqual(ror_ytd.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd.values[-1], .0046, places=self.places)
+        self.assertEqual(ror_ytd.start_period, pd.Period('2016-1', freq='M'))
+        self.assertEqual(ror_ytd.end_period, pd.Period('2016-12', freq='M'))
+        np.testing.assert_almost_equal(ror_ytd.values, [.3480], decimal=self.places)
 
         ror_ytd_real = self.portfolio.rate_of_return(kind='ytd', real=True)
-        self.assertEqual(ror_ytd_real.start_period,
-                         pd.Period(year=self.portfolio_period_end.year, month=1, freq='M'))
-        self.assertEqual(ror_ytd_real.end_period, self.portfolio_period_end)
-        self.assertAlmostEqual(ror_ytd_real.values[-1], -.0452, places=self.places)
+        self.assertEqual(ror_ytd_real.start_period, pd.Period('2016-1', freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-12', freq='M'))
+        np.testing.assert_almost_equal(ror_ytd_real.values, [.1084], decimal=self.places)
 
     def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
@@ -131,6 +131,11 @@ class PortfolioStatisticsTest(unittest.TestCase):
                                          start_period='2016-8', end_period='2016-12', currency='USD')
 
         self.assertRaises(Exception, short_portfolio, period='year')
+
+        self.assertEqual(self.portfolio.risk().kind, TimeSeriesKind.REDUCED_VALUE)
+        self.assertEqual(self.portfolio.risk(period='year').kind, TimeSeriesKind.REDUCED_VALUE)
+        self.assertEqual(self.portfolio.risk(period='month').kind, TimeSeriesKind.REDUCED_VALUE)
+
         self.assertAlmostEqual(self.portfolio.risk(period='year').value, .1689, places=self.places)
         self.assertAlmostEqual(self.portfolio.risk(period='month').value, .0432, places=self.places)
         self.assertAlmostEqual(self.portfolio.risk().value, .1689, places=self.places)
