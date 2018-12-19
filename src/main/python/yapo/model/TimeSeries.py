@@ -22,7 +22,7 @@ class TimeSeries:
         self._kind = kind
 
         if self.kind == TimeSeriesKind.DIFF or self.kind == TimeSeriesKind.VALUES:
-            if len(values) != end_period - start_period + 1:
+            if self.size != end_period - start_period + 1:
                 raise ValueError('values and period range have different lengths')
 
         if self.kind == TimeSeriesKind.YTD:
@@ -32,6 +32,10 @@ class TimeSeries:
                 raise ValueError('end period month should be 1')
             if len(values) != end_period.year - start_period.year + 1:
                 raise ValueError('values len should be equal to full years count')
+
+        if self.kind == TimeSeriesKind.REDUCED_VALUE:
+            if self.size > 1:
+                raise ValueError('size is greater than 1')
 
     def __validate(self, time_series):
         if self._start_period != time_series.start_period:
@@ -47,9 +51,9 @@ class TimeSeries:
 
     @property
     def value(self):
-        if self._size > 1:
-            raise ValueError('`values` has size greater than one')
-        return self._values[0]
+        if self.kind == TimeSeriesKind.REDUCED_VALUE:
+            return self._values[0]
+        raise ValueError('incorrect `kind` to get value')
 
     @property
     def kind(self):
