@@ -10,6 +10,7 @@ from .model.FinancialSymbol import FinancialSymbol
 from .model.FinancialSymbolId import FinancialSymbolId
 from .model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSources
 from .model.Portfolio import Portfolio, PortfolioAsset
+from ._search import _Search
 
 
 @singleton
@@ -17,6 +18,7 @@ class Yapo:
 
     @inject
     def __init__(self, fin_syms_registry: FinancialSymbolsRegistry):
+        self.__search = _Search()
         self.fin_syms_registry = fin_syms_registry
         self.__period_lowest = '1900-1'
         self.__period_highest = lambda: str(pd.Period.now(freq='M'))
@@ -150,6 +152,9 @@ class Yapo:
         else:
             return self.fin_syms_registry.namespaces()
 
+    def search(self, query, top=10):
+        return self.__search.perform(query, top)
+
 
 with Context(AllSymbolSources):
     yapo_instance = Yapo()
@@ -157,3 +162,4 @@ information = yapo_instance.information
 portfolio = yapo_instance.portfolio
 portfolio_asset = yapo_instance.portfolio_asset
 available_names = yapo_instance.available_names
+search = yapo_instance.search

@@ -1,1 +1,5 @@
-from .instance import information, portfolio, portfolio_asset, available_names
+from .instance import information, \
+                      portfolio, \
+                      portfolio_asset, \
+                      available_names, \
+                      search
