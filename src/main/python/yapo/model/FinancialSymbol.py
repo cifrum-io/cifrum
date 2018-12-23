@@ -95,6 +95,10 @@ class FinancialSymbol:
     def namespace(self):
         return self.identifier.namespace
 
+    @property
+    def identifier_str(self):
+        return self.identifier.format()
+
     def __repr__(self):
         from pprint import pformat
-        return pformat(vars(self))
+        return '{}\n{}'.format(self.identifier_str, pformat(vars(self)))

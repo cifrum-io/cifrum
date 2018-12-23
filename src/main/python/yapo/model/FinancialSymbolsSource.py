@@ -391,7 +391,7 @@ class QuandlSource(FinancialSymbolsSource):
     def get_all_infos(self):
         infos = []
         for idx, row in self.index.iterrows():
-            fsi = FinancialSymbolId(self.namespace, str(idx)).format()
+            fsi = FinancialSymbolId(self.namespace, str(idx))
             fs_info = FinancialSymbolInfo(fin_sym_id=fsi, short_name=idx)
             infos.append(fs_info)
         return infos
