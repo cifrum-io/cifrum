@@ -6,8 +6,8 @@ import itertools
 from serum import inject
 
 import yapo
+from yapo._sources.registries import CurrencySymbolsRegistry
 from yapo.model.Enums import Currency
-from yapo.model.FinancialSymbolsSource import CurrencySymbolsRegistry
 
 
 class CurrencyConversionTest(unittest.TestCase):

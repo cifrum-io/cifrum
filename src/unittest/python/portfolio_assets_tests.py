@@ -2,9 +2,15 @@ import unittest
 
 from freezegun import freeze_time
 from serum import Context
+import pandas as pd
+import numpy as np
+import datetime as dtm
+
+from yapo._sources.all_sources import SymbolSources
+from yapo._sources.base_classes import SingleFinancialSymbolSource
+from yapo.model.Enums import Currency, SecurityType, Period
 
 import yapo
-from yapo.model.FinancialSymbolsSource import *
 
 
 class PortfolioAssetsTest(unittest.TestCase):

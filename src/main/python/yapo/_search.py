@@ -3,8 +3,8 @@ from typing import List
 from serum import inject
 import re
 
-from yapo.model.FinancialSymbol import FinancialSymbol
-from .model.FinancialSymbolsSource import AllSymbolSources
+from ._sources.all_sources import AllSymbolSources
+from .model.FinancialSymbol import FinancialSymbol
 
 
 @inject

@@ -8,7 +8,7 @@ import pandas as pd
 from contracts import contract
 from serum import inject
 
-from .FinancialSymbolsSource import CurrencySymbolsRegistry
+from .._sources.registries import CurrencySymbolsRegistry
 from .Enums import Currency, Period
 from .FinancialSymbol import FinancialSymbol
 from .TimeSeries import TimeSeries, TimeSeriesKind

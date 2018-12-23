@@ -5,10 +5,11 @@ import pandas as pd
 from contracts import contract
 from serum import inject, singleton, Context
 
+from ._sources.registries import FinancialSymbolsRegistry
+from ._sources.all_sources import AllSymbolSources
 from .model.Enums import Currency, SecurityType
 from .model.FinancialSymbol import FinancialSymbol
 from .model.FinancialSymbolId import FinancialSymbolId
-from .model.FinancialSymbolsSource import FinancialSymbolsRegistry, AllSymbolSources
 from .model.Portfolio import Portfolio, PortfolioAsset
 from ._search import _Search
 
