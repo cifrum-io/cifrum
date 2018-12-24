@@ -40,7 +40,7 @@ class PortfolioInflation:
         inflation = TimeSeries(values=inflation_values.value.values,
                                start_period=inflation_values.period.min(),
                                end_period=inflation_values.period.max(),
-                               kind=[TimeSeriesKind.VALUES, TimeSeriesKind.DIFF])
+                               kind=TimeSeriesKind.DIFF)
         if isinstance(years_ago, int):
             inflation = inflation[-years_ago * _MONTHS_PER_YEAR:]
 

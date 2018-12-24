@@ -9,6 +9,81 @@ class TimeSeriesKind(Enum):
     REDUCED_VALUE = 3
     YTD = 4
     CUMULATIVE = 5
+    CURRENCY_RATE = 6
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self == TimeSeriesKind.CURRENCY_RATE:
+            return other
+        if other == TimeSeriesKind.CURRENCY_RATE:
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __add__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __radd__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __rsub__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __sub__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __truediv__(self, other):
+        if isinstance(other, (int, float, complex)):
+            return self
+        if self == TimeSeriesKind.CURRENCY_RATE:
+            return other
+        if other == TimeSeriesKind.CURRENCY_RATE:
+            return self
+        if self != other:
+            raise ValueError('kinds are incompatible')
+        return self
+
+    def __pow__(self, power, modulo=None):
+        return self
+
+    def sqrt(self):
+        return self
+
+    def std(self):
+        return self
+
+    def mean(self):
+        return self
+
+    def sum(self):
+        return self
+
+    def prod(self):
+        return self
+
+    def cumprod(self):
+        return TimeSeriesKind.CUMULATIVE
+
+    def pct_change(self):
+        return TimeSeriesKind.DIFF
 
 
 class TimeSeries:
@@ -22,7 +97,9 @@ class TimeSeries:
         self._end_period = end_period
         self._kind = kind
 
-        if self.kind == TimeSeriesKind.DIFF or self.kind == TimeSeriesKind.VALUES:
+        if self.kind == TimeSeriesKind.DIFF or \
+                self.kind == TimeSeriesKind.VALUES or \
+                self.kind == TimeSeriesKind.CUMULATIVE:
             if self.size != end_period - start_period + 1:
                 raise ValueError('values and period range have different lengths')
 
@@ -43,8 +120,6 @@ class TimeSeries:
             raise ValueError('start periods are incompatible')
         if self._end_period != time_series.end_period:
             raise ValueError('end periods are incompatible')
-        if self._kind != time_series.kind_full:
-            raise ValueError('kinds are incompatible')
 
     @property
     def values(self):
@@ -58,10 +133,6 @@ class TimeSeries:
 
     @property
     def kind(self):
-        return self._kind[-1]
-
-    @property
-    def kind_full(self):
         return self._kind
 
     @property
@@ -82,13 +153,13 @@ class TimeSeries:
         vals = np.diff(self._values) / self._values[:-1]
         return TimeSeries(values=vals,
                           start_period=self._start_period + 1, end_period=self._end_period,
-                          kind=self._kind + [TimeSeriesKind.DIFF])
+                          kind=self.kind.pct_change())
 
     def apply(self, fun, *args):
         if len(args) == 0:
             ts = TimeSeries(values=fun(self._values),
                             start_period=self._start_period, end_period=self._end_period,
-                            kind=self._kind)
+                            kind=fun(self.kind))
             return ts
         else:
             other = args[0]
@@ -96,10 +167,10 @@ class TimeSeries:
                 self.__validate(other)
                 ts = TimeSeries(values=fun(self._values, other._values),
                                 start_period=self._start_period, end_period=self._end_period,
-                                kind=self._kind)
+                                kind=fun(self.kind, other.kind))
                 return ts
             elif isinstance(other, (int, float, complex)):
-                ts = TimeSeries(fun(self._values, other),
+                ts = TimeSeries(values=fun(self._values, other),
                                 start_period=self._start_period, end_period=self._end_period,
                                 kind=self._kind)
                 return ts
@@ -109,7 +180,7 @@ class TimeSeries:
     def reduce(self, fun):
         return TimeSeries(values=np.array([fun(self._values)]),
                           start_period=self._start_period, end_period=self._end_period,
-                          kind=self._kind + [TimeSeriesKind.REDUCED_VALUE])
+                          kind=TimeSeriesKind.REDUCED_VALUE)
 
     def __mul__(self, other):
         return self.apply(lambda x, y: x * y, other)
@@ -160,10 +231,7 @@ class TimeSeries:
         return self.reduce(lambda x: x.prod())
 
     def cumprod(self):
-        r = self.apply(lambda x: x.cumprod())
-        self.__validate(r)
-        r._kind.append(TimeSeriesKind.CUMULATIVE)
-        return r
+        return self.apply(lambda x: x.cumprod())
 
     def __repr__(self):
         return 'TimeSeries(start_period={}, end_period={}, kind={}, values={}'.format(

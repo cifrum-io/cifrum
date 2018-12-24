@@ -76,7 +76,7 @@ class PortfolioAsset(PortfolioInflation):
         vals.sort_values(by='period', ascending=True, inplace=True)
         ts = TimeSeries(values=vals['close'].values,
                         start_period=self.period_min, end_period=self.period_max,
-                        kind=[TimeSeriesKind.VALUES])
+                        kind=TimeSeriesKind.VALUES)
         return ts
 
     def __convert_currency(self, currency_to: Currency):
@@ -89,7 +89,7 @@ class PortfolioAsset(PortfolioInflation):
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
-                                   kind=[TimeSeriesKind.VALUES])
+                                   kind=TimeSeriesKind.CURRENCY_RATE)
         self.values = self.values * currency_rate
 
     def close(self):
@@ -112,7 +112,7 @@ class PortfolioAsset(PortfolioInflation):
             ror_ytd = TimeSeries(values=np.array(ror_ytd_ts),
                                  start_period=ror_full_yearly.start_period,
                                  end_period=ror_full_yearly.end_period,
-                                 kind=[TimeSeriesKind.VALUES, TimeSeriesKind.DIFF, TimeSeriesKind.YTD])
+                                 kind=TimeSeriesKind.YTD)
             return ror_ytd
 
         ror = self.values.pct_change()
