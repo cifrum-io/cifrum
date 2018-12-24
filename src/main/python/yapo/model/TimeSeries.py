@@ -8,6 +8,7 @@ class TimeSeriesKind(Enum):
     DIFF = 2
     REDUCED_VALUE = 3
     YTD = 4
+    CUMULATIVE = 5
 
 
 class TimeSeries:
@@ -159,7 +160,10 @@ class TimeSeries:
         return self.reduce(lambda x: x.prod())
 
     def cumprod(self):
-        return self.apply(lambda x: x.cumprod())
+        r = self.apply(lambda x: x.cumprod())
+        self.__validate(r)
+        r._kind.append(TimeSeriesKind.CUMULATIVE)
+        return r
 
     def __repr__(self):
         return 'TimeSeries(start_period={}, end_period={}, kind={}, values={}'.format(

@@ -170,12 +170,12 @@ class PortfolioAsset(PortfolioInflation):
 
         ror = self.values.pct_change()
 
-        if kind == 'accumulated':
-            ror = (ror + 1.).cumprod() - 1.
-
         if real:
             inflation = self.inflation(kind='values')
-            ror = (ror + 1.) / (inflation + 1.).cumprod() - 1.
+            ror = (ror + 1.) / (inflation + 1.) - 1.
+
+        if kind == 'accumulated':
+            ror = (ror + 1.).cumprod() - 1.
 
         return ror
 
@@ -304,12 +304,12 @@ class Portfolio(PortfolioInflation):
         ror_assets = np.array([a.rate_of_return() for a in self.assets])
         ror = (ror_assets * self.weights).sum()
 
-        if kind == 'accumulated':
-            ror = (ror + 1.).cumprod() - 1.
-
         if real:
             inflation = self.inflation(kind='values')
-            ror = (ror + 1.) / (inflation + 1.).cumprod() - 1.
+            ror = (ror + 1.) / (inflation + 1.) - 1.
+
+        if kind == 'accumulated':
+            ror = (ror + 1.).cumprod() - 1.
 
         return ror
 

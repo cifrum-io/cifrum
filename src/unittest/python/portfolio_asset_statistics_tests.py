@@ -39,7 +39,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-12', freq='M'))
         self.assertEqual(ror_ytd_real.kind, TimeSeriesKind.YTD)
         np.testing.assert_almost_equal(ror_ytd_real.values,
-                                       [-0.2696, -0.5081, -0.7703, -0.5840, -0.4408], decimal=self.places)
+                                       [.1835, -.0486, -.4572, -.0026, .5376], decimal=self.places)
 
     def test__handle_related_inflation(self):
         self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
