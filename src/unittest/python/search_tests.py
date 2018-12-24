@@ -1,6 +1,6 @@
 import unittest
 import yapo
-from yapo.model.Enums import SecurityType
+from yapo._common.enums import SecurityType
 
 
 class SearchTest(unittest.TestCase):

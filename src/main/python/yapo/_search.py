@@ -4,7 +4,7 @@ from serum import inject
 import re
 
 from ._sources.all_sources import AllSymbolSources
-from .model.FinancialSymbol import FinancialSymbol
+from ._common.financial_symbol import FinancialSymbol
 
 
 @inject

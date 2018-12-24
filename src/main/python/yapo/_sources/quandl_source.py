@@ -3,11 +3,11 @@ import pandas as pd
 import quandl
 
 from .base_classes import FinancialSymbolsSource
-from ..model.FinancialSymbolInfo import FinancialSymbolInfo
-from ..model.Enums import Currency, SecurityType, Period
-from ..model.FinancialSymbolId import FinancialSymbolId
-from ..model.FinancialSymbol import FinancialSymbol
-from ..model.Settings import *
+from .._common.financial_symbol_info import FinancialSymbolInfo
+from .._common.enums import Currency, SecurityType, Period
+from .._common.financial_symbol_id import FinancialSymbolId
+from .._common.financial_symbol import FinancialSymbol
+from .._settings import *
 
 
 @singleton

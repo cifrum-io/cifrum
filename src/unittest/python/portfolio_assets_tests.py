@@ -8,7 +8,7 @@ import datetime as dtm
 
 from yapo._sources.all_sources import SymbolSources
 from yapo._sources.base_classes import SingleFinancialSymbolSource
-from yapo.model.Enums import Currency, SecurityType, Period
+from yapo._common.enums import Currency, SecurityType, Period
 
 import yapo
 
@@ -67,7 +67,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                             currency=Currency.RUB)]
 
         with Context(TestSymbolSources):
-            yapo_instance = yapo.instance.Yapo()
+            yapo_instance = yapo._instance.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',
@@ -104,7 +104,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                             currency=Currency.RUB)]
 
         with Context(TestSymbolSources):
-            yapo_instance = yapo.instance.Yapo()
+            yapo_instance = yapo._instance.Yapo()
         end_period = pd.Period.now(freq='M')
         start_period = end_period - 2
         asset = yapo_instance.portfolio_asset(name='test_ns/test',

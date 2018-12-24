@@ -2,7 +2,7 @@ import unittest
 import yapo
 import numpy as np
 import pandas as pd
-from yapo.model.TimeSeries import TimeSeriesKind
+from yapo._common.time_series import TimeSeriesKind
 
 
 class PortfolioAssetStatisticsTest(unittest.TestCase):

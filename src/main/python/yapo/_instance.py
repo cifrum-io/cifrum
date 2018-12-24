@@ -7,10 +7,10 @@ from serum import inject, singleton, Context
 
 from ._sources.registries import FinancialSymbolsRegistry
 from ._sources.all_sources import AllSymbolSources
-from .model.Enums import Currency, SecurityType
-from .model.FinancialSymbol import FinancialSymbol
-from .model.FinancialSymbolId import FinancialSymbolId
-from .model.Portfolio import Portfolio, PortfolioAsset
+from ._common.enums import Currency, SecurityType
+from ._common.financial_symbol import FinancialSymbol
+from ._common.financial_symbol_id import FinancialSymbolId
+from ._portfolio.portfolio import Portfolio, PortfolioAsset
 from ._search import _Search
 
 

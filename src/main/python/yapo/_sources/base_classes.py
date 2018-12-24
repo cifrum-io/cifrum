@@ -1,9 +1,9 @@
 from pprint import pformat
 import pandas as pd
 
-from ..model.FinancialSymbolInfo import FinancialSymbolInfo
-from ..model.FinancialSymbolId import FinancialSymbolId
-from ..model.FinancialSymbol import FinancialSymbol
+from .._common.financial_symbol_info import FinancialSymbolInfo
+from .._common.financial_symbol_id import FinancialSymbolId
+from .._common.financial_symbol import FinancialSymbol
 
 
 class FinancialSymbolsSource:
@@ -62,4 +62,3 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
             short_name=self.financial_symbol.short_name
         )
         return [fin_sym_info]
-

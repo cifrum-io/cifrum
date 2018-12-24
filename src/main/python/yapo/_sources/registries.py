@@ -3,9 +3,9 @@ import pandas as pd
 from itertools import groupby
 
 from .all_sources import SymbolSources
-from ..model.Settings import *
-from ..model import FinancialSymbolId
-from ..model.Enums import Currency
+from .._settings import rostsber_url
+from .._common.financial_symbol_id import FinancialSymbolId
+from .._common.enums import Currency
 
 
 @singleton
