@@ -68,8 +68,14 @@ class PortfolioAsset(PortfolioInflation):
         elif self.symbol.period == Period.MONTH:
             del vals['date']
         elif self.symbol.period == Period.DECADE:
-            vals = vals[vals['period'].str[-1] == '3']
-            vals['period'] = vals['period'].apply(lambda p: pd.Period(p[:-2], freq='M'))
+            vals = vals[vals['date'].dt.day == 3]
+            vals['date'] = vals['date'].apply(lambda p: pd.Period(p, freq='M'))
+            vals.rename(columns={'date': 'period'}, inplace=True)
+            self.period_min, self.period_max = min(vals['period']), max(vals['period'])
+            ts = TimeSeries(values=vals['rate'].values,
+                            start_period=self.period_min, end_period=self.period_max,
+                            kind=TimeSeriesKind.DIFF)
+            return ts
         else:
             raise Exception('Unexpected type of `period`')
 
