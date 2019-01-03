@@ -28,14 +28,14 @@ class PortfolioAsset(PortfolioInflation):
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
             datetime_now -= dateutil.relativedelta.relativedelta(months=1)
-        period_end = pd.Period(datetime_now, freq='M')  # can't use Period.now because `now` is mocked in tests
+        period_now = pd.Period(datetime_now, freq='M')  # can't use Period.now because `now` is mocked in tests
         self.period_min = max(
             pd.Period(self.symbol.start_period, freq='M'),
             start_period,
         )
         self.period_max = min(
             pd.Period(self.symbol.end_period, freq='M'),
-            period_end,
+            period_now,
             end_period,
         )
         self.values = self.__transform_values_according_to_period()
@@ -46,43 +46,17 @@ class PortfolioAsset(PortfolioInflation):
         super().__init__(self.currency, self.period_min, self.period_max)
 
     def __transform_values_according_to_period(self):
-        vals = self.symbol.values(self.period_min, self.period_max)
-
-        if self.symbol.period == Period.DAY:
-            # we are interested in day-time data as follows
-            # - if there is no data for month or more (ticker is dead, probably), we drop all data for
-            #   the last available period
-            # - we drop data for the period of the current month
-            # - for every period we take the value that is last in each month
-
-            if 'period' not in vals.columns:
-                vals['period'] = vals['date'].dt.to_period('M')
-            if self.symbol.end_period < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
-                vals = vals[vals['period'] < pd.Period(self.symbol.end_period, freq='M')]
-            indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
-            indicator__lastdate_indices = vals['period'] != vals['period'].shift(1)
-            vals = vals[indicator__lastdate_indices & indicator__not_current_period].copy()
-            del vals['date']
-
-            self.period_max = min(self.period_max, vals['period'].max())
-        elif self.symbol.period == Period.MONTH:
-            del vals['date']
-        elif self.symbol.period == Period.DECADE:
-            vals = vals[vals['date'].dt.day == 3]
-            vals['date'] = vals['date'].apply(lambda p: pd.Period(p, freq='M'))
-            vals.rename(columns={'date': 'period'}, inplace=True)
-            self.period_min, self.period_max = min(vals['period']), max(vals['period'])
+        vals = self.symbol.values(start_period=self.period_min, end_period=self.period_max)
+        self.period_max = min(self.period_max, max(vals['period']))
+        # TODO: okama_dev-98
+        if self.symbol.period == Period.DECADE:
             ts = TimeSeries(values=vals['rate'].values,
                             start_period=self.period_min, end_period=self.period_max,
                             kind=TimeSeriesKind.DIFF)
-            return ts
         else:
-            raise Exception('Unexpected type of `period`')
-
-        vals.sort_values(by='period', ascending=True, inplace=True)
-        ts = TimeSeries(values=vals['close'].values,
-                        start_period=self.period_min, end_period=self.period_max,
-                        kind=TimeSeriesKind.VALUES)
+            ts = TimeSeries(values=vals['close'].values,
+                            start_period=self.period_min, end_period=self.period_max,
+                            kind=TimeSeriesKind.VALUES)
         return ts
 
     def __convert_currency(self, currency_to: Currency):

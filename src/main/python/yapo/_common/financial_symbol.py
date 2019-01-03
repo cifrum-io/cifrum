@@ -1,6 +1,9 @@
 from collections import namedtuple
+import datetime as dtm
+import dateutil
 
 import pandas as pd
+from .._common.enums import Period
 
 
 class ValuesFetcher:
@@ -81,7 +84,34 @@ class FinancialSymbol:
     def values(self, start_period, end_period):
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
-        return self.values_fetcher._fetch(start_period=start_period, end_period=end_period)
+        vals = self.values_fetcher._fetch(start_period=start_period, end_period=end_period)
+
+        if self.period == Period.DAY:
+            # we are interested in day-time data as follows
+            # - if there is no data for month or more (ticker is dead, probably), we drop all data for
+            #   the last available period
+            # - we drop data for the period of the current month
+            # - for every period we take the value that is last in each month
+
+            if 'period' not in vals.columns:
+                vals['period'] = vals['date'].dt.to_period('M')
+            if self.end_period < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
+                vals = vals[vals['period'] < pd.Period(self.end_period, freq='M')]
+            indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
+            indicator__lastdate_indices = vals['period'] != vals['period'].shift(1)
+            vals = vals[indicator__lastdate_indices & indicator__not_current_period].copy()
+            del vals['date']
+        elif self.period == Period.MONTH:
+            del vals['date']
+        elif self.period == Period.DECADE:
+            vals = vals[vals['date'].dt.day == 3]
+            vals['date'] = vals['date'].apply(lambda p: pd.Period(p, freq='M'))
+            vals.rename(columns={'date': 'period'}, inplace=True)
+        else:
+            raise Exception('Unexpected type of `period`')
+
+        vals.sort_values(by='period', ascending=True, inplace=True)
+        return vals
 
     @property
     def values_fetcher(self):
