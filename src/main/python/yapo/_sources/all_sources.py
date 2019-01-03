@@ -6,6 +6,7 @@ from .micex_stocks_source import MicexStocksSource
 from .mutru_funds_source import MutualFundsRuSource
 from .quandl_source import QuandlSource
 from .single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource, MicexMcftrSource
+from .okama_source import OkamaSource
 from .inflation_sources import InflationUsSource, InflationRuSource, InflationEuSource
 
 
@@ -28,6 +29,7 @@ class AllSymbolSources(SymbolSources):
     micex_stocks_source: MicexStocksSource
     mut_ru_source: MutualFundsRuSource
     quandl_source: QuandlSource
+    okama_source: OkamaSource
 
     @property
     def sources(self):
@@ -41,4 +43,5 @@ class AllSymbolSources(SymbolSources):
             self.micex_stocks_source,
             self.mut_ru_source,
             self.quandl_source,
+            self.okama_source,
         ]

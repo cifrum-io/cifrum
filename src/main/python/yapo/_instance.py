@@ -72,7 +72,8 @@ class Yapo:
 
             currency = finsym_info.currency if currency is None else Currency.__dict__[currency.upper()]
 
-            allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT, SecurityType.CURRENCY}
+            allowed_security_types = \
+                {SecurityType.STOCK_ETF, SecurityType.MUT, SecurityType.CURRENCY, SecurityType.RATES}
             assert finsym_info.security_type in allowed_security_types
             a = PortfolioAsset(symbol=finsym_info,
                                start_period=start_period, end_period=end_period, currency=currency)
