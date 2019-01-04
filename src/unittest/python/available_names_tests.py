@@ -7,7 +7,7 @@ class AvailableNamesTest(unittest.TestCase):
 
     def test__return_namespaces_list_by_default(self):
         self.assertEqual(set(yapo.available_names()),
-                         {'infl', 'cbr', 'micex', 'mut_ru', 'ny'})
+                         {'infl', 'cbr', 'micex', 'mut_ru', 'ny', 'index'})
 
     def test__return_empty_list_or_none_if_symbol_doesnt_exist(self):
         nonexisting_id = 'nlu/xxx'

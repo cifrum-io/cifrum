@@ -7,8 +7,7 @@ from .._common.financial_symbol_info import FinancialSymbolInfo
 from .._common.enums import Currency, SecurityType, Period
 from .._common.financial_symbol_id import FinancialSymbolId
 from .._common.financial_symbol import FinancialSymbol
-from .._settings import rostsber_url
-from .._index.top10 import compute as compute_top10
+from .._index.okid10 import compute as compute_top10
 
 
 @singleton

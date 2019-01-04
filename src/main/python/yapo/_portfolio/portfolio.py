@@ -47,6 +47,7 @@ class PortfolioAsset(PortfolioInflation):
 
     def __transform_values_according_to_period(self):
         vals = self.symbol.values(start_period=self.period_min, end_period=self.period_max)
+        self.period_min = max(self.period_min, min(vals['period']))
         self.period_max = min(self.period_max, max(vals['period']))
         # TODO: okama_dev-98
         if self.symbol.period == Period.DECADE:

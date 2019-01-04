@@ -22,7 +22,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                        start_period='2015-3', end_period='2017-5', currency='USD')
 
     def test__fail_if_asset_security_type_is_not_supported(self):
-        unsupported_ids = ['infl/RUB', 'infl/USD', 'infl/EUR', 'cbr/TOP_rates', 'micex/MCFTR']
+        unsupported_ids = ['infl/RUB', 'infl/USD', 'infl/EUR', 'micex/MCFTR']
 
         for unsupported_id in unsupported_ids:
             self.assertRaises(AssertionError,
