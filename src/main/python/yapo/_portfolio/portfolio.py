@@ -23,6 +23,9 @@ class PortfolioAsset(PortfolioInflation):
 
     def __init__(self, symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: Currency):
+        if end_period - start_period < 2:
+            raise ValueError('period range should be at least 2 months')
+
         self.symbol = symbol
 
         datetime_now = dtm.datetime.now()
@@ -152,6 +155,9 @@ class Portfolio(PortfolioInflation):
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
+        if end_period - start_period < 2:
+            raise ValueError('period range should be at least 2 months')
+
         self.weights = weights
         self.period_min = max(start_period, *[a.period_min for a in assets])
         self.period_max = min(end_period, *[a.period_max for a in assets])

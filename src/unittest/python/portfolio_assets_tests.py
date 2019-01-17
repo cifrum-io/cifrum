@@ -123,3 +123,26 @@ class PortfolioAssetsTest(unittest.TestCase):
             rate_of_return_given = asset.rate_of_return().values
             rate_of_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
             np.testing.assert_almost_equal(rate_of_return_given, rate_of_return_expected)
+
+    def test__fail_if_date_range_is_short(self):
+        # Asset
+        self.assertRaises(ValueError,
+                          lambda: yapo.portfolio_asset(name='micex/FXRU', start_period='2015-3', end_period='2015-4'))
+
+        try:
+            yapo.portfolio_asset(name='micex/FXRU', start_period='2015-3', end_period='2015-4')
+        except ValueError as e:
+            self.assertTrue(e.args[0].startswith('period range should'))
+
+        # Portfolio
+        self.assertRaises(ValueError,
+                          lambda: yapo.portfolio(assets={'micex/FXRU': 1.},
+                                                 start_period='2015-3', end_period='2015-4',
+                                                 currency='rub'))
+
+        try:
+            yapo.portfolio(assets={'micex/FXRU': 1.},
+                           start_period='2015-3', end_period='2015-4',
+                           currency='rub')
+        except ValueError as e:
+            self.assertTrue(e.args[0].startswith('period range should'))
