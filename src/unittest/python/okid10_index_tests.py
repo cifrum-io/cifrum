@@ -39,3 +39,16 @@ class Okid10IndexTest(unittest.TestCase):
                                        [1290.8230, 1303.5421, 1315.8087, 1327.6302, 1339.0072], decimal=self.places)
         np.testing.assert_almost_equal(okid10.values[-5:].values,
                                        [2737.4407, 2752.9855, 2768.5141, 2784.0878, 2799.7449], decimal=self.places)
+
+    def test__compute_correctly_in_other_currencies(self):
+        okid10_usd = yapo.portfolio_asset(name=self.asset_name, end_period='2018-12', currency='usd')
+        okid10_rub = yapo.portfolio_asset(name=self.asset_name, end_period='2018-12', currency='rub')
+
+        okid10_currency_rate = okid10_usd.close() / okid10_rub.close()
+
+        vs_rub = yapo.portfolio_asset(name='cbr/RUB',
+                                      start_period=okid10_currency_rate.start_period,
+                                      end_period=okid10_currency_rate.end_period,
+                                      currency='usd').close()
+
+        np.testing.assert_almost_equal(okid10_currency_rate.values, vs_rub.values, decimal=self.places)
