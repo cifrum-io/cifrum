@@ -86,9 +86,9 @@ class PortfolioAsset(PortfolioInflation):
         if kind == 'ytd':
             ror = self.rate_of_return(kind='values', real=real)
 
-            drop_first_count = 0 if ror.start_period.month == 1 else _MONTHS_PER_YEAR - ror.start_period.month + 1
-            drop_last_count = 0 if ror.end_period.month == _MONTHS_PER_YEAR else ror.end_period.month
-            ror_full_yearly = ror[drop_first_count:-drop_last_count]
+            drop_first_count = None if ror.start_period.month == 1 else _MONTHS_PER_YEAR - ror.start_period.month + 1
+            drop_last_count = None if ror.end_period.month == _MONTHS_PER_YEAR else -ror.end_period.month
+            ror_full_yearly = ror[drop_first_count:drop_last_count]
             ror_full_yearly_splits = \
                 np.split(ror_full_yearly.values,
                          ror_full_yearly.end_period.year - ror_full_yearly.start_period.year + 1)
