@@ -31,7 +31,7 @@ class PortfolioAsset(PortfolioInflation):
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
             datetime_now -= dateutil.relativedelta.relativedelta(months=1)
-        period_now = pd.Period(datetime_now, freq='M')  # can't use Period.now because `now` is mocked in tests
+        period_now = pd.Period(datetime_now, freq='M')
         self.period_min = max(
             pd.Period(self.symbol.start_period, freq='M'),
             start_period,
