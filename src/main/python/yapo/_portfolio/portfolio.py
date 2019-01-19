@@ -27,6 +27,7 @@ class PortfolioAsset(PortfolioInflation):
             raise ValueError('period range should be at least 2 months')
 
         self.symbol = symbol
+        self.currency = currency
 
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
@@ -34,11 +35,15 @@ class PortfolioAsset(PortfolioInflation):
         period_now = pd.Period(datetime_now, freq='M')
         self.period_min = max(
             pd.Period(self.symbol.start_period, freq='M'),
+            self.currency.period_min,
+            self.currency.inflation().start_period,
             start_period,
         )
         self.period_max = min(
             pd.Period(self.symbol.end_period, freq='M'),
             period_now,
+            self.currency.period_max,
+            self.currency.inflation().end_period,
             end_period,
         )
         self.values = self.__transform_values_according_to_period()
@@ -160,9 +165,19 @@ class Portfolio(PortfolioInflation):
             raise ValueError('period range should be at least 2 months')
 
         self.weights = weights
-        self.period_min = max(start_period, *[a.period_min for a in assets])
-        self.period_max = min(end_period, *[a.period_max for a in assets])
         self.currency = currency
+        self.period_min = max(
+            start_period,
+            self.currency.period_min,
+            self.currency.inflation().start_period,
+            *[a.period_min for a in assets],
+        )
+        self.period_max = min(
+            end_period,
+            self.currency.period_max,
+            self.currency.inflation().end_period,
+            *[a.period_max for a in assets]
+        )
 
         super().__init__(self.currency, self.period_min, self.period_max)
 
