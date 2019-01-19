@@ -17,7 +17,7 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.portfolio = yapo.portfolio(assets={'nlu/922': 1., 'micex/FXRU': 1., 'micex/FXMM': 1.,
+        cls.portfolio = yapo.portfolio(assets={'mut_ru/0890-94127385': 1., 'micex/FXRU': 1., 'micex/FXMM': 1.,
                                                'cbr/USD': 1., 'cbr/EUR': 1., 'cbr/RUB': 1.},
                                        start_period='2015-3', end_period='2017-5', currency='USD')
 
