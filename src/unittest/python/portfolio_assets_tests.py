@@ -8,7 +8,7 @@ import datetime as dtm
 
 from yapo._sources.all_sources import SymbolSources
 from yapo._sources.base_classes import SingleFinancialSymbolSource
-from yapo._common.enums import Currency, SecurityType, Period
+from yapo.common.enums import Currency, SecurityType, Period
 
 import yapo
 

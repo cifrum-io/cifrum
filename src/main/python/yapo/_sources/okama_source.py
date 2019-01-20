@@ -3,10 +3,10 @@ import pandas as pd
 
 from .base_classes import FinancialSymbolsSource
 from .single_financial_symbol_source import CbrTopRatesSource
-from .._common.financial_symbol_info import FinancialSymbolInfo
-from .._common.enums import Currency, SecurityType, Period
-from .._common.financial_symbol_id import FinancialSymbolId
-from .._common.financial_symbol import FinancialSymbol
+from ..common.financial_symbol_info import FinancialSymbolInfo
+from ..common.enums import Currency, SecurityType, Period
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol import FinancialSymbol
 from .._index.okid10 import compute as compute_top10
 
 

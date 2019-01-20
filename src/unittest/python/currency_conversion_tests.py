@@ -7,7 +7,7 @@ from serum import inject
 
 import yapo
 from yapo._sources.registries import CurrencySymbolsRegistry
-from yapo._common.enums import Currency
+from yapo.common.enums import Currency
 
 
 class CurrencyConversionTest(unittest.TestCase):

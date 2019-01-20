@@ -3,7 +3,7 @@ import pandas as pd
 
 from .base_classes import SingleFinancialSymbolSource
 from .._settings import rostsber_url, change_column_name
-from .._common.enums import Currency, SecurityType, Period
+from ..common.enums import Currency, SecurityType, Period
 
 
 def _load_inflation_values(inflation_country):

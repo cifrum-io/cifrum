@@ -4,8 +4,8 @@ from itertools import groupby
 
 from .all_sources import SymbolSources
 from .._settings import rostsber_url
-from .._common.financial_symbol_id import FinancialSymbolId
-from .._common.enums import Currency
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.enums import Currency
 
 
 @singleton

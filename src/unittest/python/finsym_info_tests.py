@@ -2,8 +2,8 @@ import unittest
 
 import yapo
 import pandas as pd
-from yapo._common.enums import Currency, SecurityType, Period
-from yapo._common.financial_symbol import FinancialSymbol
+from yapo.common.enums import Currency, SecurityType, Period
+from yapo.common.financial_symbol import FinancialSymbol
 from yapo._settings import change_column_name
 
 

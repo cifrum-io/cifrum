@@ -7,9 +7,9 @@ from serum import inject, singleton, Context
 
 from ._sources.registries import FinancialSymbolsRegistry
 from ._sources.all_sources import AllSymbolSources
-from ._common.enums import Currency, SecurityType
-from ._common.financial_symbol import FinancialSymbol
-from ._common.financial_symbol_id import FinancialSymbolId
+from .common.enums import Currency, SecurityType
+from .common.financial_symbol import FinancialSymbol
+from .common.financial_symbol_id import FinancialSymbolId
 from ._portfolio.portfolio import Portfolio, PortfolioAsset
 from ._search import _Search
 

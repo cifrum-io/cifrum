@@ -3,7 +3,7 @@ import datetime as dtm
 import dateutil
 
 import pandas as pd
-from .._common.enums import Period
+from ..common.enums import Period
 
 
 class ValuesFetcher:

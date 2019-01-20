@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import itertools as it
 
-from yapo._common.time_series import TimeSeriesKind
+from yapo.common.time_series import TimeSeriesKind
 
 
 class PortfolioStatisticsTest(unittest.TestCase):

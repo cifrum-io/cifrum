@@ -2,8 +2,8 @@ import pandas as pd
 from contracts import contract
 
 from .._settings import _MONTHS_PER_YEAR
-from .._common.enums import Currency
-from .._common.time_series import TimeSeries, TimeSeriesKind
+from ..common.enums import Currency
+from ..common.time_series import TimeSeries, TimeSeriesKind
 
 
 class PortfolioInflation:

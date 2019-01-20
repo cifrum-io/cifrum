@@ -1,9 +1,9 @@
 from pprint import pformat
 import pandas as pd
 
-from .._common.financial_symbol_info import FinancialSymbolInfo
-from .._common.financial_symbol_id import FinancialSymbolId
-from .._common.financial_symbol import FinancialSymbol
+from ..common.financial_symbol_info import FinancialSymbolInfo
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol import FinancialSymbol
 
 
 class FinancialSymbolsSource:

@@ -1,4 +1,4 @@
-from .._common.time_series import TimeSeries, TimeSeriesKind
+from ..common.time_series import TimeSeries, TimeSeriesKind
 from .._settings import _MONTHS_PER_YEAR
 
 import numpy as np

@@ -10,9 +10,9 @@ from textwrap import dedent
 
 from .inflation import PortfolioInflation
 from .._sources.registries import CurrencySymbolsRegistry
-from .._common.enums import Currency, Period
-from .._common.financial_symbol import FinancialSymbol
-from .._common.time_series import TimeSeries, TimeSeriesKind
+from ..common.enums import Currency, Period
+from ..common.financial_symbol import FinancialSymbol
+from ..common.time_series import TimeSeries, TimeSeriesKind
 from .._settings import _MONTHS_PER_YEAR
 
 
