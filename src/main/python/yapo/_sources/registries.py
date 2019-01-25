@@ -1,9 +1,12 @@
+from typing import Optional
+
 from serum import singleton, inject
 import pandas as pd
 from itertools import groupby
 
 from .all_sources import SymbolSources
 from .._settings import rostsber_url
+from ..common.financial_symbol import FinancialSymbol
 from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.enums import Currency
 
@@ -30,7 +33,7 @@ class FinancialSymbolsRegistry:
                 for sym_source in self.symbol_sources.get(namespace)
                 for name in sym_source.get_all_infos()]
 
-    def get(self, financial_symbol_id: FinancialSymbolId):
+    def get(self, financial_symbol_id: FinancialSymbolId) -> Optional[FinancialSymbol]:
         if financial_symbol_id.namespace in self.symbol_sources.keys():
             result = []
             for symbol_source in self.symbol_sources.get(financial_symbol_id.namespace):

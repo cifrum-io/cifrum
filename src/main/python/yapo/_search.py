@@ -1,15 +1,18 @@
-from typing import List
+from typing import List, Optional
 
 from serum import inject
 import re
 
-from ._sources.all_sources import AllSymbolSources
+from .common.financial_symbol_id import FinancialSymbolId
 from .common.financial_symbol import FinancialSymbol
+from ._sources.registries import FinancialSymbolsRegistry
+from ._sources.all_sources import AllSymbolSources
 
 
 @inject
 class _Search:
     sources: AllSymbolSources
+    fin_syms_registry: FinancialSymbolsRegistry
 
     def __init__(self):
         self.id2sym = {}
@@ -53,15 +56,37 @@ class _Search:
 
         self.lines = quandl_lines + micex_stocks_lines + mutru_lines
 
+    def _check_finsym_access(self, query: str) -> Optional[FinancialSymbol]:
+        namespaces = self.fin_syms_registry.namespaces()
+
+        starts_with_namespace = False
+        for ns in namespaces:
+            if query.startswith(ns + '/'):
+                starts_with_namespace = True
+                break
+        if not starts_with_namespace:
+            return None
+
+        fsid = FinancialSymbolId.parse(query)
+        return self.fin_syms_registry.get(fsid)
+
     @inject
     def perform(self, query: str, top: int) -> List[FinancialSymbol]:
-        query = re.sub(r'\s+', ' ', query.strip().lower())
-        if len(query) == 0:
-            return []
+        try:
+            fs = self._check_finsym_access(query=query)
+        except Exception:
+            fs = None
 
-        r = [(l.find(query), l) for l in self.lines]
-        r = filter(lambda x: x[0] != -1, r)
-        r = sorted(r, key=lambda x: '{:4d} {}'.format(x[0], x[1]))
-        r = r[:top]
-        r = [self.id2sym[x[1]] for x in r]
-        return list(r)[:top]
+        if fs:
+            return [fs]
+        else:
+            query = re.sub(r'\s+', ' ', query.strip().lower())
+            if len(query) == 0:
+                return []
+
+            r = [(l.find(query), l) for l in self.lines]
+            r = filter(lambda x: x[0] != -1, r)
+            r = sorted(r, key=lambda x: '{:4d} {}'.format(x[0], x[1]))
+            r = r[:top]
+            r = [self.id2sym[x[1]] for x in r]
+            return list(r)[:top]

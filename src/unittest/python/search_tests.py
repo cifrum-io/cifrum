@@ -1,5 +1,10 @@
 import unittest
+
+from serum import Context
+
 import yapo
+from yapo._search import _Search
+from yapo._sources.all_sources import AllSymbolSources
 from yapo.common.enums import SecurityType
 
 
@@ -35,3 +40,17 @@ class SearchTest(unittest.TestCase):
 
         rs = yapo.search(query='microsoft', top=30)
         self.assertEqual(rs[0].identifier_str, 'ny/MSFT')
+
+    def test__search_exact_finsym(self):
+        qry = 'micex/SBER'
+
+        with Context(AllSymbolSources):
+            search_instance = _Search()
+
+        r = search_instance._check_finsym_access(query=qry)
+        self.assertIsNotNone(r)
+        self.assertEqual(r.identifier_str, 'micex/SBER')
+
+        rs = yapo.search(query=qry)
+        self.assertEqual(len(rs), 1)
+        self.assertEqual(rs[0].identifier_str, 'micex/SBER')
