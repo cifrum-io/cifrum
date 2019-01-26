@@ -6,6 +6,7 @@ import pandas as pd
 from contracts import contract
 import datetime as dtm
 from textwrap import dedent
+import copy
 
 
 from .inflation import PortfolioInflation
@@ -46,7 +47,7 @@ class PortfolioAsset(PortfolioInflation):
             self.currency.inflation().end_period,
             end_period,
         )
-        self.values = self.__transform_values_according_to_period()
+        self.__values = self.__transform_values_according_to_period()
 
         self.currency = currency
         self.__convert_currency(currency_to=currency)
@@ -80,10 +81,10 @@ class PortfolioAsset(PortfolioInflation):
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
                                    kind=TimeSeriesKind.CURRENCY_RATE)
-        self.values = self.values * currency_rate
+        self.__values = self.__values * currency_rate
 
     def close(self):
-        return self.values
+        return copy.deepcopy(self.__values)
 
     def rate_of_return(self, kind='values', real=False):
         if kind not in ['values', 'accumulated', 'ytd']:
@@ -105,7 +106,7 @@ class PortfolioAsset(PortfolioInflation):
                                  kind=TimeSeriesKind.YTD)
             return ror_ytd
 
-        ror = self.values.pct_change()
+        ror = self.close().pct_change()
 
         if real:
             inflation = self.inflation(kind='values')

@@ -22,22 +22,24 @@ class Okid10IndexTest(unittest.TestCase):
         okid10 = yapo.portfolio_asset(name=self.asset_name)
         cbr_top10 = yapo.portfolio_asset(name='cbr/TOP_rates')
 
-        self.assertEqual(okid10.period_min, cbr_top10.period_min + _MONTHS_PER_YEAR)
-        self.assertEqual(okid10.period_max, cbr_top10.period_max)
+        self.assertEqual(okid10.close().start_period,
+                         cbr_top10.close().start_period + _MONTHS_PER_YEAR)
+        self.assertEqual(okid10.close().end_period,
+                         cbr_top10.close().end_period)
 
     def test__have_valid_selected_period_range(self):
         start_period = pd.Period('2013-1', freq='M')
         end_period = pd.Period('2015-3', freq='M')
 
         okid10 = yapo.portfolio_asset(name=self.asset_name, start_period=str(start_period), end_period=str(end_period))
-        self.assertEqual(okid10.period_min, start_period)
-        self.assertEqual(okid10.period_max, end_period)
+        self.assertEqual(okid10.close().start_period, start_period)
+        self.assertEqual(okid10.close().end_period, end_period)
 
     def test__have_correct_values(self):
         okid10 = yapo.portfolio_asset(name=self.asset_name, end_period='2018-12')
-        np.testing.assert_almost_equal(okid10.values[:5].values,
+        np.testing.assert_almost_equal(okid10.close()[:5].values,
                                        [1290.8230, 1303.5421, 1315.8087, 1327.6302, 1339.0072], decimal=self.places)
-        np.testing.assert_almost_equal(okid10.values[-5:].values,
+        np.testing.assert_almost_equal(okid10.close()[-5:].values,
                                        [2737.4407, 2752.9855, 2768.5141, 2784.0878, 2799.7449], decimal=self.places)
 
     def test__compute_correctly_in_other_currencies(self):
