@@ -34,13 +34,13 @@ class PortfolioAsset(PortfolioInflation):
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
             datetime_now -= dateutil.relativedelta.relativedelta(months=1)
         period_now = pd.Period(datetime_now, freq='M')
-        self.period_min = max(
+        self._period_min = max(
             pd.Period(self.symbol.start_period, freq='M'),
             self.currency.period_min,
             self.currency.inflation().start_period,
             start_period,
         )
-        self.period_max = min(
+        self._period_max = min(
             pd.Period(self.symbol.end_period, freq='M'),
             period_now,
             self.currency.period_max,
@@ -52,21 +52,21 @@ class PortfolioAsset(PortfolioInflation):
         self.currency = currency
         self.__convert_currency(currency_to=currency)
 
-        super().__init__(self.currency, self.period_min, self.period_max)
+        super().__init__(self.currency, self._period_min, self._period_max)
 
     def __transform_values_according_to_period(self):
-        vals = self.symbol.values(start_period=self.period_min, end_period=self.period_max)
+        vals = self.symbol.values(start_period=self._period_min, end_period=self._period_max)
         if len(vals['period']) > 0:
-            self.period_min = max(self.period_min, min(vals['period']))
-            self.period_max = min(self.period_max, max(vals['period']))
+            self._period_min = max(self._period_min, min(vals['period']))
+            self._period_max = min(self._period_max, max(vals['period']))
         # TODO: okama_dev-98
         if self.symbol.period == Period.DECADE:
             ts = TimeSeries(values=vals['rate'].values,
-                            start_period=self.period_min, end_period=self.period_max,
+                            start_period=self._period_min, end_period=self._period_max,
                             kind=TimeSeriesKind.DIFF)
         else:
             ts = TimeSeries(values=vals['close'].values,
-                            start_period=self.period_min, end_period=self.period_max,
+                            start_period=self._period_min, end_period=self._period_max,
                             kind=TimeSeriesKind.VALUES)
         return ts
 
@@ -76,7 +76,7 @@ class PortfolioAsset(PortfolioInflation):
             return
 
         currency_rate = self.currency_symbols_registry \
-                            .convert(currency_from, currency_to, self.period_min, self.period_max)
+                            .convert(currency_from, currency_to, self._period_min, self._period_max)
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
@@ -117,9 +117,6 @@ class PortfolioAsset(PortfolioInflation):
 
         return ror
 
-    def period(self):
-        return pd.period_range(self.period_min, self.period_max, freq='M')
-
     def risk(self, period='year'):
         """
         Returns risk of the asset
@@ -130,7 +127,7 @@ class PortfolioAsset(PortfolioInflation):
             year - returns risk approximated to yearly value
         """
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self.period_min, end_period=self.period_max,
+                      start_period=self._period_min, end_period=self._period_max,
                       currency=self.currency)
         return p.risk(period=period)
 
@@ -140,7 +137,7 @@ class PortfolioAsset(PortfolioInflation):
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self.period_min, end_period=self.period_max,
+                      start_period=self._period_min, end_period=self._period_max,
                       currency=self.currency)
         return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
 
@@ -152,7 +149,7 @@ class PortfolioAsset(PortfolioInflation):
                  period_min: {},
                  period_max: {}
             )""".format(self.symbol.identifier, self.currency,
-                        self.period_min, self.period_max)
+                        self._period_min, self._period_max)
         return dedent(asset_repr)
 
 
@@ -167,31 +164,28 @@ class Portfolio(PortfolioInflation):
 
         self.weights = weights
         self.currency = currency
-        self.period_min = max(
+        self._period_min = max(
             start_period,
             self.currency.period_min,
             self.currency.inflation().start_period,
-            *[a.period_min for a in assets],
+            *[a._period_min for a in assets],
         )
-        self.period_max = min(
+        self._period_max = min(
             end_period,
             self.currency.period_max,
             self.currency.inflation().end_period,
-            *[a.period_max for a in assets]
+            *[a._period_max for a in assets]
         )
 
-        super().__init__(self.currency, self.period_min, self.period_max)
+        super().__init__(self.currency, self._period_min, self._period_max)
 
         self.assets = [PortfolioAsset(symbol=a.symbol,
-                                      start_period=self.period_min,
-                                      end_period=self.period_max,
+                                      start_period=self._period_min,
+                                      end_period=self._period_max,
                                       currency=currency) for a in assets]
 
     def assets_weighted(self):
         return list(zip(self.assets, self.weights))
-
-    def period(self):
-        return pd.period_range(self.period_min, self.period_max, freq='M')
 
     def risk(self, period='year'):
         """
@@ -206,7 +200,7 @@ class Portfolio(PortfolioInflation):
             ror = self.rate_of_return()
             return ror.std()
         elif period == 'year':
-            if self.period_max - self.period_min < 12:
+            if self._period_max - self._period_min < 12:
                 raise Exception('year risk is request for less than 12 months')
 
             mean = (1. + self.rate_of_return()).mean()
@@ -221,7 +215,7 @@ class Portfolio(PortfolioInflation):
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         if years_ago is None:
-            years_total = (self.period_max - self.period_min) / _MONTHS_PER_YEAR
+            years_total = (self._period_max - self._period_min) / _MONTHS_PER_YEAR
             cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
             if real:
                 cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
@@ -231,7 +225,7 @@ class Portfolio(PortfolioInflation):
                              for y in years_ago])
         elif isinstance(years_ago, int):
             months_count = years_ago * _MONTHS_PER_YEAR
-            if self.period_min > self.period_max - months_count:
+            if self._period_min > self._period_max - months_count:
                 return self.compound_annual_growth_rate(years_ago=None, real=real)
 
             ror_series = self.rate_of_return()[-months_count:]
@@ -273,5 +267,5 @@ class Portfolio(PortfolioInflation):
                  start_period: {},
                  end_period: {}
             )""".format(assets_repr, self.currency,
-                        self.period_min, self.period_max)
+                        self._period_min, self._period_max)
         return dedent(portfolio_repr)

@@ -143,6 +143,9 @@ class TimeSeries:
     def end_period(self):
         return self._end_period
 
+    def period(self):
+        return list(pd.period_range(self.start_period, self.end_period, freq='M'))
+
     @property
     def size(self):
         return self._size
