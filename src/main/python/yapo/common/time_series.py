@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from enum import Enum
+import copy
 
 
 class TimeSeriesKind(Enum):
@@ -87,15 +88,24 @@ class TimeSeriesKind(Enum):
 
 
 class TimeSeries:
-    def __init__(self, values, start_period: pd.Period, end_period: pd.Period, kind):
+    def __init__(self, values, start_period: pd.Period, end_period: pd.Period, kind, freq='M'):
         if not isinstance(values, np.ndarray):
             raise ValueError('values should be numpy array')
 
         self._values = values
         self._size = self._values.size
-        self._start_period = start_period
-        self._end_period = end_period
+        self._freq = freq
         self._kind = kind
+
+        if self._freq == 'M':
+            self._period_range = list(pd.period_range(start_period, end_period, freq='M'))
+        elif self._freq == 'Y':
+            rng = pd.period_range(start_period, end_period, freq='M')
+            self._period_range = list(filter(lambda r: r.month == start_period.month, rng))
+        else:
+            raise ValueError('supported freq values: M, Y')
+        self._start_period = min(self._period_range)
+        self._end_period = max(self._period_range)
 
         if self.kind == TimeSeriesKind.DIFF or \
                 self.kind == TimeSeriesKind.VALUES or \
@@ -104,11 +114,11 @@ class TimeSeries:
                 raise ValueError('values and period range have different lengths')
 
         if self.kind == TimeSeriesKind.YTD:
-            if start_period.month != 1:
+            if self._start_period.month != 1:
                 raise ValueError('start period month should be 1')
-            if end_period.month != 12:
+            if self._end_period.month != 1:
                 raise ValueError('end period month should be 1')
-            if len(values) != end_period.year - start_period.year + 1:
+            if len(values) != self._end_period.year - self._start_period.year + 1:
                 raise ValueError('values len should be equal to full years count')
 
         if self.kind == TimeSeriesKind.REDUCED_VALUE:
@@ -144,7 +154,7 @@ class TimeSeries:
         return self._end_period
 
     def period(self):
-        return list(pd.period_range(self.start_period, self.end_period, freq='M'))
+        return copy.deepcopy(self._period_range)
 
     @property
     def size(self):

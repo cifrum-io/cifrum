@@ -77,12 +77,12 @@ class PortfolioStatisticsTest(unittest.TestCase):
     def test__ytd_rate_of_return(self):
         ror_ytd = self.portfolio.rate_of_return(kind='ytd')
         self.assertEqual(ror_ytd.start_period, pd.Period('2016-1', freq='M'))
-        self.assertEqual(ror_ytd.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd.end_period, pd.Period('2016-1', freq='M'))
         np.testing.assert_almost_equal(ror_ytd.values, [.3480], decimal=self.places)
 
         ror_ytd_real = self.portfolio.rate_of_return(kind='ytd', real=True)
         self.assertEqual(ror_ytd_real.start_period, pd.Period('2016-1', freq='M'))
-        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-1', freq='M'))
         np.testing.assert_almost_equal(ror_ytd_real.values, [.3206], decimal=self.places)
 
     def test__handle_related_inflation(self):

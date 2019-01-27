@@ -30,13 +30,13 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
     def test__ytd_rate_of_return(self):
         ror_ytd = self.asset.rate_of_return(kind='ytd')
         self.assertEqual(ror_ytd.start_period, pd.Period('2012-1', freq='M'))
-        self.assertEqual(ror_ytd.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd.end_period, pd.Period('2016-1', freq='M'))
         self.assertEqual(ror_ytd.kind, TimeSeriesKind.YTD)
         np.testing.assert_almost_equal(ror_ytd.values, [.2041, -.0344, -.4531, .0046, .5695], decimal=self.places)
 
         ror_ytd_real = self.asset.rate_of_return(kind='ytd', real=True)
         self.assertEqual(ror_ytd_real.start_period, pd.Period('2012-1', freq='M'))
-        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-12', freq='M'))
+        self.assertEqual(ror_ytd_real.end_period, pd.Period('2016-1', freq='M'))
         self.assertEqual(ror_ytd_real.kind, TimeSeriesKind.YTD)
         np.testing.assert_almost_equal(ror_ytd_real.values,
                                        [.1835, -.0486, -.4572, -.0026, .5376], decimal=self.places)

@@ -103,6 +103,7 @@ class PortfolioAsset(PortfolioInflation):
             ror_ytd = TimeSeries(values=np.array(ror_ytd_ts),
                                  start_period=ror_full_yearly.start_period,
                                  end_period=ror_full_yearly.end_period,
+                                 freq='Y',
                                  kind=TimeSeriesKind.YTD)
             return ror_ytd
 
