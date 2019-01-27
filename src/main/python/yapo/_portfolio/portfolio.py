@@ -265,8 +265,5 @@ class Portfolio(PortfolioInflation):
             Portfolio(
                  assets: {},
                  currency: {},
-                 start_period: {},
-                 end_period: {}
-            )""".format(assets_repr, self.currency,
-                        self._period_min, self._period_max)
+            )""".format(assets_repr, self.currency)
         return dedent(portfolio_repr)
