@@ -153,7 +153,7 @@ class TimeSeries:
     def end_period(self):
         return self._end_period
 
-    def period(self):
+    def period_range(self):
         return copy.deepcopy(self._period_range)
 
     @property

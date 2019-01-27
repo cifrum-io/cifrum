@@ -31,10 +31,9 @@ class PortfolioAssetsTest(unittest.TestCase):
 
     def test__period_should_be_sorted(self):
         for asset in self.portfolio.assets:
-            period = asset.close().period()
-
-            self.assertTrue(all(period[i] <= period[i + 1]
-                                for i in range(len(period) - 1)))
+            period_range = asset.close().period_range()
+            self.assertTrue(all(period_range[i] <= period_range[i + 1]
+                                for i in range(len(period_range) - 1)))
 
     def test__default_periods(self):
         asset = yapo.portfolio_asset(name='micex/SBER')
@@ -75,14 +74,14 @@ class PortfolioAssetsTest(unittest.TestCase):
         asset = yapo_instance.portfolio_asset(name='test_ns/test',
                                               start_period=str(start_period), end_period=str(end_period),
                                               currency='USD')
-        self.assertEqual(set(asset.close().period()),
+        self.assertEqual(set(asset.close().period_range()),
                          {end_period - 1, end_period - 2})
 
     @freeze_time('2018-1-30 1:0:0')
     def test__quandl_values(self):
         asset = yapo.portfolio_asset(name='ny/MSFT',
                                      start_period='2017-11', end_period='2018-2', currency='usd')
-        self.assertEqual(set(asset.close().period()),
+        self.assertEqual(set(asset.close().period_range()),
                          {pd.Period('2017-11'), pd.Period('2017-12')})
 
     @freeze_time('2018-10-31 1:0:0')
@@ -114,7 +113,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         asset = yapo_instance.portfolio_asset(name='test_ns/test',
                                               start_period=str(start_period), end_period=str(end_period),
                                               currency='USD')
-        self.assertEqual(set(asset.close().period()), {end_period - 2})
+        self.assertEqual(set(asset.close().period_range()), {end_period - 2})
 
     def test__compute_accumulated_rate_of_return(self):
         for asset in self.portfolio.assets:
