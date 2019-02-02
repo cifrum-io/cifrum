@@ -46,6 +46,8 @@ class PortfolioInflation:
 
         if kind == 'accumulated':
             return (inflation + 1.).prod() - 1.
+        elif kind == 'accumulated_series':
+            return (inflation + 1.).cumprod() - 1.
         elif kind == 'a_mean':
             inflation_amean = inflation.mean()
             return inflation_amean
