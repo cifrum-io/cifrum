@@ -51,7 +51,7 @@ class PortfolioInflation:
             return inflation_amean
         elif kind == 'g_mean':
             years_total = (self._period_max - self._period_min) / _MONTHS_PER_YEAR
-            inflation_gmean = (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
+            inflation_gmean = (self.inflation(kind='accumulated', years_ago=years_ago) + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':
             return inflation
