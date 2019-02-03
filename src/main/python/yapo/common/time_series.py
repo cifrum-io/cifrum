@@ -166,12 +166,14 @@ class TimeSeries:
         vals = np.diff(self._values) / self._values[:-1]
         return TimeSeries(values=vals,
                           start_period=self._start_period + 1, end_period=self._end_period,
+                          freq=self._freq,
                           kind=self.kind.pct_change())
 
     def apply(self, fun, *args):
         if len(args) == 0:
             ts = TimeSeries(values=fun(self._values),
                             start_period=self._start_period, end_period=self._end_period,
+                            freq=self._freq,
                             kind=fun(self.kind))
             return ts
         else:
@@ -180,11 +182,13 @@ class TimeSeries:
                 self.__validate(other)
                 ts = TimeSeries(values=fun(self._values, other._values),
                                 start_period=self._start_period, end_period=self._end_period,
+                                freq=self._freq,
                                 kind=fun(self.kind, other.kind))
                 return ts
             elif isinstance(other, (int, float, complex)):
                 ts = TimeSeries(values=fun(self._values, other),
                                 start_period=self._start_period, end_period=self._end_period,
+                                freq=self._freq,
                                 kind=self._kind)
                 return ts
             else:
@@ -193,6 +197,7 @@ class TimeSeries:
     def reduce(self, fun):
         return TimeSeries(values=np.array([fun(self._values)]),
                           start_period=self._start_period, end_period=self._end_period,
+                          freq=self._freq,
                           kind=TimeSeriesKind.REDUCED_VALUE)
 
     def __mul__(self, other):
@@ -221,6 +226,7 @@ class TimeSeries:
             pr = pr[key.start:key.stop]
             ts = TimeSeries(values=self._values[key.start:key.stop],
                             start_period=pr.min(), end_period=pr.max(),
+                            freq=self._freq,
                             kind=self._kind)
             return ts
         return self._values[key]
