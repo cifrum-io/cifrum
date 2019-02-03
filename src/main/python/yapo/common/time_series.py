@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from enum import Enum
 import copy
+from collections.abc import Iterable
+
+from .._settings import _MONTHS_PER_YEAR
 
 
 class TimeSeriesKind(Enum):
@@ -204,9 +207,41 @@ class TimeSeries:
         return self.apply(lambda x, y: x * y, other)
 
     def __add__(self, other):
+        if isinstance(other, Iterable):
+            vals_new = np.append(self._values, other)
+
+            if self._freq == 'Y':
+                end_period_new = self.end_period + len(list(other)) * _MONTHS_PER_YEAR
+            elif self._freq == 'M':
+                end_period_new = self.end_period + len(list(other))
+            else:
+                raise ValueError('supported freq values: M, Y')
+
+            ts = TimeSeries(values=vals_new,
+                            start_period=self.start_period, end_period=end_period_new,
+                            freq=self._freq,
+                            kind=self._kind)
+            return ts
+
         return self.apply(lambda x, y: x + y, other)
 
     def __radd__(self, other):
+        if isinstance(other, Iterable):
+            vals_new = np.append(other, self._values)
+
+            if self._freq == 'Y':
+                start_period_new = self.start_period - len(list(other)) * _MONTHS_PER_YEAR
+            elif self._freq == 'M':
+                start_period_new = self.start_period - len(list(other))
+            else:
+                raise ValueError('supported freq values: M, Y')
+
+            ts = TimeSeries(values=vals_new,
+                            start_period=start_period_new, end_period=self.end_period,
+                            freq=self._freq,
+                            kind=self._kind)
+            return ts
+
         return self.apply(lambda x, y: y + x, other)
 
     def __rsub__(self, other):
