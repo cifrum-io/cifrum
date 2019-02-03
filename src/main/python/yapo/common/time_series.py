@@ -212,6 +212,9 @@ class TimeSeries:
     def __rsub__(self, other):
         return self.apply(lambda x, y: y - x, other)
 
+    def __rmul__(self, other):
+        return self.apply(lambda x, y: y * x, other)
+
     def __sub__(self, other):
         return self.apply(lambda x, y: x - y, other)
 
