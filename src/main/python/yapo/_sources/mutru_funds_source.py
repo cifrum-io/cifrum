@@ -14,7 +14,6 @@ class MutualFundsRuSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='mut_ru')
         self.url_base = rostsber_url + 'mut_ru/'
-        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t')
 
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.index['date_start'] = pd.to_datetime(self.index['date_start'])
