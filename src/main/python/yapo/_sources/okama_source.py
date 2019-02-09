@@ -46,7 +46,7 @@ class OkamaSource(FinancialSymbolsSource):
                                   start_period=self.cbr_top10_sym.start_period,
                                   end_period=self.cbr_top10_sym.end_period,
                                   currency=Currency.RUB,
-                                  security_type=SecurityType.RATES,
+                                  security_type=SecurityType.INDEX,
                                   period=Period.MONTH,
                                   adjusted_close=True)
             return sym

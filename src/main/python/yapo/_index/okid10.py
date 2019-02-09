@@ -11,7 +11,7 @@ def compute(cbr_top10_rates):
         index_part = TimeSeries(values=np.repeat(rates_yearly, _MONTHS_PER_YEAR)[:len(cbr_top10_rates) - month_idx],
                                 start_period=min(cbr_top10_rates['period']) + month_idx + 1,
                                 end_period=max(cbr_top10_rates['period']) + 1,
-                                kind=TimeSeriesKind.DIFF)
+                                kind=TimeSeriesKind.VALUES)
         index_part = (1 + index_part / _MONTHS_PER_YEAR).cumprod()
         index_total = index_part if index_total is None else index_total[1:] + index_part
 
