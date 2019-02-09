@@ -20,12 +20,12 @@ class Okid10IndexTest(unittest.TestCase):
 
     def test__have_valid_max_period_range(self):
         okid10 = yapo.portfolio_asset(name=self.asset_name)
-        cbr_top10 = yapo.portfolio_asset(name='cbr/TOP_rates')
+        cbr_top10 = yapo.information(name='cbr/TOP_rates')
 
         self.assertEqual(okid10.close().start_period,
-                         cbr_top10.close().start_period + _MONTHS_PER_YEAR)
+                         cbr_top10.start_period + _MONTHS_PER_YEAR)
         self.assertEqual(okid10.close().end_period,
-                         cbr_top10.close().end_period)
+                         cbr_top10.end_period)
 
     def test__have_valid_selected_period_range(self):
         start_period = pd.Period('2013-1', freq='M')
