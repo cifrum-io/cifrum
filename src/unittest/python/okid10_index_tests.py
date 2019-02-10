@@ -38,9 +38,9 @@ class Okid10IndexTest(unittest.TestCase):
     def test__have_correct_values(self):
         okid10 = yapo.portfolio_asset(name=self.asset_name, end_period='2018-12')
         np.testing.assert_almost_equal(okid10.close()[:5].values,
-                                       [1290.8230, 1303.5421, 1315.8087, 1327.6302, 1339.0072], decimal=self.places)
+                                       [100., 100.9854, 101.9356, 102.8515, 103.7328], decimal=self.places)
         np.testing.assert_almost_equal(okid10.close()[-5:].values,
-                                       [2737.4407, 2752.9855, 2768.5141, 2784.0878, 2799.7449], decimal=self.places)
+                                       [212.0694, 213.2737, 214.4767, 215.6832, 216.8961], decimal=self.places)
 
     def test__compute_correctly_in_other_currencies(self):
         okid10_usd = yapo.portfolio_asset(name=self.asset_name, end_period='2018-12', currency='usd')

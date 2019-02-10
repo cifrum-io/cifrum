@@ -15,5 +15,7 @@ def compute(cbr_top10_rates):
         index_part = (1 + index_part / _MONTHS_PER_YEAR).cumprod()
         index_total = index_part if index_total is None else index_total[1:] + index_part
 
-    index_total *= 100
+    index_total = (index_total.pct_change() + 1.).cumprod() - 1.
+    index_total = [0] + index_total
+    index_total = (index_total + 1) * 100
     return index_total
