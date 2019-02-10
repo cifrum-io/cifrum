@@ -10,36 +10,27 @@ from ..common.enums import Currency, SecurityType, Period
 from .._settings import rostsber_url, change_column_name
 
 
-def _load_toprates():
-    df = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(rostsber_url), sep='\t')
-    df.sort_values(by='decade', inplace=True)
-    df.rename(columns={'close': change_column_name, 'decade': 'date'},
-              inplace=True)
-    return df
-
-
-def _load_cbr_deposit_rate_date(kind):
-    index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(rostsber_url), sep='\t')
-    period_str = index[kind][0]
-    return pd.Period(period_str, freq='M')
-
-
-def _load_micex_mcftr_date(kind):
-    index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t')
-    period_str = index[kind][0]
-    return pd.Period(period_str, freq='M')
-
-
-
 @singleton
 class CbrTopRatesSource(SingleFinancialSymbolSource):
+    def _load_rates(self):
+        df = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(rostsber_url), sep='\t')
+        df.sort_values(by='decade', inplace=True)
+        df.rename(columns={'close': change_column_name, 'decade': 'date'},
+                  inplace=True)
+        return df
+
+    def _load_dates(self, kind):
+        index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(rostsber_url), sep='\t')
+        period_str = index[kind][0]
+        return pd.Period(period_str, freq='M')
+
     def __init__(self):
         super().__init__(
             namespace='cbr',
             name='TOP_rates',
-            values_fetcher=lambda: _load_toprates(),
-            start_period=_load_cbr_deposit_rate_date('date_start'),
-            end_period=_load_cbr_deposit_rate_date('date_end'),
+            values_fetcher=lambda: self._load_rates(),
+            start_period=self._load_dates(kind='date_start'),
+            end_period=self._load_dates(kind='date_end'),
             long_name='Динамика максимальной процентной ставки (по вкладам в российских рублях)',
             currency=Currency.RUB,
             security_type=SecurityType.RATES,
@@ -50,6 +41,12 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 
 @singleton
 class MicexMcftrSource(SingleFinancialSymbolSource):
+    def _load_date(self, kind):
+        index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t')
+        period_str = index[kind][0]
+        date = dtm.datetime.strptime(period_str, '%Y-%M-%d')
+        return date
+
     def __init__(self):
         df = pd.read_csv(rostsber_url + 'index/moex/mcftr.csv', sep='\t')
 
@@ -57,8 +54,8 @@ class MicexMcftrSource(SingleFinancialSymbolSource):
             namespace='micex',
             name='MCFTR',
             values_fetcher=lambda: df.copy(),
-            start_period=_load_micex_mcftr_date('date_start'),
-            end_period=_load_micex_mcftr_date('date_end'),
+            start_period=self._load_date('date_start'),
+            end_period=self._load_date('date_end'),
             short_name='MICEX Total Return',
             currency=Currency.RUB,
             security_type=SecurityType.INDEX,
