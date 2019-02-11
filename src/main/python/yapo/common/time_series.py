@@ -290,6 +290,26 @@ class TimeSeries:
     def cumprod(self):
         return self.apply(lambda x: x.cumprod())
 
+    def ytd(self):
+        if self._kind != TimeSeriesKind.DIFF:
+            raise ValueError('incorrect kind')
+        if self._freq != 'M':
+            raise ValueError('incorrect frequency')
+
+        drop_first_count = None if self.start_period.month == 1 else _MONTHS_PER_YEAR - self.start_period.month + 1
+        drop_last_count = None if self.end_period.month == _MONTHS_PER_YEAR else -self.end_period.month
+        values_full_yearly = self[drop_first_count:drop_last_count]
+        values_full_yearly_splits = \
+            np.split(values_full_yearly.values,
+                     values_full_yearly.end_period.year - values_full_yearly.start_period.year + 1)
+        values_ytd_ts = [((splt + 1.).prod() - 1.) for splt in values_full_yearly_splits]
+        values_ytd = TimeSeries(values=np.array(values_ytd_ts),
+                                start_period=values_full_yearly.start_period,
+                                end_period=values_full_yearly.end_period,
+                                freq='Y',
+                                kind=TimeSeriesKind.YTD)
+        return values_ytd
+
     def __repr__(self):
         return 'TimeSeries(start_period={}, end_period={}, kind={}, values={}'.format(
             self._start_period, self._end_period, self._kind, self._values

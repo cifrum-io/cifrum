@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 from contracts import contract
 
 from .._settings import _MONTHS_PER_YEAR
@@ -46,6 +47,8 @@ class PortfolioInflation:
 
         if kind == 'accumulated':
             return (inflation + 1.).prod() - 1.
+        elif kind == 'yoy':
+            return inflation.ytd()
         elif kind == 'accumulated_series':
             return (inflation + 1.).cumprod() - 1.
         elif kind == 'a_mean':

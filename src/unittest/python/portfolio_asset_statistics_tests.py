@@ -103,5 +103,10 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(self.asset.inflation(kind='a_mean').value, .0014, places=self.places)
         self.assertAlmostEqual(self.asset.inflation(kind='g_mean').value, .0167, places=self.places)
 
+        infl_yoy = self.asset.inflation(kind='yoy')
+        self.assertEqual(infl_yoy.start_period, pd.Period('2012-1'))
+        self.assertEqual(infl_yoy.end_period, pd.Period('2016-1'))
+        np.testing.assert_almost_equal(infl_yoy.values, [.0174, .015, .0076, .0073, .0207], decimal=self.places)
+
         self.assertEqual(self.asset.inflation(kind='values').size,
                          self.asset.rate_of_return().size)
