@@ -40,31 +40,6 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 
 
 @singleton
-class MicexMcftrSource(SingleFinancialSymbolSource):
-    def _load_date(self, kind):
-        index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t', index_col='name')
-        period_str = index.loc['mcftr'][kind]
-        date = dtm.datetime.strptime(period_str, '%Y-%M-%d')
-        return date
-
-    def __init__(self):
-        df = pd.read_csv(rostsber_url + 'index/moex/mcftr.csv', sep='\t')
-
-        super().__init__(
-            namespace='micex',
-            name='MCFTR',
-            values_fetcher=lambda: df.copy(),
-            start_period=self._load_date('date_start'),
-            end_period=self._load_date('date_end'),
-            short_name='MICEX Total Return',
-            currency=Currency.RUB,
-            security_type=SecurityType.INDEX,
-            period=Period.DAY,
-            adjusted_close=False,
-        )
-
-
-@singleton
 class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')

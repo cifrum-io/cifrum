@@ -46,7 +46,7 @@ class AvailableNamesTest(unittest.TestCase):
         self.assertEqual(__fin_sim_ids(namespace='infl'), {'infl/RUB', 'infl/EUR', 'infl/USD'})
         self.assertEqual(__fin_sim_ids(namespace='cbr'), {'cbr/TOP_rates', 'cbr/RUB', 'cbr/USD', 'cbr/EUR'})
         self.assertTrue(__fin_sim_ids(namespace='micex').issuperset(
-            {'micex/MCFTR', 'micex/MRKY', 'micex/URKZ', 'micex/VSMO', 'micex/ROSN'}
+            {'micex/MRKY', 'micex/URKZ', 'micex/VSMO', 'micex/ROSN'}
         ))
         self.assertTrue(__fin_sim_ids(namespace='mut_ru').issuperset(
             {'mut_ru/2277', 'mut_ru/0164-70287842', 'mut_ru/0890-94127385', 'mut_ru/2569'}

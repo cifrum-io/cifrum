@@ -5,7 +5,8 @@ from serum import singleton, inject
 from .micex_stocks_source import MicexStocksSource
 from .mutru_funds_source import MutualFundsRuSource
 from .quandl_source import QuandlSource
-from .single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource, MicexMcftrSource
+from .moex_indexes_source import MoexIndexesSource
+from .single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource
 from .okama_source import OkamaSource
 from .inflation_sources import InflationUsSource, InflationRuSource, InflationEuSource
 
@@ -25,7 +26,7 @@ class AllSymbolSources(SymbolSources):
     inflation_ru_source: InflationRuSource
     inflation_eu_source: InflationEuSource
     inflation_us_source: InflationUsSource
-    micex_mcftr_source: MicexMcftrSource
+    moex_indexes_source: MoexIndexesSource
     micex_stocks_source: MicexStocksSource
     mut_ru_source: MutualFundsRuSource
     quandl_source: QuandlSource
@@ -39,8 +40,8 @@ class AllSymbolSources(SymbolSources):
             self.inflation_ru_source,
             self.inflation_eu_source,
             self.inflation_us_source,
-            self.micex_mcftr_source,
             self.micex_stocks_source,
+            self.moex_indexes_source,
             self.mut_ru_source,
             self.quandl_source,
             self.okama_source,
