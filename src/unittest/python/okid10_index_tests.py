@@ -24,8 +24,7 @@ class Okid10IndexTest(unittest.TestCase):
 
         self.assertEqual(okid10.close().start_period,
                          cbr_top10.start_period + _MONTHS_PER_YEAR)
-        self.assertEqual(okid10.close().end_period,
-                         cbr_top10.end_period)
+        self.assertTrue(cbr_top10.end_period - okid10.close().end_period < 2)
 
     def test__have_valid_selected_period_range(self):
         start_period = pd.Period('2013-1', freq='M')
