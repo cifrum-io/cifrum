@@ -39,7 +39,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         asset = yapo.portfolio_asset(name='micex/SBER')
         self.assertGreaterEqual(asset.close().start_period, pd.Period('1900-1', freq='M'))
         self.assertGreaterEqual(pd.Period.now(freq='M'), asset.close().end_period)
-        self.assertEqual(asset.currency, Currency.RUB)
+        self.assertEqual(asset.currency.value, Currency.RUB)
 
         portfolio = yapo.portfolio(assets={'micex/SBER': 1.}, currency='rub')
         self.assertGreaterEqual(portfolio.rate_of_return().start_period, pd.Period('1900-1', freq='M'))
@@ -62,8 +62,8 @@ class PortfolioAssetsTest(unittest.TestCase):
                             namespace='test_ns', name='test',
                             values_fetcher=lambda: self.values,
                             security_type=SecurityType.STOCK_ETF,
-                            start_period=self.values['date'].min(),
-                            end_period=self.values['date'].max(),
+                            start_period=pd.Period(self.values['date'].min(), freq='D'),
+                            end_period=pd.Period(self.values['date'].max(), freq='D'),
                             period=Period.DAY,
                             currency=Currency.RUB)]
 
@@ -101,8 +101,8 @@ class PortfolioAssetsTest(unittest.TestCase):
                             namespace='test_ns', name='test',
                             values_fetcher=lambda: self.values,
                             security_type=SecurityType.STOCK_ETF,
-                            start_period=self.values['date'].min(),
-                            end_period=self.values['date'].max(),
+                            start_period=pd.Period(self.values['date'].min(), freq='D'),
+                            end_period=pd.Period(self.values['date'].max(), freq='D'),
                             period=Period.DAY,
                             currency=Currency.RUB)]
 

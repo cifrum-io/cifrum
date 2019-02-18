@@ -14,9 +14,9 @@ class InflationSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='infl')
         self.index = pd.read_csv('{}inflation/__index.csv'.format(rostsber_url),
-                                 sep='\t', index_col='name')
-        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
-        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
+                                 sep='\t', index_col='name', parse_dates=['date_start', 'date_end'])
+        self.index['date_start'] = self.index['date_start'].dt.to_period(freq='M')
+        self.index['date_end'] = self.index['date_end'].dt.to_period(freq='M')
 
     def __extract_values(self, currency, start_period, end_period):
         df = pd.read_csv('{}inflation/{}.csv'.format(rostsber_url, currency), sep='\t', parse_dates=['date'])
@@ -33,8 +33,8 @@ class InflationSource(FinancialSymbolsSource):
                                  values=lambda start_period, end_period:
                                      self.__extract_values(name, start_period, end_period),
                                  short_name=row['short_name'],
-                                 start_period=pd.Period(row['date_start'], freq='M'),
-                                 end_period=pd.Period(row['date_end'], freq='M'),
+                                 start_period=row['date_start'],
+                                 end_period=row['date_end'],
                                  currency=Currency[name],
                                  security_type=SecurityType.INFLATION,
                                  period=Period.MONTH,

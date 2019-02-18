@@ -95,7 +95,9 @@ class FinancialSymbol:
 
             if 'period' not in vals.columns:
                 vals['period'] = vals['date'].dt.to_period('M')
-            if self.end_period < dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1):
+
+            month_ago = pd.Period(dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1), freq='D')
+            if self.end_period < month_ago:
                 vals = vals[vals['period'] < pd.Period(self.end_period, freq='M')]
             indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
             indicator__lastdate_indices = vals['period'] != vals['period'].shift(1)

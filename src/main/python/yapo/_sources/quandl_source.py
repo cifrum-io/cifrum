@@ -17,9 +17,10 @@ class QuandlSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='ny')
         self.url_base = rostsber_url + 'quandl/'
-        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
-        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
-        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
+                                 parse_dates=['date_start', 'date_end'])
+        self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
+        self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
 
     @staticmethod
     def __extract_values(name, start_period, end_period):
@@ -34,13 +35,14 @@ class QuandlSource(FinancialSymbolsSource):
 
     def fetch_financial_symbol(self, name: str):
         if name in self.index.index:
+            row = self.index.loc[name]
             symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                      values=lambda start_period, end_period:
                                          self.__extract_values(name, start_period, end_period),
-                                     exchange=self.index.loc[name, 'exchange'],
-                                     short_name=self.index.loc[name, 'short_name'],
-                                     start_period=self.index.loc[name, 'date_start'],
-                                     end_period=self.index.loc[name, 'date_end'],
+                                     exchange=row['exchange'],
+                                     short_name=row['short_name'],
+                                     start_period=row['date_start'],
+                                     end_period=row['date_end'],
                                      currency=Currency.USD,
                                      security_type=SecurityType.STOCK_ETF,
                                      period=Period.DAY,

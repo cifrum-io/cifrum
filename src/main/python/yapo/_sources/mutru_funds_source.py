@@ -15,9 +15,10 @@ class MutualFundsRuSource(FinancialSymbolsSource):
         super().__init__(namespace='mut_ru')
         self.url_base = rostsber_url + 'mut_ru/'
 
-        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
-        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
-        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
+        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
+                                 parse_dates=['date_start', 'date_end'])
+        self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
+        self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
 
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
