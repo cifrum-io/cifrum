@@ -8,7 +8,7 @@ from .quandl_source import QuandlSource
 from .moex_indexes_source import MoexIndexesSource
 from .single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource
 from .okama_source import OkamaSource
-from .inflation_sources import InflationUsSource, InflationRuSource, InflationEuSource
+from .inflation_source import InflationSource
 from .yahoo_indexes_source import YahooIndexesSource
 
 
@@ -24,9 +24,7 @@ class SymbolSources(metaclass=ABCMeta):
 class AllSymbolSources(SymbolSources):
     cbr_currencies_source: CbrCurrenciesSource
     cbr_top_rates_source: CbrTopRatesSource
-    inflation_ru_source: InflationRuSource
-    inflation_eu_source: InflationEuSource
-    inflation_us_source: InflationUsSource
+    inflation_source: InflationSource
     moex_indexes_source: MoexIndexesSource
     micex_stocks_source: MicexStocksSource
     mut_ru_source: MutualFundsRuSource
@@ -39,9 +37,7 @@ class AllSymbolSources(SymbolSources):
         return [
             self.cbr_currencies_source,
             self.cbr_top_rates_source,
-            self.inflation_ru_source,
-            self.inflation_eu_source,
-            self.inflation_us_source,
+            self.inflation_source,
             self.micex_stocks_source,
             self.moex_indexes_source,
             self.mut_ru_source,

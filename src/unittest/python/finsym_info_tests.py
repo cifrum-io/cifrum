@@ -123,6 +123,6 @@ class FinancialSymbolInformationTest(unittest.TestCase):
         self.assertEqual(len(infos), len(ids_arr))
 
     def test__be_invariant_in_respect_to_order(self):
-        infos1 = yapo.information(names=['infl/RUB', 'infl/EUR'])
-        infos2 = yapo.information(names=['infl/EUR', 'infl/RUB'])
-        self.assertCountEqual(infos1, infos2)
+        infos1 = set(y.identifier.format() for y in yapo.information(names=['infl/RUB', 'infl/EUR']))
+        infos2 = set(y.identifier.format() for y in yapo.information(names=['infl/EUR', 'infl/RUB']))
+        self.assertEqual(infos1, infos2)
