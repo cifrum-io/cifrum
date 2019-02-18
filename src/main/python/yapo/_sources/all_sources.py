@@ -9,6 +9,7 @@ from .moex_indexes_source import MoexIndexesSource
 from .single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource
 from .okama_source import OkamaSource
 from .inflation_sources import InflationUsSource, InflationRuSource, InflationEuSource
+from .yahoo_indexes_source import YahooIndexesSource
 
 
 @singleton
@@ -31,6 +32,7 @@ class AllSymbolSources(SymbolSources):
     mut_ru_source: MutualFundsRuSource
     quandl_source: QuandlSource
     okama_source: OkamaSource
+    yahoo_indexes_source: YahooIndexesSource
 
     @property
     def sources(self):
@@ -45,4 +47,5 @@ class AllSymbolSources(SymbolSources):
             self.mut_ru_source,
             self.quandl_source,
             self.okama_source,
+            self.yahoo_indexes_source,
         ]
