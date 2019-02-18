@@ -42,8 +42,8 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 @singleton
 class MicexMcftrSource(SingleFinancialSymbolSource):
     def _load_date(self, kind):
-        index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t')
-        period_str = index[kind][0]
+        index = pd.read_csv(rostsber_url + 'index/moex/__index.csv', sep='\t', index_col='name')
+        period_str = index.loc['mcftr'][kind]
         date = dtm.datetime.strptime(period_str, '%Y-%M-%d')
         return date
 
