@@ -11,6 +11,7 @@ from .common.enums import Currency, SecurityType
 from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
 from ._portfolio.portfolio import Portfolio, PortfolioAsset
+from ._portfolio.currency import PortfolioCurrencyFactory
 from ._search import _Search
 
 
@@ -18,9 +19,12 @@ from ._search import _Search
 class Yapo:
 
     @inject
-    def __init__(self, fin_syms_registry: FinancialSymbolsRegistry):
+    def __init__(self,
+                 fin_syms_registry: FinancialSymbolsRegistry,
+                 portfolio_currency_factory: PortfolioCurrencyFactory):
         self.__search = _Search()
         self.fin_syms_registry = fin_syms_registry
+        self.portfolio_currency_factory = portfolio_currency_factory
         self.__period_lowest = '1900-1'
         self.__period_highest = lambda: str(pd.Period.now(freq='M'))
 
@@ -157,6 +161,18 @@ class Yapo:
     def search(self, query, top=10):
         return self.__search.perform(query, top)
 
+    def inflation(self, currency: str, kind: str,
+                  end_period: str,
+                  start_period: str = None, years_ago: int = None):
+        currency = Currency.__dict__[currency.upper()]
+        pc = self.portfolio_currency_factory.create(currency=currency)
+        start_period = pd.Period(start_period, freq='M') if start_period else None
+        end_period = pd.Period(end_period, freq='M')
+        inflation_ts = pc.inflation(kind=kind,
+                                    start_period=start_period, end_period=end_period,
+                                    years_ago=years_ago)
+        return inflation_ts
+
 
 with Context(AllSymbolSources):
     yapo_instance = Yapo()
@@ -165,3 +181,4 @@ portfolio = yapo_instance.portfolio
 portfolio_asset = yapo_instance.portfolio_asset
 available_names = yapo_instance.available_names
 search = yapo_instance.search
+inflation = yapo_instance.inflation

@@ -126,10 +126,12 @@ class PortfolioAsset:
                       currency=self.currency.value)
         return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
 
-    def inflation(self, kind: str):
+    def inflation(self, kind: str, years_ago: int = None):
         ror = self.rate_of_return()
+        start_period = None if years_ago else ror.start_period
         return self.currency.inflation(kind=kind,
-                                       start_period=ror.start_period, end_period=ror.end_period)
+                                       start_period=start_period, end_period=ror.end_period,
+                                       years_ago=years_ago)
 
     def __repr__(self):
         asset_repr = """\
