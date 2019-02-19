@@ -9,18 +9,19 @@ from textwrap import dedent
 import copy
 
 
-from .inflation import PortfolioInflation
-from .._sources.registries import CurrencySymbolsRegistry
+from .currency import PortfolioCurrencyFactory
 from ..common.enums import Currency, Period
 from ..common.financial_symbol import FinancialSymbol
 from ..common.time_series import TimeSeries, TimeSeriesKind
 from .._settings import _MONTHS_PER_YEAR
+from .._sources.registries import CurrencySymbolsRegistry
 
 
 @inject
-class PortfolioAsset(PortfolioInflation):
+class PortfolioAsset:
 
     currency_symbols_registry: CurrencySymbolsRegistry
+    portfolio_currency_factory: PortfolioCurrencyFactory
 
     def __init__(self, symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: Currency):
@@ -28,7 +29,7 @@ class PortfolioAsset(PortfolioInflation):
             raise ValueError('period range should be at least 2 months')
 
         self.symbol = symbol
-        self.currency = currency
+        self.currency = self.portfolio_currency_factory.create(currency=currency)
 
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
@@ -37,22 +38,17 @@ class PortfolioAsset(PortfolioInflation):
         self._period_min = max(
             pd.Period(self.symbol.start_period, freq='M'),
             self.currency.period_min,
-            self.currency.inflation().start_period,
             start_period,
         )
         self._period_max = min(
             pd.Period(self.symbol.end_period, freq='M'),
             period_now,
             self.currency.period_max,
-            self.currency.inflation().end_period,
             end_period,
         )
         self.__values = self.__transform_values_according_to_period()
 
-        self.currency = currency
-        self.__convert_currency(currency_to=currency)
-
-        super().__init__(self.currency, self._period_min, self._period_max)
+        self.__convert_currency(currency_to=self.currency.value)
 
     def __transform_values_according_to_period(self):
         vals = self.symbol.values(start_period=self._period_min, end_period=self._period_max)
@@ -117,7 +113,7 @@ class PortfolioAsset(PortfolioInflation):
         """
         p = Portfolio(assets=[self], weights=np.array([1.0]),
                       start_period=self._period_min, end_period=self._period_max,
-                      currency=self.currency)
+                      currency=self.currency.value)
         return p.risk(period=period)
 
     @contract(
@@ -127,8 +123,13 @@ class PortfolioAsset(PortfolioInflation):
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         p = Portfolio(assets=[self], weights=np.array([1.0]),
                       start_period=self._period_min, end_period=self._period_max,
-                      currency=self.currency)
+                      currency=self.currency.value)
         return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
+
+    def inflation(self, kind: str):
+        ror = self.rate_of_return()
+        return self.currency.inflation(kind=kind,
+                                       start_period=ror.start_period, end_period=ror.end_period)
 
     def __repr__(self):
         asset_repr = """\
@@ -142,7 +143,10 @@ class PortfolioAsset(PortfolioInflation):
         return dedent(asset_repr)
 
 
-class Portfolio(PortfolioInflation):
+@inject
+class Portfolio:
+    portfolio_currency_factory: PortfolioCurrencyFactory
+
     def __init__(self,
                  assets: List[PortfolioAsset],
                  weights: np.array,
@@ -152,21 +156,17 @@ class Portfolio(PortfolioInflation):
             raise ValueError('period range should be at least 2 months')
 
         self.weights = weights
-        self.currency = currency
+        self.currency = self.portfolio_currency_factory.create(currency=currency)
         self._period_min = max(
             start_period,
             self.currency.period_min,
-            self.currency.inflation().start_period,
             *[a._period_min for a in assets],
         )
         self._period_max = min(
             end_period,
             self.currency.period_max,
-            self.currency.inflation().end_period,
             *[a._period_max for a in assets]
         )
-
-        super().__init__(self.currency, self._period_min, self._period_max)
 
         self.assets = [PortfolioAsset(symbol=a.symbol,
                                       start_period=self._period_min,
@@ -204,10 +204,12 @@ class Portfolio(PortfolioInflation):
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         if years_ago is None:
-            years_total = (self._period_max - self._period_min) / _MONTHS_PER_YEAR
-            cagr = (self.rate_of_return() + 1.).prod() ** (1 / years_total) - 1.
+            ror = self.rate_of_return()
+            years_total = (ror.end_period - ror.start_period) / _MONTHS_PER_YEAR
+            cagr = (ror + 1.).prod() ** (1 / years_total) - 1.
             if real:
-                cagr = (cagr + 1.) / (self.inflation(kind='accumulated') + 1.) ** (1 / years_total) - 1.
+                inflation_accumulated = self.inflation(kind='accumulated')
+                cagr = (cagr + 1.) / (inflation_accumulated + 1.) ** (1 / years_total) - 1.
             return cagr
         elif isinstance(years_ago, list):
             return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
@@ -220,13 +222,14 @@ class Portfolio(PortfolioInflation):
             ror_series = self.rate_of_return()[-months_count:]
             cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
             if real:
-                inflation = self.inflation(kind='accumulated', years_ago=years_ago)
-                cagr = (cagr + 1.) / (inflation + 1.) ** (1 / years_ago) - 1.
+                inflation_accumulated = self.inflation(kind='accumulated',
+                                                       years_ago=years_ago)
+                cagr = (cagr + 1.) / (inflation_accumulated + 1.) ** (1 / years_ago) - 1.
             return cagr
         else:
             raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
-    def rate_of_return(self, kind='values', real=False):
+    def rate_of_return(self, kind='values', real=False) -> TimeSeries:
         if kind not in ['values', 'accumulated', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
@@ -246,6 +249,14 @@ class Portfolio(PortfolioInflation):
             ror = (ror + 1.).cumprod() - 1.
 
         return ror
+
+    def inflation(self, kind: str, years_ago: int = None):
+        ror = self.rate_of_return()
+        start_period = None if years_ago else ror.start_period
+        return self.currency.inflation(kind=kind,
+                                       start_period=start_period,
+                                       end_period=ror.end_period,
+                                       years_ago=years_ago)
 
     def __repr__(self):
         assets_repr = ', '.join(asset.symbol.identifier.__repr__() for asset in self.assets)

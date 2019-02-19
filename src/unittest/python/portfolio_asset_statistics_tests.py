@@ -41,19 +41,9 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         np.testing.assert_almost_equal(ror_ytd_real.values,
                                        [.1835, -.0486, -.4572, -.0026, .5376], decimal=self.places)
 
-    def test__handle_related_inflation(self):
-        self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
-
-        self.assertAlmostEqual(self.asset.inflation(kind='accumulated').value, .1062, places=self.places)
-        self.assertAlmostEqual(self.asset.inflation(kind='a_mean').value, 0.0014, places=self.places)
-        self.assertAlmostEqual(self.asset.inflation(kind='g_mean').value, 0.0167, places=self.places)
-
-        self.assertEqual(self.asset.inflation(kind='values').size,
-                         self.asset.rate_of_return().size)
-
     def test__compound_annual_growth_rate(self):
         cagr_default = self.asset.compound_annual_growth_rate()
-        self.assertAlmostEqual(cagr_default.value, -.0562, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, -.0570, places=self.places)
 
         cagr_long_time = self.asset.compound_annual_growth_rate(years_ago=20)
         self.assertAlmostEqual(cagr_long_time.value, cagr_default.value, places=self.places)
@@ -69,7 +59,7 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate_real(self):
         cagr_default = self.asset.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, -.0717, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, -.0727, places=self.places)
 
         cagr_long_time = self.asset.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual(cagr_default.value, cagr_long_time.value, places=self.places)
@@ -96,12 +86,16 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(self.asset.risk(period='year').value, .2860, places=self.places)
         self.assertAlmostEqual(self.asset.risk(period='month').value, .0823, places=self.places)
 
-    def test__inflation(self):
-        self.assertRaises(Exception, self.asset.inflation, kind='abracadabra')
+    def test__handle_related_inflation(self):
+        with self.assertRaisesRegexp(ValueError, 'inflation kind is not supported: abracadabra'):
+            self.asset.inflation(kind='abracadabra')
+
+        self.assertEqual(self.asset.inflation(kind='values').size,
+                         self.asset.rate_of_return().size)
 
         self.assertAlmostEqual(self.asset.inflation(kind='accumulated').value, .1062, places=self.places)
-        self.assertAlmostEqual(self.asset.inflation(kind='a_mean').value, .0014, places=self.places)
-        self.assertAlmostEqual(self.asset.inflation(kind='g_mean').value, .0167, places=self.places)
+        self.assertAlmostEqual(self.asset.inflation(kind='a_mean').value, 0.0014, places=self.places)
+        self.assertAlmostEqual(self.asset.inflation(kind='g_mean').value, 0.0167, places=self.places)
 
         infl_yoy = self.asset.inflation(kind='yoy')
         self.assertEqual(infl_yoy.start_period, pd.Period('2012-1'))

@@ -86,7 +86,8 @@ class PortfolioStatisticsTest(unittest.TestCase):
         np.testing.assert_almost_equal(ror_ytd_real.values, [.3206], decimal=self.places)
 
     def test__handle_related_inflation(self):
-        self.assertRaises(Exception, self.portfolio.inflation, kind='abracadabra')
+        with self.assertRaisesRegexp(ValueError, 'inflation kind is not supported: abracadabra'):
+            self.portfolio.inflation(kind='abracadabra')
 
         self.assertAlmostEqual(self.portfolio.inflation(kind='accumulated').value, .0365, places=self.places)
         self.assertAlmostEqual(self.portfolio.inflation(kind='a_mean').value, .0014, places=self.places)
@@ -102,7 +103,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate(self):
         cagr_default = self.portfolio.compound_annual_growth_rate()
-        self.assertAlmostEqual(cagr_default.value, .1241, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1293, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20)
         self.assertAlmostEqual((cagr_default - cagr_long_time).value, 0., places=self.places)
@@ -118,7 +119,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     def test__compound_annual_growth_rate_real(self):
         cagr_default = self.portfolio.compound_annual_growth_rate(real=True)
-        self.assertAlmostEqual(cagr_default.value, .1056, places=self.places)
+        self.assertAlmostEqual(cagr_default.value, .1101, places=self.places)
 
         cagr_long_time = self.portfolio.compound_annual_growth_rate(years_ago=20, real=True)
         self.assertAlmostEqual(cagr_default.value, cagr_long_time.value, places=self.places)
