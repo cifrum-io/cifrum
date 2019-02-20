@@ -162,12 +162,12 @@ class Yapo:
         return self.__search.perform(query, top)
 
     def inflation(self, currency: str, kind: str,
-                  end_period: str,
+                  end_period: str = None,
                   start_period: str = None, years_ago: int = None):
         currency = Currency.__dict__[currency.upper()]
         pc = self.portfolio_currency_factory.create(currency=currency)
         start_period = pd.Period(start_period, freq='M') if start_period else None
-        end_period = pd.Period(end_period, freq='M')
+        end_period = pd.Period(end_period, freq='M') if end_period else pc.period_max
         inflation_ts = pc.inflation(kind=kind,
                                     start_period=start_period, end_period=end_period,
                                     years_ago=years_ago)
