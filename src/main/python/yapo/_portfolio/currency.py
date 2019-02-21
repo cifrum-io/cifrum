@@ -67,6 +67,8 @@ class PortfolioCurrency:
 
             g_mean - geometric mean of inflation
 
+            yoy - Year on Year inflation
+
             values - raw values of inflation
         :return:
         """

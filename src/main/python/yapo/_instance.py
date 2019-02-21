@@ -166,7 +166,10 @@ class Yapo:
                   start_period: str = None, years_ago: int = None):
         currency = Currency.__dict__[currency.upper()]
         pc = self.portfolio_currency_factory.create(currency=currency)
-        start_period = pd.Period(start_period, freq='M') if start_period else None
+        if start_period:
+            start_period = pd.Period(start_period, freq='M')
+        elif years_ago is None:
+            start_period = pc.period_min
         end_period = pd.Period(end_period, freq='M') if end_period else pc.period_max
         inflation_ts = pc.inflation(kind=kind,
                                     start_period=start_period, end_period=end_period,
