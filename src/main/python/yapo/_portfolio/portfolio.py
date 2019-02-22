@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 import dateutil.relativedelta
 from serum import inject
 import numpy as np
@@ -24,12 +24,16 @@ class PortfolioAsset:
     portfolio_currency_factory: PortfolioCurrencyFactory
 
     def __init__(self, symbol: FinancialSymbol,
-                 start_period: pd.Period, end_period: pd.Period, currency: Currency):
+                 start_period: pd.Period, end_period: pd.Period, currency: Currency,
+                 portfolio: 'Portfolio' = None,
+                 weight: int = None):
         if end_period - start_period < 2:
             raise ValueError('period range should be at least 2 months')
 
         self.symbol = symbol
         self.currency = self.portfolio_currency_factory.create(currency=currency)
+        self._portfolio = portfolio
+        self._weight = weight
 
         datetime_now = dtm.datetime.now()
         if (datetime_now + dtm.timedelta(days=1)).month == datetime_now.month:
@@ -49,6 +53,14 @@ class PortfolioAsset:
         self.__values = self.__transform_values_according_to_period()
 
         self.__convert_currency(currency_to=self.currency.value)
+
+    @property
+    def portfolio(self):
+        return self._portfolio
+
+    @property
+    def weight(self):
+        return self._weight
 
     def __transform_values_according_to_period(self):
         vals = self.symbol.values(start_period=self._period_min, end_period=self._period_max)
@@ -170,13 +182,17 @@ class Portfolio:
             *[a._period_max for a in assets]
         )
 
-        self.assets = [PortfolioAsset(symbol=a.symbol,
-                                      start_period=self._period_min,
-                                      end_period=self._period_max,
-                                      currency=currency) for a in assets]
+        self._assets = [PortfolioAsset(symbol=a.symbol,
+                                       start_period=self._period_min,
+                                       end_period=self._period_max,
+                                       currency=currency,
+                                       portfolio=self,
+                                       weight=w) for a, w in zip(assets, weights)]
 
-    def assets_weighted(self):
-        return list(zip(self.assets, self.weights))
+    @property
+    def assets(self) -> Dict[str, PortfolioAsset]:
+        assets_dict = {a.symbol.identifier_str: a for a in self._assets}
+        return assets_dict
 
     def risk(self, period='year'):
         """
@@ -236,11 +252,11 @@ class Portfolio:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
-            ror_assets = np.array([a.rate_of_return(kind='ytd', real=real) for a in self.assets])
+            ror_assets = np.array([a.rate_of_return(kind='ytd', real=real) for a in self._assets])
             ror = (ror_assets * self.weights).sum()
             return ror
 
-        ror_assets = np.array([a.rate_of_return() for a in self.assets])
+        ror_assets = np.array([a.rate_of_return() for a in self._assets])
         ror = (ror_assets * self.weights).sum()
 
         if real:
@@ -261,7 +277,7 @@ class Portfolio:
                                        years_ago=years_ago)
 
     def __repr__(self):
-        assets_repr = ', '.join(asset.symbol.identifier.__repr__() for asset in self.assets)
+        assets_repr = ', '.join(asset.symbol.identifier.__repr__() for asset in self._assets)
         portfolio_repr = """\
             Portfolio(
                  assets: {},

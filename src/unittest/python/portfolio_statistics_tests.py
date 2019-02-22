@@ -40,12 +40,9 @@ class PortfolioStatisticsTest(unittest.TestCase):
     def test__normalize_weights(self):
         self.assertAlmostEqual(np.sum(self.portfolio.weights), 1., places=self.places)
 
-        portfolio_assets = {
-            k.symbol.identifier.format(): v for k, v in self.portfolio.assets_weighted()
-        }
-        self.assertAlmostEqual(portfolio_assets['mut_ru/0890-94127385'], .4444, places=self.places)
-        self.assertAlmostEqual(portfolio_assets['micex/FXRU'], .3333, places=self.places)
-        self.assertAlmostEqual(portfolio_assets['micex/FXMM'], .2222, places=self.places)
+        self.assertAlmostEqual(self.portfolio.assets['mut_ru/0890-94127385'].weight, .4444, places=self.places)
+        self.assertAlmostEqual(self.portfolio.assets['micex/FXRU'].weight, .3333, places=self.places)
+        self.assertAlmostEqual(self.portfolio.assets['micex/FXMM'].weight, .2222, places=self.places)
 
         asset_names = {'mut_ru/xxxx-xxxxxxxx': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
         portfolio_misprint = yapo.portfolio(assets=asset_names,
@@ -53,15 +50,12 @@ class PortfolioStatisticsTest(unittest.TestCase):
                                             end_period=str(self.portfolio_period_end),
                                             currency='USD')
         self.assertAlmostEqual(np.sum(portfolio_misprint.weights), 1., places=self.places)
-        portfolio_assets = {
-            k.symbol.identifier.format(): v for k, v in portfolio_misprint.assets_weighted()
-        }
-        self.assertAlmostEqual(portfolio_assets['micex/FXRU'], .4, places=self.places)
-        self.assertAlmostEqual(portfolio_assets['micex/FXMM'], .6, places=self.places)
+        self.assertAlmostEqual(portfolio_misprint.assets['micex/FXRU'].weight, .4, places=self.places)
+        self.assertAlmostEqual(portfolio_misprint.assets['micex/FXMM'].weight, .6, places=self.places)
 
     def test__rate_of_return(self):
         rate_of_return_definition = \
-            sum(asset.rate_of_return() * weight for asset, weight in self.portfolio.assets_weighted())
+            sum(asset.rate_of_return() * asset.weight for asset in self.portfolio.assets.values())
         np.testing.assert_almost_equal(self.portfolio.rate_of_return().values,
                                        rate_of_return_definition.values)
 

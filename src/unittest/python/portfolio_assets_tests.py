@@ -30,7 +30,7 @@ class PortfolioAssetsTest(unittest.TestCase):
                                                            start_period='2011-3', end_period='2015-5', currency='USD'))
 
     def test__period_should_be_sorted(self):
-        for asset in self.portfolio.assets:
+        for asset in self.portfolio.assets.values():
             period_range = asset.close().period_range()
             self.assertTrue(all(period_range[i] <= period_range[i + 1]
                                 for i in range(len(period_range) - 1)))
@@ -116,13 +116,13 @@ class PortfolioAssetsTest(unittest.TestCase):
         self.assertEqual(set(asset.close().period_range()), {end_period - 2})
 
     def test__compute_accumulated_rate_of_return(self):
-        for asset in self.portfolio.assets:
+        for asset in self.portfolio.assets.values():
             aror = asset.rate_of_return(kind='accumulated').values
             self.assertTrue(not np.all(np.isnan(aror)))
         self.assertTrue(not np.all(np.isnan(self.portfolio.rate_of_return(kind='accumulated').values)))
 
     def test__close_and_its_change_should_preserve_ratio(self):
-        for asset in self.portfolio.assets:
+        for asset in self.portfolio.assets.values():
             rate_of_return_given = asset.rate_of_return().values
             rate_of_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
             np.testing.assert_almost_equal(rate_of_return_given, rate_of_return_expected)
