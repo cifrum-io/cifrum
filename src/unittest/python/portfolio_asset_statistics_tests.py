@@ -57,6 +57,19 @@ class PortfolioAssetStatisticsTest(unittest.TestCase):
         self.assertAlmostEqual(cagr_long_time1.value, cagr_long_time.value, places=self.places)
         self.assertAlmostEqual(cagr_one_year1.value, cagr_one_year.value, places=self.places)
 
+    def test__cagr_should_be_full_when_it_has_period_equal_to_ror(self):
+        start_period = pd.Period('2011-01', freq='M')
+        years_amount = 5
+        end_period = start_period + years_amount * 12
+        asset = yapo.portfolio_asset(name=self.asset_name,
+                                     start_period=str(start_period),
+                                     end_period=str(end_period), currency='usd')
+        cagr1 = asset.compound_annual_growth_rate()
+        self.assertAlmostEqual(cagr1.value, -.1448, places=self.places)
+
+        cagr2 = asset.compound_annual_growth_rate(years_ago=years_amount)
+        self.assertAlmostEqual(cagr2.value, cagr1.value, places=self.places)
+
     def test__compound_annual_growth_rate_real(self):
         cagr_default = self.asset.compound_annual_growth_rate(real=True)
         self.assertAlmostEqual(cagr_default.value, -.0727, places=self.places)

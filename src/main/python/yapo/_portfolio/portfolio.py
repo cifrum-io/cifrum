@@ -233,8 +233,9 @@ class Portfolio:
             return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
                              for y in years_ago])
         elif isinstance(years_ago, int):
+            ror = self.rate_of_return()
             months_count = years_ago * _MONTHS_PER_YEAR
-            if self._period_min > self._period_max - months_count:
+            if ror.end_period - ror.start_period < months_count:
                 return self.compound_annual_growth_rate(years_ago=None, real=real)
 
             ror_series = self.rate_of_return()[-months_count:]
