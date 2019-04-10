@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from serum import singleton
 import datetime as dtm
 import pandas as pd
@@ -56,6 +58,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
             Currency.EUR.name: pd.Period('1999', freq='D'),
         }
 
+    @lru_cache(maxsize=512)
     def __currency_values(self, name, start_period, end_period):
         start_period = max(start_period,
                            pd.Period(self.__currency_min_date[name], freq='M'))

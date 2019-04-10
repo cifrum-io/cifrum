@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from serum import singleton
 import pandas as pd
 
@@ -19,6 +21,7 @@ class MicexStocksSource(FinancialSymbolsSource):
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
 
+    @lru_cache(maxsize=512)
     def __extract_values(self, secid, start_period, end_period):
         df = pd.read_csv(self.url_base + secid + '.csv', sep='\t')
         df['date'] = pd.to_datetime(df['date'])

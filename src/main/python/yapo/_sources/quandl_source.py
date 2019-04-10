@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from serum import singleton
 import pandas as pd
 import quandl
@@ -22,8 +24,8 @@ class QuandlSource(FinancialSymbolsSource):
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
 
-    @staticmethod
-    def __extract_values(name, start_period, end_period):
+    @lru_cache(maxsize=512)
+    def __extract_values(self, name, start_period, end_period):
         df = quandl.get('EOD/{}.11'.format(name),
                         start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
                         end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),

@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from serum import singleton
 import pandas as pd
 
@@ -18,6 +20,7 @@ class InflationSource(FinancialSymbolsSource):
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='M')
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='M')
 
+    @lru_cache(maxsize=512)
     def __extract_values(self, currency, start_period, end_period):
         df = pd.read_csv('{}inflation/{}.csv'.format(rostsber_url, currency), sep='\t', parse_dates=['date'])
         df['period'] = df['date'].dt.to_period('M')

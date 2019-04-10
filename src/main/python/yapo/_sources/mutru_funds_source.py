@@ -1,3 +1,5 @@
+from functools import lru_cache
+
 from serum import singleton
 import pandas as pd
 
@@ -20,6 +22,7 @@ class MutualFundsRuSource(FinancialSymbolsSource):
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
 
+    @lru_cache(maxsize=512)
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
         df = pd.read_csv(url, sep='\t', parse_dates=['date'])
