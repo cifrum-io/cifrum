@@ -20,22 +20,22 @@ class PortfolioCurrency:
             self.__inflation_source.fetch_financial_symbol(currency.name)
         self._currency_symbol = \
             self.__cbr_currencies_source.fetch_financial_symbol(currency.name)
-
-    @property
-    def period_min(self):
-        period = max(
-            self._inflation_symbol.start_period.asfreq(freq='M'),
+        self._period_min = max(
+            self._inflation_symbol.start_period.asfreq(freq='M') - 1,
             self._currency_symbol.start_period.asfreq(freq='M'),
         )
-        return period
-
-    @property
-    def period_max(self):
-        period = min(
+        self._period_max = min(
             self._inflation_symbol.end_period.asfreq(freq='M'),
             self._currency_symbol.end_period.asfreq(freq='M'),
         )
-        return period
+
+    @property
+    def period_min(self):
+        return self._period_min
+
+    @property
+    def period_max(self):
+        return self._period_max
 
     @property
     def value(self):

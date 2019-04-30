@@ -124,7 +124,8 @@ class PortfolioAsset:
             year - returns risk approximated to yearly value
         """
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min, end_period=self._period_max,
+                      start_period=self._period_min + 1,
+                      end_period=self._period_max,
                       currency=self.currency.value)
         return p.risk(period=period)
 
@@ -134,7 +135,8 @@ class PortfolioAsset:
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min, end_period=self._period_max,
+                      start_period=self._period_min + 1,
+                      end_period=self._period_max,
                       currency=self.currency.value)
         return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
 
@@ -166,24 +168,28 @@ class Portfolio:
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
-        if end_period - start_period < 2:
-            raise ValueError('period range should be at least 2 months')
+        """
+        :param start_period: start period of first order diff
+        :param end_period: end period of first order diff
+        """
+        if end_period - start_period < 1:
+            raise ValueError('period range should be at least 1 months')
 
         self.weights = weights
         self.currency = self.portfolio_currency_factory.create(currency=currency)
         self._period_min = max(
+            self.currency.period_min + 1,
+            *[a._period_min + 1 for a in assets],
             start_period,
-            self.currency.period_min,
-            *[a._period_min for a in assets],
         )
         self._period_max = min(
-            end_period,
             self.currency.period_max,
-            *[a._period_max for a in assets]
+            *[a._period_max for a in assets],
+            end_period,
         )
 
         self._assets = [PortfolioAsset(symbol=a.symbol,
-                                       start_period=self._period_min,
+                                       start_period=self._period_min - 1,
                                        end_period=self._period_max,
                                        currency=currency,
                                        portfolio=self,
@@ -212,7 +218,8 @@ class Portfolio:
 
             mean = (1. + self.rate_of_return()).mean()
             risk_monthly = self.risk(period='month')
-            return ((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24).sqrt()
+            risk_yearly = ((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24).sqrt()
+            return risk_yearly
         else:
             raise Exception('unexpected value of `period` {}'.format(period))
 
