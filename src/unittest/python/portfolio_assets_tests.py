@@ -140,7 +140,7 @@ class PortfolioAssetsTest(unittest.TestCase):
         # Portfolio
         self.assertRaises(ValueError,
                           lambda: yapo.portfolio(assets={'micex/FXRU': 1.},
-                                                 start_period='2015-3', end_period='2015-4',
+                                                 start_period='2015-4', end_period='2015-4',
                                                  currency='rub'))
 
         try:

@@ -114,7 +114,8 @@ class Yapo:
 
         names = list(assets.keys())
         assets_resolved = self.portfolio_asset(names=names,
-                                               start_period=start_period, end_period=end_period,
+                                               start_period=str(pd.Period(start_period, freq='M') - 1),
+                                               end_period=end_period,
                                                currency=currency)
         assets = {a: assets[a.symbol.identifier.format()] for a in assets_resolved}
         weights_sum = np.abs(np.fromiter(assets.values(), dtype=float, count=len(assets)).sum())

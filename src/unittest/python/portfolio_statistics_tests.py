@@ -11,7 +11,7 @@ class PortfolioStatisticsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.portfolio_period_start = pd.Period('2015-3', freq='M')
+        cls.portfolio_period_start = pd.Period('2015-4', freq='M')
         cls.portfolio_period_end = pd.Period('2017-5', freq='M')
         cls.asset_names = {'mut_ru/0890-94127385': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
         cls.portfolio = yapo.portfolio(assets=cls.asset_names,
