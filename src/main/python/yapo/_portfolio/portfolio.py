@@ -214,7 +214,7 @@ class Portfolio:
             return ror.std()
         elif period == 'year':
             if self._period_max - self._period_min < 12:
-                raise Exception('year risk is request for less than 12 months')
+                raise Exception('year risk is requested for less than 12 months')
 
             mean = (1. + self.rate_of_return()).mean()
             risk_monthly = self.risk(period='month')
@@ -260,7 +260,7 @@ class Portfolio:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
-            ror_assets = np.array([a.rate_of_return(kind='ytd', real=real) for a in self._assets])
+            ror_assets = np.array([a.rate_of_return(kind=kind, real=real) for a in self._assets])
             ror = (ror_assets * self.weights).sum()
             return ror
 

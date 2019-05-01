@@ -302,6 +302,9 @@ class TimeSeries:
 
         drop_first_count = None if self.start_period.month == 1 else _MONTHS_PER_YEAR - self.start_period.month + 1
         drop_last_count = None if self.end_period.month == _MONTHS_PER_YEAR else -self.end_period.month
+        if drop_first_count and drop_last_count and drop_first_count + (-drop_last_count) == self.size:
+            msg = "YTD for the current dates range ({} - {}) is empty".format(self.start_period, self.end_period)
+            raise ValueError(msg)
         values_full_yearly = self[drop_first_count:drop_last_count]
         values_full_yearly_splits = \
             np.split(values_full_yearly.values,
