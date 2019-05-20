@@ -107,7 +107,7 @@ class PortfolioCurrency:
             inflation_amean = inflation_ts.mean()
             return inflation_amean
         elif kind == 'g_mean':
-            years_total = (end_period - start_period + 1) / _MONTHS_PER_YEAR
+            years_total = ((end_period - start_period).n + 1) / _MONTHS_PER_YEAR
             inflation_gmean = (__accumulated() + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':

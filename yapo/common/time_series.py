@@ -113,7 +113,7 @@ class TimeSeries:
         if self.kind == TimeSeriesKind.DIFF or \
                 self.kind == TimeSeriesKind.VALUES or \
                 self.kind == TimeSeriesKind.CUMULATIVE:
-            if self.size != end_period - start_period + 1:
+            if self.size != (end_period - start_period).n + 1:
                 raise ValueError('values and period range have different lengths')
 
         if self.kind == TimeSeriesKind.YTD:

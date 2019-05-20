@@ -27,7 +27,7 @@ class PortfolioAsset:
                  start_period: pd.Period, end_period: pd.Period, currency: Currency,
                  portfolio: 'Portfolio' = None,
                  weight: int = None):
-        if end_period - start_period < 2:
+        if (end_period - start_period).n < 2:
             raise ValueError('period range should be at least 2 months')
 
         self.symbol = symbol
@@ -172,7 +172,7 @@ class Portfolio:
         :param start_period: start period of first order diff
         :param end_period: end period of first order diff
         """
-        if end_period - start_period < 1:
+        if (end_period - start_period).n < 1:
             raise ValueError('period range should be at least 1 months')
 
         self.weights = weights
@@ -213,7 +213,7 @@ class Portfolio:
             ror = self.rate_of_return()
             return ror.std()
         elif period == 'year':
-            if self._period_max - self._period_min < 12:
+            if (self._period_max - self._period_min).n < 12:
                 raise Exception('year risk is requested for less than 12 months')
 
             mean = (1. + self.rate_of_return()).mean()
@@ -230,7 +230,7 @@ class Portfolio:
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         if years_ago is None:
             ror = self.rate_of_return()
-            years_total = (ror.end_period - ror.start_period) / _MONTHS_PER_YEAR
+            years_total = (ror.end_period - ror.start_period).n / _MONTHS_PER_YEAR
             cagr = (ror + 1.).prod() ** (1 / years_total) - 1.
             if real:
                 inflation_accumulated = self.inflation(kind='accumulated')
@@ -242,7 +242,7 @@ class Portfolio:
         elif isinstance(years_ago, int):
             ror = self.rate_of_return()
             months_count = years_ago * _MONTHS_PER_YEAR
-            if ror.end_period - ror.start_period < months_count:
+            if (ror.end_period - ror.start_period).n < months_count:
                 return self.compound_annual_growth_rate(years_ago=None, real=real)
 
             ror_series = self.rate_of_return()[-months_count:]

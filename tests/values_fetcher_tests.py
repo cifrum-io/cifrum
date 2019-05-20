@@ -25,8 +25,8 @@ class ValuesFetcherTest(unittest.TestCase):
             end_period = min(self.period_max, end_period)
 
             values = [
-                start_period - self.period_min + v + 1
-                for v in range(end_period - start_period + 1)
+                (start_period - self.period_min).n + v + 1
+                for v in range((end_period - start_period).n + 1)
             ]
             df = pd.DataFrame.from_dict({
                 'close': values,
@@ -55,7 +55,7 @@ class ValuesFetcherTest(unittest.TestCase):
         pe = pd.Period('2015-1', freq='M')
         values = values_fetcher._fetch(start_period=ps, end_period=pe)
 
-        self.assertEqual(len(values), pe - ps + 1)
+        self.assertEqual(len(values), (pe - ps).n + 1)
         self.assertEqual(len(values_fun.requests), 1)
         self.assertEqual(min(values.date.dt.to_period(freq='M')), ps)
         self.assertEqual(max(values.date.dt.to_period(freq='M')), pe)
@@ -74,7 +74,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 1)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps1, pe1))
@@ -91,7 +91,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 2)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps2, pe1))
@@ -108,7 +108,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 2)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps2, pe1))
@@ -125,7 +125,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 2)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps1, pe2))
@@ -142,7 +142,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 2)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps1, pe2))
@@ -159,7 +159,7 @@ class ValuesFetcherTest(unittest.TestCase):
         values2 = values_fetcher._fetch(start_period=ps2, end_period=pe2)
 
         self.assertEqual(len(values_fun.requests), 2)
-        self.assertEqual(len(values2), pe2 - ps2 + 1)
+        self.assertEqual(len(values2), (pe2 - ps2).n + 1)
         np.testing.assert_equal(values2.close.values,
                                 values_fun(start_period=ps2, end_period=pe2).close.values)
         self.assertEqual(values_fetcher._period_range, (ps2, pe2))

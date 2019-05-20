@@ -29,7 +29,7 @@ class OkamaSource(FinancialSymbolsSource):
                     end_period=end_period,
                 )
                 index_vals = compute_top10(vals)
-                drop_first = max(0, start_period - index_vals.start_period)
+                drop_first = max(0, (start_period - index_vals.start_period).n)
                 index_vals = index_vals[drop_first:]
                 df = pd.DataFrame({'date': pd.date_range(index_vals.start_period.to_timestamp(),
                                                          (index_vals.end_period + 1).to_timestamp(),
