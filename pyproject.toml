@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "yapo"
+version = "0.1.0"
+description = ""
+authors = [
+    "Alexander Myltsev <https://github.com/alexander-myltsev/>",
+    "Sergey Kikevich <https://github.com/chilango74/>",
+]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+numpy = "^1.16"
+PyContracts = "^1.8"
+quandl = "^3.4"
+serum = "^5.1"
+pandas = "^0.24"
+
+[tool.poetry.dev-dependencies]
+nose = "^1.3"
+freezegun = "^0.3.11"
+
+[build-system]
+requires = ["poetry >= 0.12, <1"]
+python = ">=3.6, <4"
+build-backend = "poetry.masonry.api"
