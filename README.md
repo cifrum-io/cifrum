@@ -1,11 +1,6 @@
-Docker
-------
+[![Build Status](https://travis-ci.org/okama-io/yapo.svg?branch=master)](https://travis-ci.org/okama-io/yapo)
 
-Steps required to run it locally in Docker:
+YAPO
+====
 
-```bash
-cp .env-sample .env
-# Replace QUANDL_KEY with actual value in .env
-docker build --rm -t rostsber/yapo:latest .
-docker run --env-file=.env -it -p 8888:8888 -v "$(pwd)":/opt/yapo/ --name jupyter-yapo rostsber/yapo:latest
-```
+TODO
