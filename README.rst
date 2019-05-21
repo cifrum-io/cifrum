@@ -1,5 +1,10 @@
-.. image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
-    :target: https://travis-ci.org/okama-io/yapo
+|Travis|_ |Gitter|_
+
+.. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
+.. _Travis: https://travis-ci.org/okama-io/yapo
+
+.. |Gitter| image:: https://badges.gitter.im/okama-io/community.svg
+.. _Gitter: https://gitter.im/okama-io/community
 
 YAPO
 ====
