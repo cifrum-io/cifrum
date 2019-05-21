@@ -80,7 +80,7 @@ Discussion, Development, and Getting Help
   correctness, documentation, performance, and feature requests.
 - `The community forum <okama-discourse_>`_ can also be used for general
   questions and discussions.
-- Finally, the `Gitter channel <todo_>`_ is available for the development
+- Finally, the `Gitter channel <Gitter_>`_ is available for the development
   related questions.
 
 Contributing
@@ -120,4 +120,3 @@ License
 .. _yapo-github: https://github.com/okama-io/yapo
 .. _yapo-github-issues: https://github.com/okama-io/yapo/issues
 .. _license: https://github.com/okama-io/yapo/blob/master/LICENSE
-
