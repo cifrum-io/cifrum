@@ -6,6 +6,8 @@
 .. |Gitter| image:: https://badges.gitter.im/okama-io/community.svg
 .. _Gitter: https://gitter.im/okama-io/community
 
+.. contents:: Contents of this Document
+
 YAPO
 ====
 
