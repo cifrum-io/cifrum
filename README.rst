@@ -6,10 +6,13 @@
 .. |Gitter| image:: https://badges.gitter.im/okama-io/community.svg
 .. _Gitter: https://gitter.im/okama-io/community
 
+**YAPO** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
+manipulation with financial & economic data
+
 .. contents:: Contents of this Document
 
-YAPO
-====
+Introduction
+============
 
 ``yapo`` is a Python library developed to solve quantitative finance and
 investments tasks. Additionally, it has the broader goal to become the most
@@ -17,7 +20,7 @@ useful and flexible open sourced tool for financial data analysis available in
 popular programming languages.
 
 Applications
-------------
+============
 
 Useful applications of ``yapo`` in the community developed are as follows:
 
@@ -25,7 +28,7 @@ Useful applications of ``yapo`` in the community developed are as follows:
 * `tell us more <okama-discourse_>`_ if you know any
 
 The Ecosystem
--------------
+=============
 
 The ecosystem around the library consists of:
 
@@ -36,7 +39,7 @@ The ecosystem around the library consists of:
 * `The community <okama-discourse_>`_
 
 Main Features
--------------
+=============
 
 * ``[x]`` ``TimeSeries`` to verify correctness of financial data manipulations
 * ``[x]`` Error-free manipulations with financial data checked by tests and active community
@@ -58,23 +61,23 @@ Main Features
 * ``[x]`` History of deposit rates for top 10 banks of Russia
 
 Installation
-------------
+============
 
 TODO
 
 Jupyter Notebooks
------------------
+=================
 
 TODO
 
 Dependencies
-------------
+============
 
 The library dependencies are listed at
 `pyproject.toml <https://github.com/okama-io/yapo/blob/readme/pyproject.toml#L10>`_.
 
 Discussion, Development, and Getting Help
------------------------------------------
+=========================================
 
 - The development discussion takes place at `the GitHub repo
   <yapo-github-issues_>`_. We encourage you to report issues using `the Github
@@ -86,7 +89,7 @@ Discussion, Development, and Getting Help
   related questions.
 
 Contributing
-------------
+============
 
 All contributions, bug reports, bug fixes, documentation improvements,
 enhancements, frontend implementation, and ideas are welcomed and the subject
@@ -112,10 +115,11 @@ Before starting work on your contribution, please read the contributing guide.
 Feel free to ask questions at `the community <okama-discourse_>`_.
 
 License
--------
+=======
 
 `MIT <license_>`_
 
+.. |--| unicode:: U+2013
 .. _okama.io: https://okama.io/
 .. _okama-glossary: https://okama.io/#/glossary
 .. _okama-discourse: http://community.okama.io
