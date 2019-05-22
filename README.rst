@@ -1,10 +1,13 @@
-|Travis|_ |Gitter|_
+|Travis|_ |Gitter|_ |Pepy|_
 
 .. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
 .. _Travis: https://travis-ci.org/okama-io/yapo
 
 .. |Gitter| image:: https://badges.gitter.im/okama-io/community.svg
 .. _Gitter: https://gitter.im/okama-io/community
+
+.. |Pepy| image:: https://pepy.tech/badge/yapo
+.. _Pepy: https://pepy.tech/badge/yapo
 
 **YAPO** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
