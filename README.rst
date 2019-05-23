@@ -53,12 +53,17 @@ Main Features
 * ``[ ]`` Bonds key properties calculations
 * ``[x]`` Access to financial data from different stock markets: EOD close, adjusted close, currency rates, inflation
 * ``[x]`` Financial and Economic data with API with GraphQL data access
+
+Financial and Economic data freely available
+=============
 * ``[x]`` EOD adjusted close for NYSE and NASDAQ stocks and ETF
-* ``[ ]`` EOD close for Moscow Exchange stocks and ETF
-* ``[ ]`` EOD close for Russian open-end funds
+* ``[x]`` EOD close for Moscow Exchange stocks and ETF
+* ``[x]`` EOD close for Russian open-end funds
+* ``[ ]`` EOD close for BSE and NSE stocks and ETF (India)
 * ``[x]`` EOD for main stock and bond Indexes
 * ``[ ]`` Bonds data for Moscow Exchange-traded securities: EOD close, coupons, maturity
-* ``[x]`` Exchange Rates for USD, EUR, RUB,
+* ``[x]`` Exchange Rates for USD, EUR, RUB
+* ``[ ]`` Exchange Rates for Bitcoin [BTC], Ethereum [ETH], Binance Coin [BNB] and other cryptocurrencies
 * ``[x]`` Inflation for US, EU, and Russia
 * ``[x]`` Key interest rates for US, EU, and Russia
 * ``[x]`` History of deposit rates for top 10 banks of Russia
