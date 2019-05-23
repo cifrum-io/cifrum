@@ -47,7 +47,7 @@ Main Features
 * ``[x]`` ``TimeSeries`` to verify correctness of financial data manipulations
 * ``[x]`` Error-free manipulations with financial data checked by tests and active community
 * ``[x]`` Asset analysis tools for asset correlations and main performance indicators
-* ``[x]`` Portfolio analysis tools for asset class allocation and portfolio backtesting
+* ``[ ]`` Portfolio analysis tools for asset class allocation and portfolio backtesting
 * ``[ ]`` Portfolio optimization and efficient frontier visualization
 * ``[ ]`` Monte Carlo Simulation for financial assets and investment portfolios
 * ``[ ]`` Bonds key properties calculations
@@ -117,8 +117,6 @@ to enable distributed work on the project.
 Contributions should be submitted as a pull request. A member of the
 development team will review the pull request and guide you through the
 contributing process.
-
-Before starting work on your contribution, please read the contributing guide.
 
 Feel free to ask questions at `the community <okama-discourse_>`_.
 
