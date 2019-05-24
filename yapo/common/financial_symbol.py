@@ -10,8 +10,8 @@ class ValuesFetcher:
 
     _PeriodRange = namedtuple('PeriodRange', 'start, end')
 
-    def __init__(self, values_fun, period_min, period_max):
-        self._values_fetcher = values_fun
+    def __init__(self, values_func, period_min, period_max):
+        self._values_func = values_func
         self._period_min = period_min
         self._period_max = period_max
         self._current_period_start = None
@@ -30,17 +30,17 @@ class ValuesFetcher:
                 (start_period < self._current_period_start and end_period > self._current_period_end):
             self._current_period_start = start_period
             self._current_period_end = end_period
-            self._values = self._values_fetcher(start_period, end_period)
+            self._values = self._values_func(start_period, end_period)
 
         elif start_period >= self._current_period_start and end_period <= self._current_period_end:
             pass
 
         elif start_period < self._current_period_start:
-            self._values = self._values_fetcher(start_period, self._current_period_start - 1).append(self._values)
+            self._values = self._values_func(start_period, self._current_period_start - 1).append(self._values)
             self._current_period_start = start_period
 
         elif end_period > self._current_period_end:
-            self._values = self._values.append(self._values_fetcher(self._current_period_end + 1, end_period))
+            self._values = self._values.append(self._values_func(self._current_period_end + 1, end_period))
             self._current_period_end = end_period
 
         else:
@@ -67,7 +67,7 @@ class FinancialSymbol:
                  adjusted_close=None):
         self.identifier = identifier
         self.__values_fetcher = ValuesFetcher(
-            values_fun=values,
+            values_func=values,
             period_min=pd.Period(start_period, freq='M'),
             period_max=pd.Period(end_period, freq='M'))
         self.isin = isin
