@@ -6,6 +6,7 @@ authors = [
     "Alexander Myltsev <https://github.com/alexander-myltsev/>",
     "Sergey Kikevich <https://github.com/chilango74/>",
 ]
+licence = 'MIT'
 
 [tool.poetry.dependencies]
 python = "^3.6"
