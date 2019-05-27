@@ -8,6 +8,19 @@ from yapo._sources.all_sources import AllSymbolSources
 from yapo.common.enums import SecurityType
 
 
+def test__handle_the_incorrect_query_string():
+    assert_that(calling(l.search).with_args(query=None), raises(ValueError))
+    assert_that(calling(l.search).with_args(query=42), raises(ValueError))
+    assert_that(calling(l.search).with_args(query=.42), raises(ValueError))
+    assert_that(calling(l.search).with_args(query=[]), raises(ValueError))
+    assert_that(l.search(query=''), empty())
+
+    assert_that(calling(l.search).with_args(query='microsoft', top=[]), raises(ValueError))
+    assert_that(calling(l.search).with_args(query='microsoft', top=.2), raises(ValueError))
+    assert_that(calling(l.search).with_args(query='microsoft', top='a'), raises(ValueError))
+    assert_that(l.search(query='microsoft', top=-10), empty())
+
+
 @pytest.mark.parametrize('query, expect_item', [('spy', 'ny/SPY'),
                                                 ('sber', 'micex/SBER'),
                                                 ('0890-94127385', 'mut_ru/0890-94127385')])

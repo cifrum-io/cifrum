@@ -159,7 +159,7 @@ class Yapo:
         else:
             return self.fin_syms_registry.namespaces()
 
-    def search(self, query, top=10):
+    def search(self, query: str, top=10):
         return self.__search.perform(query, top)
 
     def inflation(self, currency: str, kind: str,

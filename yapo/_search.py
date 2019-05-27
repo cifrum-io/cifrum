@@ -80,6 +80,15 @@ class _Search:
         if fs:
             return [fs]
         else:
+            if not isinstance(query, str):
+                raise ValueError('`query` should be string')
+            if not isinstance(top, int):
+                raise ValueError('`top` should be int')
+
+            top = max(0, top)
+            if not query or top == 0:
+                return []
+
             query = re.sub(r'\s+', ' ', query.strip().lower())
             if len(query) == 0:
                 return []
