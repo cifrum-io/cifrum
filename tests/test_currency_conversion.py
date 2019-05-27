@@ -35,6 +35,20 @@ def test__currency_should_not_be_converted_to_itself_inside_datatable(currency: 
     np.testing.assert_equal(vs.values, 1.)
 
 
+@pytest.mark.parametrize('currency, expected_start_period',
+                         [(Currency.RUB, pd.Period('1999-1', freq='M')),
+                          (Currency.USD, pd.Period('1913-1', freq='M')),
+                          (Currency.EUR, pd.Period('1996-1', freq='M'))])
+@inject
+def test__identity_currency_conversion_should_be_of_max_period(csr: CurrencySymbolsRegistry,
+                                                               currency: Currency,
+                                                               expected_start_period: pd.Period):
+    ts = csr.convert(currency_from=currency, currency_to=currency,
+                     start_period=pd.Period('1900-1', freq='M'),
+                     end_period=pd.Period.now(freq='M'))
+    assert ts['period'].min() == expected_start_period
+
+
 def test__currency_should_be_converted_other_currency():
     vs = l.portfolio_asset(name='cbr/EUR',
                            start_period='2015-1', end_period='2017-1',
