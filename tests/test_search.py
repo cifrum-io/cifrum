@@ -52,6 +52,7 @@ def test__search_custom_query():
         assert_that('{} {}'.format(r.short_name, r.long_name), matches_regexp(r'(?i).*microsoft.*'))
 
 
+@pytest.mark.slow
 def test__search_exact_finsym():
     qry = 'micex/SBER'
 
