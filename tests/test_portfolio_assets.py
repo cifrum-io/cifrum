@@ -75,6 +75,15 @@ def test__default_periods():
     assert pd.Period.now(freq='M') >= portfolio.rate_of_return().end_period
 
 
+def test__usd_assets_that_is_older_than_rub():
+    p_usd = l.portfolio(assets={'ny/T': 1}, currency='usd')
+    assert p_usd.rate_of_return().start_period == pd.Period('1984-08', freq='M')
+
+    p_rub = l.portfolio(assets={'ny/T': 1}, currency='rub')
+    assert p_rub.rate_of_return().start_period == pd.Period('1992-08', freq='M')
+    assert p_usd.rate_of_return().end_period == p_rub.rate_of_return().end_period
+
+
 @pytest.mark.slow
 @freeze_time('2018-10-31 1:0:0')
 def test__data_for_last_month_period_should_be_dropped(yapo_instance_factory):

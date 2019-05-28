@@ -50,9 +50,12 @@ class PortfolioAsset:
             self.currency.period_max,
             end_period,
         )
-        self.__values = self.__transform_values_according_to_period()
 
-        self.__convert_currency(currency_to=self.currency.value)
+        currency_conversion_rate = self.__currency_conversion_rate(currency_to=self.currency.value)
+        self._period_min = max(self._period_min, currency_conversion_rate.start_period)
+        self._period_max = min(self._period_max, currency_conversion_rate.end_period)
+
+        self.__values = self.__transform_values_according_to_period()
 
     @property
     def portfolio(self):
@@ -76,20 +79,22 @@ class PortfolioAsset:
             ts = TimeSeries(values=vals['close'].values,
                             start_period=self._period_min, end_period=self._period_max,
                             kind=TimeSeriesKind.VALUES)
+        currency_conversion_rate = self.__currency_conversion_rate(currency_to=self.currency.value)
+        ts = ts * currency_conversion_rate
         return ts
 
-    def __convert_currency(self, currency_to: Currency):
+    def __currency_conversion_rate(self, currency_to: Currency):
         currency_from = self.symbol.currency
-        if currency_from == currency_to:
-            return
-
         currency_rate = self.currency_symbols_registry \
-                            .convert(currency_from, currency_to, self._period_min, self._period_max)
+                            .convert(currency_from=currency_from,
+                                     currency_to=currency_to,
+                                     start_period=self._period_min,
+                                     end_period=self._period_max)
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
                                    kind=TimeSeriesKind.CURRENCY_RATE)
-        self.__values = self.__values * currency_rate
+        return currency_rate
 
     def close(self):
         return copy.deepcopy(self.__values)
