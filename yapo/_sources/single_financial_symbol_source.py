@@ -52,16 +52,16 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
             Currency.USD: 'Доллар США',
             Currency.EUR: 'Евро',
         }
-        self.__currency_min_date = {
+        self._currency_min_date = {
             Currency.RUB.name: pd.Period('1990', freq='D'),
-            Currency.USD.name: pd.Period('1900', freq='D'),
-            Currency.EUR.name: pd.Period('1999', freq='D'),
+            Currency.USD.name: pd.Period('1913', freq='D'),
+            Currency.EUR.name: pd.Period('1996', freq='D'),
         }
 
     @lru_cache(maxsize=512)
     def __currency_values(self, name, start_period, end_period):
         start_period = max(start_period,
-                           pd.Period(self.__currency_min_date[name], freq='M'))
+                           pd.Period(self._currency_min_date[name], freq='M'))
         end_period = min(end_period, pd.Period.now(freq='M'))
         date_range = pd.date_range(start=start_period.to_timestamp(),
                                    end=(end_period + 1).to_timestamp(),
@@ -81,7 +81,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
                 identifier=FinancialSymbolId(namespace='cbr', name=name),
                 values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
                 short_name=self.__short_names[currency],
-                start_period=self.__currency_min_date[currency.name],
+                start_period=self._currency_min_date[currency.name],
                 end_period=pd.Period(dtm.datetime.now(), freq='D'),
                 currency=currency,
                 security_type=SecurityType.CURRENCY,

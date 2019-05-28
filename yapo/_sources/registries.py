@@ -4,6 +4,7 @@ from serum import singleton, inject
 import pandas as pd
 from itertools import groupby
 
+from .._sources.single_financial_symbol_source import CbrCurrenciesSource
 from .all_sources import SymbolSources
 from .._settings import rostsber_url
 from ..common.financial_symbol import FinancialSymbol
@@ -54,7 +55,10 @@ class FinancialSymbolsRegistry:
 
 
 @singleton
+@inject
 class CurrencySymbolsRegistry:
+    cbr_currencies_source: CbrCurrenciesSource
+
     def __init__(self):
         self.url_base = rostsber_url + 'currency/'
         currency_index = pd.read_csv('{}__index.csv'.format(self.url_base),
@@ -71,19 +75,14 @@ class CurrencySymbolsRegistry:
             supported_currency_pair = tuple(str.split(supported_currency_pair, '-'))
             self.__f_currency_data.update({supported_currency_pair: df})
 
-        self.__currency_start_date = {
-            Currency.RUB: pd.Period('1999-1', freq='M'),
-            Currency.EUR: pd.Period('1996-1', freq='M'),
-            Currency.USD: pd.Period('1913-1', freq='M'),
-        }
-
     def __currency_data(self, currency_pair):
         return self.__f_currency_data[currency_pair].copy()
 
     def convert(self, currency_from: Currency, currency_to: Currency,
                 start_period: pd.Period, end_period: pd.Period):
         if currency_to == currency_from:
-            p_range = pd.period_range(start=str(self.__currency_start_date[currency_from]),
+            currency_min_date = self.cbr_currencies_source._currency_min_date[currency_from.name]
+            p_range = pd.period_range(start=str(currency_min_date),
                                       end=str(end_period + 1),
                                       freq='M')
             df = pd.DataFrame.from_dict({'period': p_range, 'close': 1.})

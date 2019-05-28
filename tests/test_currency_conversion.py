@@ -36,7 +36,7 @@ def test__currency_should_not_be_converted_to_itself_inside_datatable(currency: 
 
 
 @pytest.mark.parametrize('currency, expected_start_period',
-                         [(Currency.RUB, pd.Period('1999-1', freq='M')),
+                         [(Currency.RUB, pd.Period('1990-1', freq='M')),
                           (Currency.USD, pd.Period('1913-1', freq='M')),
                           (Currency.EUR, pd.Period('1996-1', freq='M'))])
 @inject
