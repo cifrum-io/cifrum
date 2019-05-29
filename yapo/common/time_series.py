@@ -158,7 +158,7 @@ class TimeSeries:
 
     @property
     def period_size(self):
-        return self._end_period - self._start_period + 1
+        return (self._end_period - self._start_period).n + 1
 
     def period_range(self):
         return copy.deepcopy(self._period_range)
