@@ -7,6 +7,7 @@ from hamcrest import *
 
 import yapo as l
 from conftest import delta, decimal_places
+from yapo.common.enums import Currency
 from yapo.common.time_series import TimeSeriesKind
 
 _portfolio_period_start = pd.Period('2015-4', freq='M')
@@ -155,3 +156,12 @@ def test__risk():
     assert_that(_portfolio.risk(period='year').value, close_to(.1689, delta))
     assert_that(_portfolio.risk(period='month').value, close_to(.0432, delta))
     assert_that(_portfolio.risk().value, close_to(.1689, delta))
+
+
+@pytest.mark.parametrize('currency', Currency)
+def test__handle_portfolio_with_asset_with_dot_in_name(currency: Currency):
+    p = l.portfolio(assets={'ny/BRK.B': 1}, currency=currency.name)
+    assert_that(p, not_none())
+    assert_that(p.assets, has_length(1))
+    assert_that(p.rate_of_return(), is_not(empty()))
+

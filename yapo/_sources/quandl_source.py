@@ -26,6 +26,7 @@ class QuandlSource(FinancialSymbolsSource):
 
     @lru_cache(maxsize=512)
     def __extract_values(self, name, start_period, end_period):
+        name = name.replace('.', '_')
         df = quandl.get('EOD/{}.11'.format(name),
                         start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
                         end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),

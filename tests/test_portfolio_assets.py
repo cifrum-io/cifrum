@@ -153,3 +153,8 @@ def test__fail_if_date_range_is_short():
                                                start_period='2015-4', end_period='2015-4',
                                                currency='rub'),
                 raises(ValueError, r'period range should be at least \d+ months'))
+
+def test__handle_asset_with_dot_in_name():
+    asset = l.portfolio_asset(name='ny/BRK.B')
+    assert_that(asset, not_none())
+    assert_that(asset.close(), is_not(empty()))
