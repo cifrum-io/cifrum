@@ -23,14 +23,11 @@ class MicexStocksSource(FinancialSymbolsSource):
 
     @lru_cache(maxsize=512)
     def __extract_values(self, secid, start_period, end_period):
-        df = pd.read_csv(self.url_base + secid + '.csv', sep='\t')
+        df = pd.read_csv(self.url_base + secid + '.csv', sep='\t', usecols=['date', 'adjusted_close'])
+        df.rename(columns={'adjusted_close': 'close'}, inplace=True)
         df['date'] = pd.to_datetime(df['date'])
         df['period'] = df['date'].dt.to_period('M')
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
-        df_new['legal_close'].fillna(df_new['close'], inplace=True)
-        del df_new['close']
-        df_new.rename(columns={'legal_close': 'close'}, inplace=True)
-        df_new.dropna(inplace=True)
         return df_new
 
     def fetch_financial_symbol(self, name: str):

@@ -25,7 +25,8 @@ class MutualFundsRuSource(FinancialSymbolsSource):
     @lru_cache(maxsize=512)
     def __extract_values(self, row_id, start_period, end_period):
         url = '{}{}.csv'.format(self.url_base, row_id)
-        df = pd.read_csv(url, sep='\t', parse_dates=['date'])
+        df = pd.read_csv(url, sep='\t', parse_dates=['date'], usecols=['date', 'adjusted_close'])
+        df.rename(columns={'adjusted_close': 'close'}, inplace=True)
         df['period'] = df['date'].dt.to_period('M')
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         return df_new
