@@ -208,3 +208,12 @@ def test__handle_portfolio_with_asset_with_dot_in_name(currency: Currency):
     assert_that(p.assets, has_length(1))
     assert_that(p.rate_of_return(), is_not(empty()))
 
+
+@pytest.mark.parametrize('currency', Currency)
+def test__handle_assets_with_monthly_data_gaps(currency: Currency):
+    p = l.portfolio(assets={'micex/KUBE': 1}, currency=currency.name)
+    assert_that(p, not_none())
+    assert_that(p.assets, has_length(1))
+    assert_that(p.rate_of_return(), is_not(empty()))
+
+
