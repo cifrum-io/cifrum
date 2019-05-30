@@ -3,6 +3,7 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
+from freezegun import freeze_time
 from hamcrest import *
 
 import yapo as l
@@ -215,5 +216,3 @@ def test__handle_assets_with_monthly_data_gaps(currency: Currency):
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
     assert_that(p.rate_of_return(), is_not(empty()))
-
-

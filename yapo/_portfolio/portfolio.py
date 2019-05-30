@@ -50,6 +50,8 @@ class PortfolioAsset:
             self.currency.period_max,
             end_period,
         )
+        if self._period_min >= self._period_max:
+            raise ValueError('`self._period_min` must not be >= `self._period_max`')
 
         currency_conversion_rate = self.__currency_conversion_rate(currency_to=self.currency.value)
         self._period_min = max(self._period_min, currency_conversion_rate.start_period)
