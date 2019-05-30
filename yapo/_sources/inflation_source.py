@@ -22,7 +22,7 @@ class InflationSource(FinancialSymbolsSource):
 
     @lru_cache(maxsize=512)
     def __extract_values(self, currency, start_period, end_period):
-        df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency.lower()), sep='\t', parse_dates=['date'])
+        df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency), sep='\t', parse_dates=['date'])
         df['period'] = df['date'].dt.to_period('M')
         df.sort_values(by='period', inplace=True)
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
