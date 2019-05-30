@@ -4,7 +4,7 @@ from serum import singleton
 import pandas as pd
 
 from .base_classes import FinancialSymbolsSource
-from .._settings import rostsber_url
+from .._settings import data_url
 from ..common.enums import Currency, SecurityType, Period
 from ..common.financial_symbol import FinancialSymbol
 from ..common.financial_symbol_id import FinancialSymbolId
@@ -15,14 +15,14 @@ from ..common.financial_symbol_info import FinancialSymbolInfo
 class InflationSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='infl')
-        self.index = pd.read_csv('{}inflation/__index.csv'.format(rostsber_url),
+        self.index = pd.read_csv('{}inflation/__index.csv'.format(data_url),
                                  sep='\t', index_col='name', parse_dates=['date_start', 'date_end'])
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='M')
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='M')
 
     @lru_cache(maxsize=512)
     def __extract_values(self, currency, start_period, end_period):
-        df = pd.read_csv('{}inflation/{}.csv'.format(rostsber_url, currency), sep='\t', parse_dates=['date'])
+        df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency.lower()), sep='\t', parse_dates=['date'])
         df['period'] = df['date'].dt.to_period('M')
         df.sort_values(by='period', inplace=True)
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()

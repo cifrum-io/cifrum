@@ -18,7 +18,7 @@ class QuandlSource(FinancialSymbolsSource):
 
     def __init__(self):
         super().__init__(namespace='ny')
-        self.url_base = rostsber_url + 'quandl/'
+        self.url_base = data_url + 'quandl/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
                                  parse_dates=['date_start', 'date_end'])
         self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')

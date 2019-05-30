@@ -9,20 +9,20 @@ from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol import FinancialSymbol
 from ..common.financial_symbol_info import FinancialSymbolInfo
 from ..common.enums import Currency, SecurityType, Period
-from .._settings import rostsber_url, change_column_name
+from .._settings import data_url, change_column_name
 
 
 @singleton
 class CbrTopRatesSource(SingleFinancialSymbolSource):
     def _load_rates(self):
-        df = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(rostsber_url), sep='\t')
+        df = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(data_url), sep='\t')
         df.sort_values(by='decade', inplace=True)
         df.rename(columns={'close': change_column_name, 'decade': 'date'},
                   inplace=True)
         return df
 
     def _load_dates(self, kind):
-        index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(rostsber_url), sep='\t')
+        index = pd.read_csv('{}cbr_deposit_rate/__index.csv'.format(data_url), sep='\t')
         period_str = index[kind][0]
         return pd.Period(period_str, freq='M')
 
@@ -45,7 +45,7 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
 class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
-        self.url_base = rostsber_url + 'currency/'
+        self.url_base = data_url + 'currency/'
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
         self.__short_names = {
             Currency.RUB: 'Рубль РФ',

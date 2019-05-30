@@ -6,7 +6,7 @@ from itertools import groupby
 
 from .._sources.single_financial_symbol_source import CbrCurrenciesSource
 from .all_sources import SymbolSources
-from .._settings import rostsber_url
+from .._settings import data_url
 from ..common.financial_symbol import FinancialSymbol
 from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.enums import Currency
@@ -60,7 +60,7 @@ class CurrencySymbolsRegistry:
     cbr_currencies_source: CbrCurrenciesSource
 
     def __init__(self):
-        self.url_base = rostsber_url + 'currency/'
+        self.url_base = data_url + 'currency/'
         currency_index = pd.read_csv('{}__index.csv'.format(self.url_base),
                                      sep='\t', parse_dates=['date_start', 'date_end'])
         self.__f_currency_data = {}

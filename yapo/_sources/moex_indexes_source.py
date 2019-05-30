@@ -8,14 +8,14 @@ from ..common.financial_symbol_info import FinancialSymbolInfo
 from ..common.enums import Currency, SecurityType, Period
 from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol import FinancialSymbol
-from .._settings import rostsber_url
+from .._settings import data_url
 
 
 @singleton
 class MoexIndexesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='index')
-        self.url_base = rostsber_url + 'index/moex/'
+        self.url_base = data_url + 'index/moex/'
 
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
                                  parse_dates=['date_start', 'date_end'])
