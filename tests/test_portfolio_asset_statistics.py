@@ -15,12 +15,12 @@ __asset = y.portfolio_asset(name=__asset_name,
                             currency='USD')
 
 
-def test__accumulated_rate_of_return():
-    arors = __asset.rate_of_return(kind='accumulated').values
+def test__cumulative_rate_of_return():
+    arors = __asset.rate_of_return(kind='cumulative').values
     assert_that(arors.max(), close_to(.0924, delta))
     assert_that(arors.min(), close_to(-.5464, delta))
 
-    arors_real = __asset.rate_of_return(kind='accumulated', real=True).values
+    arors_real = __asset.rate_of_return(kind='cumulative', real=True).values
     assert_that(arors_real.max(), close_to(.0765, delta))
     assert_that(arors_real.min(), close_to(-.5725, delta))
 
@@ -109,7 +109,7 @@ def test__handle_related_inflation():
 
     assert __asset.inflation(kind='values').size == __asset.rate_of_return().size
 
-    assert_that(__asset.inflation(kind='accumulated').value, close_to(.1062, delta))
+    assert_that(__asset.inflation(kind='cumulative').value, close_to(.1062, delta))
     assert_that(__asset.inflation(kind='a_mean').value, close_to(0.0014, delta))
     assert_that(__asset.inflation(kind='g_mean').value, close_to(0.0167, delta))
 

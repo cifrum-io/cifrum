@@ -130,12 +130,12 @@ def test__drop_last_month_data_if_no_activity_within_last_full_month(yapo_instan
     assert asset.close().period_range() == list(period_range_expected)
 
 
-def test__compute_accumulated_rate_of_return():
+def test__compute_cumulative_rate_of_return():
     for asset in __portfolio.assets.values():
-        aror = asset.rate_of_return(kind='accumulated').values
+        aror = asset.rate_of_return(kind='cumulative').values
         assert not np.any(np.isnan(aror))
 
-    aror = __portfolio.rate_of_return(kind='accumulated').values
+    aror = __portfolio.rate_of_return(kind='cumulative').values
     assert not np.any(np.isnan(aror))
 
 

@@ -73,7 +73,7 @@ class Test__compute_statistics_for_partially_incomplete_portfolio():
         return portfolio
 
     @pytest.mark.parametrize('kind, real',
-                             itertools.product(['values', 'accumulated', 'ytd'], [True, False]))
+                             itertools.product(['values', 'cumulative', 'ytd'], [True, False]))
     def test__rate_of_return(self, portfolio, kind, real):
         assert_that(portfolio.rate_of_return(kind=kind, real=real), not_none())
 
@@ -111,12 +111,12 @@ def test__rate_of_return():
                                    rate_of_return_definition.values, decimal_places)
 
 
-def test__accumulated_rate_of_return():
-    arors = _portfolio.rate_of_return(kind='accumulated').values
+def test__cumulative_rate_of_return():
+    arors = _portfolio.rate_of_return(kind='cumulative').values
     assert_that(arors.min(), close_to(-.0492, delta))
     assert_that(arors.max(), close_to(.3017, delta))
 
-    arors_real = _portfolio.rate_of_return(kind='accumulated', real=True).values
+    arors_real = _portfolio.rate_of_return(kind='cumulative', real=True).values
     assert_that(arors_real.min(), close_to(-.0524, delta))
     assert_that(arors_real.max(), close_to(.2569, delta))
 
@@ -137,7 +137,7 @@ def test__handle_related_inflation():
     assert_that(calling(_portfolio.inflation).with_args(kind='abracadabra'),
                 raises(ValueError, 'inflation kind is not supported: abracadabra'))
 
-    assert_that(_portfolio.inflation(kind='accumulated').value, close_to(.0365, delta))
+    assert_that(_portfolio.inflation(kind='cumulative').value, close_to(.0365, delta))
     assert_that(_portfolio.inflation(kind='a_mean').value, close_to(.0014, delta))
     assert_that(_portfolio.inflation(kind='g_mean').value, close_to(.0167, delta))
 

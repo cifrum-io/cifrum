@@ -100,7 +100,7 @@ class PortfolioAsset:
         return copy.deepcopy(self.__values)
 
     def rate_of_return(self, kind='values', real=False):
-        if kind not in ['values', 'accumulated', 'ytd']:
+        if kind not in ['values', 'cumulative', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
@@ -114,7 +114,7 @@ class PortfolioAsset:
             inflation = self.inflation(kind='values')
             ror = (ror + 1.) / (inflation + 1.) - 1.
 
-        if kind == 'accumulated':
+        if kind == 'cumulative':
             ror = (ror + 1.).cumprod() - 1.
 
         return ror
@@ -222,8 +222,8 @@ class Portfolio:
             years_total = (ror.end_period - ror.start_period).n / _MONTHS_PER_YEAR
             cagr = (ror + 1.).prod() ** (1 / years_total) - 1.
             if real:
-                inflation_accumulated = self.inflation(kind='accumulated')
-                cagr = (cagr + 1.) / (inflation_accumulated + 1.) ** (1 / years_total) - 1.
+                inflation_cumulative = self.inflation(kind='cumulative')
+                cagr = (cagr + 1.) / (inflation_cumulative + 1.) ** (1 / years_total) - 1.
             return cagr
         elif isinstance(years_ago, list):
             return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
@@ -237,15 +237,15 @@ class Portfolio:
             ror_series = self.rate_of_return()[-months_count:]
             cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
             if real:
-                inflation_accumulated = self.inflation(kind='accumulated',
-                                                       years_ago=years_ago)
-                cagr = (cagr + 1.) / (inflation_accumulated + 1.) ** (1 / years_ago) - 1.
+                inflation_cumulative = self.inflation(kind='cumulative',
+                                                      years_ago=years_ago)
+                cagr = (cagr + 1.) / (inflation_cumulative + 1.) ** (1 / years_ago) - 1.
             return cagr
         else:
             raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
     def rate_of_return(self, kind='values', real=False) -> TimeSeries:
-        if kind not in ['values', 'accumulated', 'ytd']:
+        if kind not in ['values', 'cumulative', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
@@ -260,7 +260,7 @@ class Portfolio:
             inflation = self.inflation(kind='values')
             ror = (ror + 1.) / (inflation + 1.) - 1.
 
-        if kind == 'accumulated':
+        if kind == 'cumulative':
             ror = (ror + 1.).cumprod() - 1.
 
         return ror

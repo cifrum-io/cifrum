@@ -23,7 +23,7 @@ def pcf():
 
 
 @pytest.mark.parametrize('currency, inflation_kind',
-                         itertools.product(Currency, ['values', 'accumulated', 'a_mean', 'g_mean']))
+                         itertools.product(Currency, ['values', 'cumulative', 'a_mean', 'g_mean']))
 def test__exists_for_all_currencies(pcf: PortfolioCurrencyFactory, currency: Currency, inflation_kind: str):
     pc = pcf.create(currency=currency)
     infl = pc.inflation(kind=inflation_kind, end_period=__end_period, years_ago=4)
@@ -31,7 +31,7 @@ def test__exists_for_all_currencies(pcf: PortfolioCurrencyFactory, currency: Cur
 
 
 @pytest.mark.parametrize('currency, inflation_kind',
-                         itertools.product(Currency, ['values', 'accumulated', 'a_mean', 'g_mean']))
+                         itertools.product(Currency, ['values', 'cumulative', 'a_mean', 'g_mean']))
 def test__should_not_handle_both_start_date_and_years_ago(pcf: PortfolioCurrencyFactory,
                                                           currency: Currency, inflation_kind: str):
     pc = pcf.create(currency=currency)
@@ -46,7 +46,7 @@ def test__should_not_handle_both_start_date_and_years_ago(pcf: PortfolioCurrency
 def test__inflation_values(pcf: PortfolioCurrencyFactory):
     pc = pcf.create(currency=Currency.USD)
 
-    assert_that(pc.inflation(kind='accumulated', end_period=__end_period, years_ago=5).value,
+    assert_that(pc.inflation(kind='cumulative', end_period=__end_period, years_ago=5).value,
                 close_to(.0780, delta))
     assert_that(pc.inflation(kind='a_mean', end_period=__end_period, years_ago=5).value,
                 close_to(.0013, delta))

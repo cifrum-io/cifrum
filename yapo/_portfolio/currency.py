@@ -69,7 +69,7 @@ class PortfolioCurrency:
             years back from `period_max` to calculate inflation
 
         :param kind:
-            accumulated - accumulated inflation
+            cumulative - cumulative inflation
 
             a_mean - arithmetic mean of inflation
 
@@ -94,21 +94,21 @@ class PortfolioCurrency:
                                   end_period=inflation_values.period.max(),
                                   kind=TimeSeriesKind.DIFF)
 
-        def __accumulated():
+        def __cumulative():
             return (inflation_ts + 1.).prod() - 1.
 
-        if kind == 'accumulated':
-            return __accumulated()
+        if kind == 'cumulative':
+            return __cumulative()
         elif kind == 'yoy':
             return inflation_ts.ytd()
-        elif kind == 'accumulated_series':
+        elif kind == 'cumulative_series':
             return (inflation_ts + 1.).cumprod() - 1.
         elif kind == 'a_mean':
             inflation_amean = inflation_ts.mean()
             return inflation_amean
         elif kind == 'g_mean':
             years_total = ((end_period - start_period).n + 1) / _MONTHS_PER_YEAR
-            inflation_gmean = (__accumulated() + 1.) ** (1 / years_total) - 1.
+            inflation_gmean = (__cumulative() + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':
             return inflation_ts
