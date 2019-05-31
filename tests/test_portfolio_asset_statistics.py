@@ -1,15 +1,15 @@
 import numpy as np
 import pandas as pd
-from hamcrest import *
+from hamcrest import assert_that, close_to, calling, raises
 
-import yapo as l
+import yapo as y
 from conftest import decimal_places, delta
 from yapo.common.time_series import TimeSeriesKind
 
 __asset_name = 'mut_ru/0890-94127385'
 __portfolio_period_start = pd.Period('2011-1', freq='M')
 __portfolio_period_end = pd.Period('2017-2', freq='M')
-__asset = l.portfolio_asset(name=__asset_name,
+__asset = y.portfolio_asset(name=__asset_name,
                             start_period=str(__portfolio_period_start),
                             end_period=str(__portfolio_period_end),
                             currency='USD')
@@ -61,7 +61,7 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
     start_period = pd.Period('2011-01', freq='M')
     years_amount = 5
     end_period = start_period + years_amount * 12
-    asset = l.portfolio_asset(name=__asset_name,
+    asset = y.portfolio_asset(name=__asset_name,
                               start_period=str(start_period),
                               end_period=str(end_period), currency='usd')
     cagr1 = asset.compound_annual_growth_rate()
@@ -89,7 +89,7 @@ def test__compound_annual_growth_rate_real():
 
 
 def test__risk():
-    short_asset = l.portfolio_asset(name=__asset_name,
+    short_asset = y.portfolio_asset(name=__asset_name,
                                     start_period='2016-8', end_period='2016-12', currency='USD')
 
     assert_that(calling(short_asset.risk).with_args(period='year'), raises(Exception))
@@ -101,6 +101,7 @@ def test__risk():
     assert_that(__asset.risk().value, close_to(.2860, delta))
     assert_that(__asset.risk(period='year').value, close_to(.2860, delta))
     assert_that(__asset.risk(period='month').value, close_to(.0823, delta))
+
 
 def test__handle_related_inflation():
     assert_that(calling(__asset.inflation).with_args(kind='abracadabra'),

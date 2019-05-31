@@ -1,47 +1,47 @@
-from hamcrest import *
+from hamcrest import assert_that, none, empty, has_length, contains_inanyorder, has_items
 
-import yapo as l
+import yapo as y
 
 
 def test__return_namespaces_list_by_default():
-    names = l.available_names()
+    names = y.available_names()
     assert_that(names, contains_inanyorder('infl', 'cbr', 'micex', 'mut_ru', 'ny', 'index'))
 
 
 def test__return_empty_list_or_none_if_symbol_doesnt_exist():
     nonexisting_id = 'nlu/xxx'
 
-    asset = l.portfolio_asset(name=nonexisting_id)
+    asset = y.portfolio_asset(name=nonexisting_id)
     assert_that(asset, none())
 
-    assets = l.portfolio_asset(names=[nonexisting_id])
+    assets = y.portfolio_asset(names=[nonexisting_id])
     assert_that(assets, empty())
 
-    assets = l.portfolio_asset(names=['micex/FXRU', nonexisting_id])
+    assets = y.portfolio_asset(names=['micex/FXRU', nonexisting_id])
     assert_that(assets, has_length(1))
 
-    portfolio = l.portfolio(assets={'micex/FXRU': 1., nonexisting_id: 1.}, currency='USD')
+    portfolio = y.portfolio(assets={'micex/FXRU': 1., nonexisting_id: 1.}, currency='USD')
     assert len(portfolio.assets) == 1
 
     nonexisting_namespace = 'yyy/FXRU'
 
-    asset = l.portfolio_asset(name=nonexisting_namespace)
+    asset = y.portfolio_asset(name=nonexisting_namespace)
     assert_that(asset, none())
 
-    assets = l.portfolio_asset(names=[nonexisting_namespace])
+    assets = y.portfolio_asset(names=[nonexisting_namespace])
     assert_that(assets, empty())
 
-    assets = l.portfolio_asset(names=['micex/FXRU', nonexisting_namespace])
+    assets = y.portfolio_asset(names=['micex/FXRU', nonexisting_namespace])
     assert_that(assets, has_length(1))
 
-    portfolio = l.portfolio(assets={'micex/FXRU': 1., nonexisting_namespace: 1.}, currency='USD')
+    portfolio = y.portfolio(assets={'micex/FXRU': 1., nonexisting_namespace: 1.}, currency='USD')
     assert_that(portfolio.assets, has_length(1))
 
 
 def test__get_names_for_individual_namespace():
     def fin_sym_ids_by_namespace(namespace):
         return [available_name.fin_sym_id.format()
-                for available_name in l.available_names(namespace=namespace)]
+                for available_name in y.available_names(namespace=namespace)]
 
     assert_that(fin_sym_ids_by_namespace(namespace='infl'),
                 contains_inanyorder('infl/RUB', 'infl/EUR', 'infl/USD'))
@@ -61,7 +61,7 @@ def test__get_names_for_individual_namespace():
 
 def test__return_several_namespaces():
     available_name_ids = [available_name.fin_sym_id.format()
-                          for available_name in l.available_names(namespaces=['infl', 'micex'])]
+                          for available_name in y.available_names(namespaces=['infl', 'micex'])]
 
     assert_that(available_name_ids,
                 has_items('infl/RUB', 'infl/EUR', 'infl/USD',

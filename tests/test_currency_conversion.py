@@ -5,7 +5,7 @@ import pandas as pd
 import pytest
 from serum import inject
 
-import yapo as l
+import yapo as y
 from yapo._sources.registries import CurrencySymbolsRegistry
 from yapo.common.enums import Currency
 
@@ -29,7 +29,7 @@ def test__currency_should_not_be_converted_to_itself_inside_converter(csr: Curre
 
 @pytest.mark.parametrize('currency', Currency)
 def test__currency_should_not_be_converted_to_itself_inside_datatable(currency: Currency):
-    vs = l.portfolio_asset(name='cbr/' + currency.name,
+    vs = y.portfolio_asset(name='cbr/' + currency.name,
                            start_period='2015-1', end_period='2017-1',
                            currency=currency.name).close()
     np.testing.assert_equal(vs.values, 1.)
@@ -50,7 +50,7 @@ def test__identity_currency_conversion_should_be_of_max_period(csr: CurrencySymb
 
 
 def test__currency_should_be_converted_other_currency():
-    vs = l.portfolio_asset(name='cbr/EUR',
+    vs = y.portfolio_asset(name='cbr/EUR',
                            start_period='2015-1', end_period='2017-1',
                            currency='USD').close()
 
@@ -59,7 +59,7 @@ def test__currency_should_be_converted_other_currency():
 
 @pytest.mark.parametrize('currency_from, currency_to', itertools.product(Currency, Currency))
 def test__support_all_types_of_currency_conversions(currency_from: Currency, currency_to: Currency):
-    vs = l.portfolio_asset(name='cbr/' + currency_from.name,
+    vs = y.portfolio_asset(name='cbr/' + currency_from.name,
                            start_period='2015-1', end_period='2016-12',
                            currency=currency_to.name).close()
 
@@ -69,11 +69,11 @@ def test__support_all_types_of_currency_conversions(currency_from: Currency, cur
 
 @pytest.mark.parametrize('currency1, currency2', itertools.product(Currency, Currency))
 def test__currency_conversion_should_be_inversive(currency1: Currency, currency2: Currency):
-    vs1 = l.portfolio_asset(name='cbr/' + currency1.name,
+    vs1 = y.portfolio_asset(name='cbr/' + currency1.name,
                             start_period='2015-1', end_period='2016-12',
                             currency=currency2.name).close()
 
-    vs2 = l.portfolio_asset(name='cbr/' + currency2.name,
+    vs2 = y.portfolio_asset(name='cbr/' + currency2.name,
                             start_period='2015-1', end_period='2016-12',
                             currency=currency1.name).close()
 
@@ -81,15 +81,15 @@ def test__currency_conversion_should_be_inversive(currency1: Currency, currency2
 
 
 def test__asset_should_be_converted_correctly():
-    vs_eur = l.portfolio_asset(name='mut_ru/0890-94127385',
+    vs_eur = y.portfolio_asset(name='mut_ru/0890-94127385',
                                start_period='2011-1', end_period='2017-2',
                                currency='EUR').close()
 
-    vs_usd = l.portfolio_asset(name='mut_ru/0890-94127385',
+    vs_usd = y.portfolio_asset(name='mut_ru/0890-94127385',
                                start_period='2011-1', end_period='2017-2',
                                currency='USD').close()
 
-    vs_curr = l.portfolio_asset(name='cbr/USD',
+    vs_curr = y.portfolio_asset(name='cbr/USD',
                                 start_period='2011-1', end_period='2017-2',
                                 currency='EUR').close()
 

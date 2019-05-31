@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from hamcrest import *
+from hamcrest import assert_that, not_none, calling, raises, close_to
 from serum import inject
 
 from conftest import decimal_places, delta

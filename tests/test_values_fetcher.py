@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 import pytest
-from hamcrest import *
+from hamcrest import assert_that, has_length, none
 
 from yapo.common.financial_symbol import ValuesFetcher
 

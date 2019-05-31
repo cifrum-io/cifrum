@@ -1,30 +1,31 @@
 import pandas as pd
-from hamcrest import *
+from hamcrest import assert_that, instance_of, empty, not_none, has_length, has_property, starts_with, \
+    contains_inanyorder, none
 
-import yapo as l
+import yapo as y
 from yapo.common.enums import Currency, SecurityType, Period
 from yapo.common.financial_symbol import FinancialSymbol
 
 
 def test__returns_sym_info():
-    info = l.information(name='micex/FXRU')
+    info = y.information(name='micex/FXRU')
     assert_that(info, instance_of(FinancialSymbol))
 
-    info = l.information(names=[])
+    info = y.information(names=[])
     assert_that(info, instance_of(list))
     assert_that(info, empty())
 
-    info = l.information(names=['infl/RUB'])
+    info = y.information(names=['infl/RUB'])
     assert_that(info, instance_of(list))
     assert_that(info, has_length(1))
 
-    info = l.information(names=['micex/FXRU', 'infl/RUB'])
+    info = y.information(names=['micex/FXRU', 'infl/RUB'])
     assert_that(info, instance_of(list))
     assert_that(info, has_length(2))
 
 
 def test__micex_stocks_should_have_correct_fields():
-    info = l.information(name='micex/SBER')
+    info = y.information(name='micex/SBER')
     assert_that(info, has_property('namespace', 'micex'))
     assert_that(info, has_property('name', 'SBER'))
     assert_that(info, has_property('isin', 'RU0009029540'))
@@ -38,7 +39,7 @@ def test__micex_stocks_should_have_correct_fields():
 
 
 def test__quandl_stocks_should_have_correct_fields():
-    info = l.information(name='ny/VNQ')
+    info = y.information(name='ny/VNQ')
     assert_that(info, has_property('namespace', 'ny'))
     assert_that(info, has_property('name', 'VNQ'))
     assert_that(info, has_property('isin', None))
@@ -52,7 +53,7 @@ def test__quandl_stocks_should_have_correct_fields():
 
 
 def test__currency_usd__should_have_correct_fields():
-    info = l.information(name='cbr/USD')
+    info = y.information(name='cbr/USD')
     assert_that(info, has_property('namespace', 'cbr'))
     assert_that(info, has_property('name', 'USD'))
     assert_that(info, has_property('isin', None))
@@ -66,7 +67,7 @@ def test__currency_usd__should_have_correct_fields():
 
 
 def test__inflation_ru__should_have_correct_fields():
-    info = l.information(name='infl/RUB')
+    info = y.information(name='infl/RUB')
     assert_that(info, has_property('namespace', 'infl'))
     assert_that(info, has_property('name', 'RUB'))
     assert_that(info, has_property('isin', None))
@@ -83,7 +84,7 @@ def test__inflation_ru__should_have_correct_fields():
 
 
 def test__top_rates__should_have_correct_fields():
-    info = l.information(name='cbr/TOP_rates')
+    info = y.information(name='cbr/TOP_rates')
     assert_that(info, has_property('namespace', 'cbr'))
     assert_that(info, has_property('name', 'TOP_rates'))
     assert_that(info, has_property('isin', None))
@@ -98,36 +99,40 @@ def test__top_rates__should_have_correct_fields():
                             end_period=str(pd.Period.now(freq='M'))).columns,
                 contains_inanyorder('period', 'rate'))
 
+
 def test__all_data_should_be_available():
-    assert_that(l.information(name='ny/MSFT'), not_none())
-    assert_that(l.information(name='micex/FXRU'), not_none())
-    assert_that(l.information(name='micex/FXMM'), not_none())
-    assert_that(l.information(name='index/MCFTR'), not_none())
-    assert_that(l.information(name='index/IMOEX'), not_none())
-    assert_that(l.information(name='index/OKID10'), not_none())
-    assert_that(l.information(name='index/^STOXX50E'), not_none())
-    assert_that(l.information(name='mut_ru/0890-94127385'), not_none())
-    assert_that(l.information(name='cbr/USD'), not_none())
-    assert_that(l.information(name='cbr/EUR'), not_none())
-    assert_that(l.information(name='infl/RUB'), not_none())
-    assert_that(l.information(name='infl/USD'), not_none())
-    assert_that(l.information(name='infl/EUR'), not_none())
-    assert_that(l.information(name='cbr/TOP_rates'), not_none())
+    assert_that(y.information(name='ny/MSFT'), not_none())
+    assert_that(y.information(name='micex/FXRU'), not_none())
+    assert_that(y.information(name='micex/FXMM'), not_none())
+    assert_that(y.information(name='index/MCFTR'), not_none())
+    assert_that(y.information(name='index/IMOEX'), not_none())
+    assert_that(y.information(name='index/OKID10'), not_none())
+    assert_that(y.information(name='index/^STOXX50E'), not_none())
+    assert_that(y.information(name='mut_ru/0890-94127385'), not_none())
+    assert_that(y.information(name='cbr/USD'), not_none())
+    assert_that(y.information(name='cbr/EUR'), not_none())
+    assert_that(y.information(name='infl/RUB'), not_none())
+    assert_that(y.information(name='infl/USD'), not_none())
+    assert_that(y.information(name='infl/EUR'), not_none())
+    assert_that(y.information(name='cbr/TOP_rates'), not_none())
+
 
 def test__return_none_if_no_finsym_is_found():
     not_existing_id = 'micex/MCFTR_doesntexist'
-    assert_that(l.information(name=not_existing_id), none())
+    assert_that(y.information(name=not_existing_id), none())
 
-    infos = l.information(names=['infl/RUB', not_existing_id])
+    infos = y.information(names=['infl/RUB', not_existing_id])
     assert_that(infos[0], not_none())
     assert_that(infos[1], none())
 
+
 def test__return_same_infos_count_as_provided():
     ids_arr = ['infl/RUB', 'infl/EUR', 'micex/MCFTR', 'micex/FXRU']
-    infos = l.information(names=ids_arr)
+    infos = y.information(names=ids_arr)
     assert len(infos) == len(ids_arr)
 
+
 def test__be_invariant_in_respect_to_order():
-    infos1 = [y.identifier.format() for y in l.information(names=['infl/RUB', 'infl/EUR'])]
-    infos2 = [y.identifier.format() for y in l.information(names=['infl/EUR', 'infl/RUB'])]
+    infos1 = [y.identifier.format() for y in y.information(names=['infl/RUB', 'infl/EUR'])]
+    infos2 = [y.identifier.format() for y in y.information(names=['infl/EUR', 'infl/RUB'])]
     assert_that(infos1, contains_inanyorder(*infos2))
