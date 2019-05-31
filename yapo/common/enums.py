@@ -1,6 +1,4 @@
 from enum import Enum, auto
-import yapo
-import pandas as pd
 
 
 class Currency(Enum):

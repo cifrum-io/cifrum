@@ -55,8 +55,8 @@ class Yapo:
             raise Exception('Unexpected state of kwargs')
 
     def portfolio_asset(self,
-                        currency: str=None,
-                        start_period: str=None, end_period: str=None,
+                        currency: str = None,
+                        start_period: str = None, end_period: str = None,
                         **kwargs) -> Union[PortfolioAsset, List[PortfolioAsset], None]:
         if start_period is None:
             start_period = self.__period_lowest
@@ -98,7 +98,7 @@ class Yapo:
     def portfolio(self,
                   assets: Dict[str, float],
                   currency: str,
-                  start_period: str=None, end_period: str=None) -> Portfolio:
+                  start_period: str = None, end_period: str = None) -> Portfolio:
         """
         :param assets: list of RostSber IDs. Supported security types: stock/ETF, MUT, Currency
         :param start_period: preferred period to start

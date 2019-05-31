@@ -1,15 +1,16 @@
+import os
 from functools import lru_cache
 
-from serum import singleton
 import pandas as pd
 import quandl
+from serum import singleton
 
 from .base_classes import FinancialSymbolsSource
-from ..common.financial_symbol_info import FinancialSymbolInfo
+from .._settings import data_url
 from ..common.enums import Currency, SecurityType, Period
-from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol import FinancialSymbol
-from .._settings import *
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
 @singleton
