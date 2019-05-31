@@ -1,4 +1,4 @@
-|Travis|_ |Gitter|_ |Pepy|_
+|Travis|_ |Gitter|_ |Pepy|_ |Codecov|_
 
 .. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
 .. _Travis: https://travis-ci.org/okama-io/yapo
@@ -8,6 +8,9 @@
 
 .. |Pepy| image:: https://pepy.tech/badge/yapo
 .. _Pepy: https://pepy.tech/badge/yapo
+
+.. |Codecov| image:: https://codecov.io/gh/okama-io/yapo/branch/master/graph/badge.svg
+.. _Codecov: https://codecov.io/gh/okama-io/yapo
 
 **YAPO** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
