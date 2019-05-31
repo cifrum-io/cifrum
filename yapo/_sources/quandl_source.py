@@ -15,15 +15,27 @@ from ..common.financial_symbol_info import FinancialSymbolInfo
 
 @singleton
 class QuandlSource(FinancialSymbolsSource):
-    quandl.ApiConfig.api_key = os.environ['QUANDL_KEY']
-
     def __init__(self):
         super().__init__(namespace='ny')
-        self.url_base = data_url + 'quandl/'
-        self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
-                                 parse_dates=['date_start', 'date_end'])
-        self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
-        self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
+
+        quandl_key_name = 'QUANDL_KEY'
+        if quandl_key_name in os.environ:
+            quandl.ApiConfig.api_key = os.environ[quandl_key_name]
+            self._available = True
+            self.url_base = data_url + 'quandl/'
+            self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name',
+                                     parse_dates=['date_start', 'date_end'])
+            self.index['date_start'] = self.index['date_start'].dt.to_period(freq='D')
+            self.index['date_end'] = self.index['date_end'].dt.to_period(freq='D')
+        else:
+            self._available = False
+            self.index = pd.DataFrame({
+                'name': [],
+                'date_start': [],
+                'date_end': [],
+                'short_name': [],
+                'exchange': [],
+            })
 
     @lru_cache(maxsize=512)
     def __extract_values(self, name, start_period, end_period):
@@ -38,11 +50,14 @@ class QuandlSource(FinancialSymbolsSource):
         return df_res
 
     def fetch_financial_symbol(self, name: str):
+        if not self._available:
+            return None
+
         if name in self.index.index:
             row = self.index.loc[name]
             symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
                                      values=lambda start_period, end_period:
-                                         self.__extract_values(name, start_period, end_period),
+                                     self.__extract_values(name, start_period, end_period),
                                      exchange=row['exchange'],
                                      short_name=row['short_name'],
                                      start_period=row['date_start'],
@@ -55,6 +70,9 @@ class QuandlSource(FinancialSymbolsSource):
         return None
 
     def get_all_infos(self):
+        if not self._available:
+            return []
+
         infos = []
         for idx, row in self.index.iterrows():
             fsi = FinancialSymbolId(self.namespace, str(idx))

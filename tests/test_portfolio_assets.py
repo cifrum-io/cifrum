@@ -75,6 +75,7 @@ def test__default_periods():
     assert pd.Period.now(freq='M') >= portfolio.rate_of_return().end_period
 
 
+@pytest.mark.quandl
 def test__usd_assets_that_is_older_than_rub():
     p_usd = y.portfolio(assets={'ny/T': 1}, currency='usd')
     assert p_usd.rate_of_return().start_period == pd.Period('1984-08', freq='M')
@@ -101,6 +102,7 @@ def test__data_for_last_month_period_should_be_dropped(yapo_instance_factory):
     assert asset.close().period_range() == list(period_range_expected)
 
 
+@pytest.mark.quandl
 @pytest.mark.slow
 @freeze_time('2018-1-30 1:0:0')
 def test__quandl_values():
@@ -166,6 +168,7 @@ def test__fail_if_awkwardly_current_time_is_less_than_asset_start_date():
                 raises(ValueError, '`self._period_min` must not be >= `self._period_max`'))
 
 
+@pytest.mark.quandl
 def test__handle_asset_with_dot_in_name():
     asset = y.portfolio_asset(name='ny/BRK.B')
     assert_that(asset, not_none())

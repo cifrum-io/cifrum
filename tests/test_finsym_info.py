@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 from hamcrest import assert_that, instance_of, empty, not_none, has_length, has_property, starts_with, \
     contains_inanyorder, none
 
@@ -38,6 +39,7 @@ def test__micex_stocks_should_have_correct_fields():
     assert_that(info, has_property('adjusted_close', True))
 
 
+@pytest.mark.quandl
 def test__quandl_stocks_should_have_correct_fields():
     info = y.information(name='ny/VNQ')
     assert_that(info, has_property('namespace', 'ny'))
@@ -100,6 +102,7 @@ def test__top_rates__should_have_correct_fields():
                 contains_inanyorder('period', 'rate'))
 
 
+@pytest.mark.quandl
 def test__all_data_should_be_available():
     assert_that(y.information(name='ny/MSFT'), not_none())
     assert_that(y.information(name='micex/FXRU'), not_none())

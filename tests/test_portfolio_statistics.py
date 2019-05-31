@@ -199,6 +199,7 @@ def test__risk():
     assert_that(_portfolio.risk().value, close_to(.1688, delta))
 
 
+@pytest.mark.quandl
 @pytest.mark.parametrize('currency', Currency)
 def test__handle_portfolio_with_asset_with_dot_in_name(currency: Currency):
     p = y.portfolio(assets={'ny/BRK.B': 1}, currency=currency.name)
