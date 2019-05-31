@@ -3,7 +3,6 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from freezegun import freeze_time
 from hamcrest import *
 
 import yapo as l
@@ -11,7 +10,7 @@ from conftest import delta, decimal_places
 from yapo.common.enums import Currency
 from yapo.common.time_series import TimeSeriesKind
 
-_portfolio_period_start = pd.Period('2015-4', freq='M')
+_portfolio_period_start = pd.Period('2015-3', freq='M')
 _portfolio_period_end = pd.Period('2017-5', freq='M')
 _asset_names = {'mut_ru/0890-94127385': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
 _portfolio = l.portfolio(assets=_asset_names,
@@ -22,28 +21,26 @@ _portfolio = l.portfolio(assets=_asset_names,
 
 def test__initial_data():
     assert_that(_portfolio.assets, has_length(3))
-    assert_that(l.portfolio_asset(name='mut_ru/0890-94127385',
-                                  start_period=_portfolio_period_start,
-                                  end_period=_portfolio_period_end,
-                                  currency='rub').close().values, contains(
-        *[1094.14, 1080.76, 1074.51, 1091.37, 1151.83, 1103.9, 1147.5,
+
+    p = l.portfolio(assets=_asset_names,
+                    start_period=str(_portfolio_period_start),
+                    end_period=str(_portfolio_period_end),
+                    currency='RUB')
+    assert_that(p.assets, has_length(3))
+
+    assert_that(p.assets['mut_ru/0890-94127385'].close().values, contains(
+        *[1055.64, 1094.14, 1080.76, 1074.51, 1091.37, 1151.83, 1103.9, 1147.5,
           1193.69, 1175.64, 1199.64, 1233.88, 1252.67, 1302.46, 1268.7,
           1269.31, 1334.93, 1351.45, 1357.41, 1366.64, 1444.08, 1535.61,
           1525.6, 1403.08, 1375.97, 1390.39, 1314.96]
     ))
-    assert_that(l.portfolio_asset(name='micex/FXRU',
-                                  start_period=_portfolio_period_start,
-                                  end_period=_portfolio_period_end,
-                                  currency='rub').close().values, contains(
-        *[4670., 4830., 5110., 5650., 6130., 6160., 6140., 6330., 7020.,
+    assert_that(p.assets['micex/FXRU'].close().values, contains(
+        *[5070., 4670., 4830., 5110., 5650., 6130., 6160., 6140., 6330., 7020.,
           7230., 7250., 6720., 6540., 6710., 6630., 6760., 6770., 6550.,
           6610., 6570., 6260., 6310., 6110., 5970., 6110., 6190.]
     ))
-    assert_that(l.portfolio_asset(name='micex/FXMM',
-                                  start_period=_portfolio_period_start,
-                                  end_period=_portfolio_period_end,
-                                  currency='rub').close().values, contains(
-        *[1110., 1121.7, 1135.5, 1146.5, 1155.7, 1164.4, 1174.3, 1183.8,
+    assert_that(p.assets['micex/FXMM'].close().values, contains(
+        *[1097.2, 1110., 1121.7, 1135.5, 1146.5, 1155.7, 1164.4, 1174.3, 1183.8,
           1194.7, 1203.8, 1215.1, 1228.6, 1233.2, 1237.3, 1246.6, 1253.7,
           1265.5, 1273.4, 1282.7, 1292.1, 1302.2, 1308.6, 1317.2, 1327.5,
           1336.8, 1346.1]

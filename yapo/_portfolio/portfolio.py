@@ -8,7 +8,6 @@ import datetime as dtm
 from textwrap import dedent
 import copy
 
-
 from .currency import PortfolioCurrencyFactory
 from ..common.enums import Currency, Period
 from ..common.financial_symbol import FinancialSymbol
@@ -19,7 +18,6 @@ from .._sources.registries import CurrencySymbolsRegistry
 
 @inject
 class PortfolioAsset:
-
     currency_symbols_registry: CurrencySymbolsRegistry
     portfolio_currency_factory: PortfolioCurrencyFactory
 
@@ -70,8 +68,8 @@ class PortfolioAsset:
     def __transform_values_according_to_period(self):
         vals = self.symbol.values(start_period=self._period_min, end_period=self._period_max)
         if len(vals['period']) > 0:
-            self._period_min = max(self._period_min, min(vals['period']))
-            self._period_max = min(self._period_max, max(vals['period']))
+            self._period_min = max(self._period_min, vals['period'].min())
+            self._period_max = min(self._period_max, vals['period'].max())
         # TODO: okama_dev-98
         if self.symbol.period == Period.DECADE:
             ts = TimeSeries(values=vals['rate'].values,
@@ -88,10 +86,10 @@ class PortfolioAsset:
     def __currency_conversion_rate(self, currency_to: Currency):
         currency_from = self.symbol.currency
         currency_rate = self.currency_symbols_registry \
-                            .convert(currency_from=currency_from,
-                                     currency_to=currency_to,
-                                     start_period=self._period_min,
-                                     end_period=self._period_max)
+            .convert(currency_from=currency_from,
+                     currency_to=currency_to,
+                     start_period=self._period_min,
+                     end_period=self._period_max)
         currency_rate = TimeSeries(values=currency_rate['close'].values,
                                    start_period=currency_rate['period'].min(),
                                    end_period=currency_rate['period'].max(),
@@ -131,7 +129,7 @@ class PortfolioAsset:
             year - returns risk approximated to yearly value
         """
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min + 1,
+                      start_period=self._period_min,
                       end_period=self._period_max,
                       currency=self.currency.value)
         return p.risk(period=period)
@@ -142,7 +140,7 @@ class PortfolioAsset:
     )
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min + 1,
+                      start_period=self._period_min,
                       end_period=self._period_max,
                       currency=self.currency.value)
         return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
@@ -175,29 +173,12 @@ class Portfolio:
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
                  currency: Currency):
-        """
-        :param start_period: start period of first order diff
-        :param end_period: end period of first order diff
-        """
-        if (end_period - start_period).n < 1:
-            raise ValueError('period range should be at least 1 months')
-
         self.weights = weights
         self.currency = self.portfolio_currency_factory.create(currency=currency)
-        self._period_min = max(
-            self.currency.period_min + 1,
-            *[a._period_min + 1 for a in assets],
-            start_period,
-        )
-        self._period_max = min(
-            self.currency.period_max,
-            *[a._period_max for a in assets],
-            end_period,
-        )
 
         self._assets = [PortfolioAsset(symbol=a.symbol,
-                                       start_period=self._period_min - 1,
-                                       end_period=self._period_max,
+                                       start_period=start_period,
+                                       end_period=end_period,
                                        currency=currency,
                                        portfolio=self,
                                        weight=w) for a, w in zip(assets, weights)]
@@ -220,10 +201,11 @@ class Portfolio:
             ror = self.rate_of_return()
             return ror.std()
         elif period == 'year':
-            if (self._period_max - self._period_min).n < 12:
+            ror = self.rate_of_return()
+            if ror.period_size < 12:
                 raise Exception('year risk is requested for less than 12 months')
 
-            mean = (1. + self.rate_of_return()).mean()
+            mean = (1. + ror).mean()
             risk_monthly = self.risk(period='month')
             risk_yearly = ((risk_monthly ** 2 + mean ** 2) ** 12 - mean ** 24).sqrt()
             return risk_yearly
