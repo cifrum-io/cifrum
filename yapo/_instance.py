@@ -3,16 +3,15 @@ from typing import List, Dict, Union
 import numpy as np
 import pandas as pd
 from contracts import contract
-from serum import inject, singleton, Context
+from serum import inject, singleton
 
+from ._portfolio.currency import PortfolioCurrencyFactory
+from ._portfolio.portfolio import Portfolio, PortfolioAsset
+from ._search import _Search
 from ._sources.registries import FinancialSymbolsRegistry
-from ._sources.all_sources import AllSymbolSources
 from .common.enums import Currency, SecurityType
 from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
-from ._portfolio.portfolio import Portfolio, PortfolioAsset
-from ._portfolio.currency import PortfolioCurrencyFactory
-from ._search import _Search
 
 
 @singleton
@@ -176,13 +175,3 @@ class Yapo:
                                     start_period=start_period, end_period=end_period,
                                     years_ago=years_ago)
         return inflation_ts
-
-
-with Context(AllSymbolSources):
-    yapo_instance = Yapo()
-information = yapo_instance.information
-portfolio = yapo_instance.portfolio
-portfolio_asset = yapo_instance.portfolio_asset
-available_names = yapo_instance.available_names
-search = yapo_instance.search
-inflation = yapo_instance.inflation
