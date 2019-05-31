@@ -89,7 +89,7 @@ class Yapo:
             assets = list(filter(None.__ne__, assets))
             return assets
         else:
-            raise Exception('Unexpected state of kwargs')
+            raise ValueError('Unexpected state of `kwargs`. Either `name`, or `names` should be given')
         pass
 
     @contract(
