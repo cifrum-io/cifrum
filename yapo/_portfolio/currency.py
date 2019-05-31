@@ -115,6 +115,10 @@ class PortfolioCurrency:
         else:
             raise ValueError('inflation kind is not supported: {}'.format(kind))
 
+    def __repr__(self):
+        currency_repr = 'Currency({})'.format(self._currency.name)
+        return currency_repr
+
 
 @singleton
 class PortfolioCurrencyFactory:
