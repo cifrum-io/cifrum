@@ -1,12 +1,14 @@
 [tool.poetry]
 name = "yapo"
-version = "0.1.0"
-description = ""
+version = "0.1.1"
+description = "Flexible and easy-to-use Python library for analysis & manipulation with financial & economic data"
 authors = [
-    "Alexander Myltsev <https://github.com/alexander-myltsev/>",
-    "Sergey Kikevich <https://github.com/chilango74/>",
+    "Alexander Myltsev",
+    "Sergey Kikevich",
 ]
-licence = 'MIT'
+licence = "MIT"
+homepage = "https://github.com/okama-io/yapo"
+repository = "https://github.com/okama-io/yapo"
 
 [tool.poetry.dependencies]
 python = "^3.6"
