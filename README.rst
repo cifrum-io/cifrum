@@ -58,7 +58,7 @@ Main Features
 * ``[x]`` Financial and Economic data with API with GraphQL data access
 
 Financial and Economic data freely available
-=============
+============================================
 * ``[x]`` EOD adjusted close for NYSE and NASDAQ stocks and ETF
 * ``[x]`` EOD close for Moscow Exchange stocks and ETF
 * ``[x]`` EOD close for Russian open-end funds
