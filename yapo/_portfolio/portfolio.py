@@ -134,6 +134,9 @@ class PortfolioAsset:
                       currency=self.currency.value)
         return p.risk(period=period)
 
+    def cagr(self, years_ago=None, real=False):
+        return self.compound_annual_growth_rate(years_ago=years_ago, real=real)
+
     @contract(
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
@@ -211,6 +214,9 @@ class Portfolio:
             return risk_yearly
         else:
             raise Exception('unexpected value of `period` {}'.format(period))
+
+    def cagr(self, years_ago=None, real=False):
+        return self.compound_annual_growth_rate(years_ago=years_ago, real=real)
 
     @contract(
         years_ago='int,>0|None|list[int,>0]',

@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from hamcrest import assert_that, close_to, calling, raises
+from hamcrest import assert_that, close_to, calling, raises, equal_to
 
 import yapo as y
 from conftest import decimal_places, delta
@@ -55,6 +55,17 @@ def test__compound_annual_growth_rate():
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
+
+
+def test__compound_annual_growth_rate_synonym():
+    assert_that(__asset.compound_annual_growth_rate().value,
+                equal_to(__asset.cagr().value))
+    assert_that(__asset.compound_annual_growth_rate(real=True).value,
+                equal_to(__asset.cagr(real=True).value))
+    assert_that(__asset.compound_annual_growth_rate(years_ago=5).value,
+                equal_to(__asset.cagr(years_ago=5).value))
+    assert_that(__asset.compound_annual_growth_rate(years_ago=5, real=True).value,
+                equal_to(__asset.cagr(years_ago=5, real=True).value))
 
 
 def test__cagr_should_be_full_when_it_has_period_equal_to_ror():

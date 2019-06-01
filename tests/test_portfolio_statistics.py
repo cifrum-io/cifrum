@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from hamcrest import assert_that, has_length, contains, not_none, close_to, calling, raises, is_not, empty
+from hamcrest import assert_that, has_length, contains, not_none, close_to, calling, raises, is_not, empty, equal_to
 
 import yapo as y
 from conftest import delta, decimal_places
@@ -181,6 +181,17 @@ def test__compound_annual_growth_rate_real():
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
+
+
+def test__compound_annual_growth_rate_synonym():
+    assert_that(_portfolio.compound_annual_growth_rate().value,
+                equal_to(_portfolio.cagr().value))
+    assert_that(_portfolio.compound_annual_growth_rate(real=True).value,
+                equal_to(_portfolio.cagr(real=True).value))
+    assert_that(_portfolio.compound_annual_growth_rate(years_ago=5).value,
+                equal_to(_portfolio.cagr(years_ago=5).value))
+    assert_that(_portfolio.compound_annual_growth_rate(years_ago=5, real=True).value,
+                equal_to(_portfolio.cagr(years_ago=5, real=True).value))
 
 
 def test__risk():
