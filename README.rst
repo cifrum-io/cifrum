@@ -85,7 +85,8 @@ Dependencies
 ============
 
 The library dependencies are listed at
-`pyproject.toml <https://github.com/okama-io/yapo/blob/master/pyproject.toml#L11>`_.
+`pyproject.toml <https://github.com/okama-io/yapo/blob/master/pyproject.toml>`_ under
+``[tool.poetry.dependencies]`` section.
 
 Discussion, Development, and Getting Help
 =========================================
