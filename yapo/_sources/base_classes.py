@@ -1,4 +1,6 @@
 from pprint import pformat
+from typing import Optional
+
 import pandas as pd
 
 from ..common.financial_symbol_info import FinancialSymbolInfo
@@ -10,7 +12,7 @@ class FinancialSymbolsSource:
     def __init__(self, namespace):
         self.namespace = namespace
 
-    def fetch_financial_symbol(self, name: str):
+    def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         raise Exception('should not be called')
 
     def __repr__(self):
@@ -53,7 +55,7 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
                             period=period,
                             adjusted_close=adjusted_close)
 
-    def fetch_financial_symbol(self, name: str):
+    def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         return self.financial_symbol if name == self.name else None
 
     def get_all_infos(self):

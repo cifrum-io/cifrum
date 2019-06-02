@@ -6,7 +6,7 @@ class FinancialSymbolId:
         namespace, name = fin_symbol_fullname.split(FinancialSymbolId.__delimiter)
         return FinancialSymbolId(namespace, name)
 
-    def __init__(self, namespace, name):
+    def __init__(self, namespace: str, name: str):
         self.namespace = namespace
         self.name = name
 

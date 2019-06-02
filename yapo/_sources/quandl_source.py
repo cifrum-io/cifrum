@@ -1,5 +1,6 @@
 import os
 from functools import lru_cache
+from typing import Optional
 
 import pandas as pd
 import quandl
@@ -49,7 +50,7 @@ class QuandlSource(FinancialSymbolsSource):
         df_res['date'] = df_res.index
         return df_res
 
-    def fetch_financial_symbol(self, name: str):
+    def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         if not self._available:
             return None
 

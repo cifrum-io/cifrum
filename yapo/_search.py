@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Tuple, Iterator
 
 from serum import inject
 import re
@@ -77,25 +77,24 @@ class _Search:
         except Exception:
             fs = None
 
-        if fs:
+        if fs is not None:
             return [fs]
-        else:
-            if not isinstance(query, str):
-                raise ValueError('`query` should be string')
-            if not isinstance(top, int):
-                raise ValueError('`top` should be int')
 
-            top = max(0, top)
-            if not query or top == 0:
-                return []
+        if not isinstance(query, str):
+            raise ValueError('`query` should be string')
+        if not isinstance(top, int):
+            raise ValueError('`top` should be int')
 
-            query = re.sub(r'\s+', ' ', query.strip().lower())
-            if len(query) == 0:
-                return []
+        top = max(0, top)
+        if not query or top == 0:
+            return []
 
-            r = [(l.find(query), l) for l in self.lines]
-            r = filter(lambda x: x[0] != -1, r)
-            r = sorted(r, key=lambda x: '{:4d} {}'.format(x[0], x[1]))
-            r = r[:top]
-            r = [self.id2sym[x[1]] for x in r]
-            return list(r)[:top]
+        query = re.sub(r'\s+', ' ', query.strip().lower())
+        if len(query) == 0:
+            return []
+
+        r: Iterator[Tuple[int, str]] = ((l.find(query), l) for l in self.lines)
+        r = filter(lambda x: x[0] != -1, r)
+        r_list = sorted(r, key=lambda x: '{:4d} {}'.format(x[0], x[1]))
+        symbols: List[FinancialSymbol] = [self.id2sym[x[1]] for x in r_list[:top]]
+        return symbols

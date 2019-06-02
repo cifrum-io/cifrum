@@ -28,6 +28,7 @@ codecov = "^2.0"
 pytest-cov = "^2.7"
 jupyterlab = "^0.35.6"
 nbval = "^0.9.1"
+mypy = "^0.701.0"
 
 [build-system]
 requires = ["poetry >= 0.12, <1"]

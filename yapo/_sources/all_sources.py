@@ -1,7 +1,9 @@
 from abc import ABCMeta, abstractmethod
+from typing import List
 
 from serum import singleton, inject
 
+from .._sources.base_classes import FinancialSymbolsSource
 from .micex_stocks_source import MicexStocksSource
 from .mutru_funds_source import MutualFundsRuSource
 from .quandl_source import QuandlSource
@@ -16,7 +18,7 @@ from .yahoo_indexes_source import YahooIndexesSource
 class SymbolSources(metaclass=ABCMeta):
     @property
     @abstractmethod
-    def sources(self):
+    def sources(self) -> List[FinancialSymbolsSource]:
         raise NotImplementedError()
 
 

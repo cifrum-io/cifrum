@@ -31,3 +31,5 @@ docs/_templates/
 
 .env
 .tox/
+.mypy_cache/
+dist/

@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import Optional
 
 from serum import singleton
 import pandas as pd
@@ -30,7 +31,7 @@ class MicexStocksSource(FinancialSymbolsSource):
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         return df_new
 
-    def fetch_financial_symbol(self, name: str):
+    def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         if name not in self.index.index:
             return None
         row = self.index.loc[name]

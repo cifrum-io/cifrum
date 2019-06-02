@@ -1,15 +1,16 @@
-from functools import lru_cache
-
-from serum import singleton
 import datetime as dtm
+from functools import lru_cache
+from typing import Optional
+
 import pandas as pd
+from serum import singleton
 
 from .base_classes import SingleFinancialSymbolSource, FinancialSymbolsSource
-from ..common.financial_symbol_id import FinancialSymbolId
-from ..common.financial_symbol import FinancialSymbol
-from ..common.financial_symbol_info import FinancialSymbolInfo
-from ..common.enums import Currency, SecurityType, Period
 from .._settings import data_url, change_column_name
+from ..common.enums import Currency, SecurityType, Period
+from ..common.financial_symbol import FinancialSymbol
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
 @singleton
@@ -72,23 +73,25 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
         df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
         return df_new
 
-    def fetch_financial_symbol(self, name: str):
-        currency = Currency.__dict__.get(name)
+    def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
+        name = name.upper()
+        currency = Currency.__dict__.get(name)  # type: ignore
+
         if currency is None:
             return None
-        else:
-            fs = FinancialSymbol(
-                identifier=FinancialSymbolId(namespace='cbr', name=name),
-                values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
-                short_name=self.__short_names[currency],
-                start_period=self._currency_min_date[currency.name],
-                end_period=pd.Period(dtm.datetime.now(), freq='D'),
-                currency=currency,
-                security_type=SecurityType.CURRENCY,
-                period=Period.DAY,
-                adjusted_close=True,
-            )
-            return fs
+
+        fs = FinancialSymbol(
+            identifier=FinancialSymbolId(namespace='cbr', name=name),
+            values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
+            short_name=self.__short_names[currency],
+            start_period=self._currency_min_date[currency.name],
+            end_period=pd.Period(dtm.datetime.now(), freq='D'),
+            currency=currency,
+            security_type=SecurityType.CURRENCY,
+            period=Period.DAY,
+            adjusted_close=True,
+        )
+        return fs
 
     def get_all_infos(self):
         return [

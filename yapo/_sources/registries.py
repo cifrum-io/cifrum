@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, List, Dict
 
 from serum import singleton, inject
 import pandas as pd
 from itertools import groupby
 
+from .._sources.base_classes import FinancialSymbolsSource
 from .._sources.single_financial_symbol_source import CbrCurrenciesSource
 from .all_sources import SymbolSources
 from .._settings import data_url
@@ -17,11 +18,13 @@ class FinancialSymbolsRegistry:
 
     @inject
     def __init__(self, symbol_sources: SymbolSources):
-        def symbol_source_key(x): return x.namespace
+        def symbol_source_key(x: FinancialSymbolsSource) -> str:
+            return x.namespace
 
-        symbol_sources = sorted(symbol_sources.sources, key=symbol_source_key)
-        self.symbol_sources = {}
-        for k, v in groupby(symbol_sources, key=symbol_source_key):
+        symbol_sources_list: List[FinancialSymbolsSource] = \
+            sorted(symbol_sources.sources, key=symbol_source_key)
+        self.symbol_sources: Dict[str, List[FinancialSymbolsSource]] = {}
+        for k, v in groupby(symbol_sources_list, key=symbol_source_key):
             self.symbol_sources.update({k: list(v)})
 
     def namespaces(self):
@@ -35,23 +38,26 @@ class FinancialSymbolsRegistry:
                 for name in sym_source.get_all_infos()]
 
     def get(self, financial_symbol_id: FinancialSymbolId) -> Optional[FinancialSymbol]:
-        if financial_symbol_id.namespace in self.symbol_sources.keys():
-            result = []
-            for symbol_source in self.symbol_sources.get(financial_symbol_id.namespace):
-                fin_symbol = symbol_source.fetch_financial_symbol(financial_symbol_id.name)
-                if fin_symbol:
-                    result.append(fin_symbol)
-            result_count = len(result)
-            if result_count == 1:
-                return result[0]
-            elif result_count == 0:
-                return None
-            else:
-                raise Exception('Something went wrong. {} names are found for {}. '
-                                'Please, submit the issue'
-                                .format(result_count, financial_symbol_id.format()))
-        else:
+        symbol_sources_list: Optional[List[FinancialSymbolsSource]] = \
+            self.symbol_sources.get(financial_symbol_id.namespace)
+
+        if symbol_sources_list is None:
             return None
+
+        result: List[FinancialSymbol] = []
+        for symbol_source in symbol_sources_list:
+            fin_symbol = symbol_source.fetch_financial_symbol(financial_symbol_id.name)
+            if fin_symbol is not None:
+                result.append(fin_symbol)
+        result_count = len(result)
+        if result_count == 1:
+            return result[0]
+        elif result_count == 0:
+            return None
+        else:
+            raise Exception('Something went wrong. {} names are found for {}. '
+                            'Please, submit the issue'
+                            .format(result_count, financial_symbol_id.format()))
 
 
 @singleton

@@ -1,4 +1,4 @@
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ class Yapo:
         self.__period_lowest = '1900-1'
         self.__period_highest = lambda: str(pd.Period.now(freq='M'))
 
-    def information(self, **kwargs) -> Union[FinancialSymbol, List[FinancialSymbol]]:
+    def information(self, **kwargs) -> Union[Optional[FinancialSymbol], List[Optional[FinancialSymbol]]]:
         """
         Fetches financial symbol information based on internal ID.
         The information includes ISIN, short and long
@@ -49,7 +49,12 @@ class Yapo:
             return finsym_info
         elif 'names' in kwargs:
             names = kwargs['names']
-            finsym_infos = [self.information(name=name) for name in names]
+            finsym_infos: List[Optional[FinancialSymbol]] = []
+            for name in names:
+                finsym_info1 = self.information(name=name)
+                if not (finsym_info1 is None or isinstance(finsym_info1, FinancialSymbol)):
+                    raise ValueError('Unexpected type of financial symbol information')
+                finsym_infos.append(finsym_info1)
             return finsym_infos
         else:
             raise Exception('Unexpected state of kwargs')
@@ -67,26 +72,37 @@ class Yapo:
             start_period = pd.Period(start_period, freq='M')
             end_period = pd.Period(end_period, freq='M')
 
-            name = kwargs['name']
+            name: str = kwargs['name']
             finsym_info = self.information(name=name)
 
             if finsym_info is None:
                 return None
+            if not isinstance(finsym_info, FinancialSymbol):
+                raise ValueError('Unexpected type of financial symbol information')
 
-            currency = finsym_info.currency if currency is None else Currency.__dict__[currency.upper()]
+            if currency is None:
+                currency_enum: Currency = finsym_info.currency
+            else:
+                currency_enum = Currency.__dict__[currency.upper()]  # type: ignore
 
             allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT,
                                       SecurityType.CURRENCY, SecurityType.INDEX}
             assert finsym_info.security_type in allowed_security_types
             a = PortfolioAsset(symbol=finsym_info,
-                               start_period=start_period, end_period=end_period, currency=currency)
+                               start_period=start_period, end_period=end_period, currency=currency_enum)
             return a
         elif 'names' in kwargs:
-            names = kwargs['names']
-            assets = [self.portfolio_asset(name=name,
-                                           start_period=start_period, end_period=end_period,
-                                           currency=currency) for name in names]
-            assets = list(filter(None.__ne__, assets))
+            names: List[str] = kwargs['names']
+            assets: List[PortfolioAsset] = []
+            for name in names:
+                pa = self.portfolio_asset(name=name,
+                                          start_period=start_period, end_period=end_period,
+                                          currency=currency)
+                if pa is None:
+                    continue
+                if not isinstance(pa, PortfolioAsset):
+                    raise ValueError('Unexpected type of portfolio asset')
+                assets.append(pa)
             return assets
         else:
             raise ValueError('Unexpected state of `kwargs`. Either `name`, or `names` should be given')
@@ -112,23 +128,29 @@ class Yapo:
             end_period = self.__period_highest()
 
         names = list(assets.keys())
-        assets_resolved = self.portfolio_asset(names=names,
-                                               start_period=str(pd.Period(start_period, freq='M') - 1),
-                                               end_period=end_period,
-                                               currency=currency)
-        assets = {a: assets[a.symbol.identifier.format()] for a in assets_resolved}
-        weights_sum = np.abs(np.fromiter(assets.values(), dtype=float, count=len(assets)).sum())
+        assets_resolved = \
+            self.portfolio_asset(names=names,
+                                 start_period=str(pd.Period(start_period, freq='M') - 1),
+                                 end_period=end_period,
+                                 currency=currency)
+        if not isinstance(assets_resolved, list):
+            raise ValueError('`assets_resolved` should be list')
+        asset2weight_dict: Dict[PortfolioAsset, float] = \
+            {a: assets[a.symbol.identifier.format()] for a in assets_resolved}
+        weights_sum: float = \
+            np.abs(np.fromiter(asset2weight_dict.values(), dtype=float, count=len(asset2weight_dict)).sum())
+
         if np.abs(weights_sum - 1.) > 1e-3:
-            assets = {a: (w / weights_sum) for a, w in assets.items()}
+            asset2weight_dict = {a: (w / weights_sum) for a, w in asset2weight_dict.items()}
 
         start_period = pd.Period(start_period, freq='M')
         end_period = pd.Period(end_period, freq='M')
-        currency = Currency.__dict__[currency.upper()]
+        currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
 
-        portfolio_instance = Portfolio(assets=list(assets.keys()),
-                                       weights=list(assets.values()),
+        portfolio_instance = Portfolio(assets=list(asset2weight_dict.keys()),
+                                       weights=list(asset2weight_dict.values()),
                                        start_period=start_period, end_period=end_period,
-                                       currency=currency)
+                                       currency=currency_enum)
         return portfolio_instance
 
     def available_names(self, **kwargs):
@@ -164,8 +186,8 @@ class Yapo:
     def inflation(self, currency: str, kind: str,
                   end_period: str = None,
                   start_period: str = None, years_ago: int = None):
-        currency = Currency.__dict__[currency.upper()]
-        pc = self.portfolio_currency_factory.create(currency=currency)
+        currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
+        pc = self.portfolio_currency_factory.create(currency=currency_enum)
         if start_period:
             start_period = pd.Period(start_period, freq='M')
         elif years_ago is None:

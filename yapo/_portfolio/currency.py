@@ -2,6 +2,7 @@ import pandas as pd
 from contracts import contract
 from serum import inject, singleton
 
+from ..common.financial_symbol import FinancialSymbol
 from .._sources.single_financial_symbol_source import CbrCurrenciesSource
 from .._sources.inflation_source import InflationSource
 from .._settings import _MONTHS_PER_YEAR
@@ -16,15 +17,21 @@ class PortfolioCurrency:
 
     def __init__(self, currency: Currency):
         self._currency = currency
-        self._inflation_symbol = \
-            self.__inflation_source.fetch_financial_symbol(currency.name)
-        self._currency_symbol = \
-            self.__cbr_currencies_source.fetch_financial_symbol(currency.name)
-        self._period_min = max(
+
+        inflation_symbol = self.__inflation_source.fetch_financial_symbol(currency.name)
+        if inflation_symbol is None:
+            raise ValueError('Inflation symbol for the `name`={} is not found'.format(currency.name))
+        self._inflation_symbol: FinancialSymbol = inflation_symbol
+
+        currency_symbol = self.__cbr_currencies_source.fetch_financial_symbol(currency.name)
+        if currency_symbol is None:
+            raise ValueError('Currency symbol for the `name`={} is not found'.format(currency.name))
+        self._currency_symbol: FinancialSymbol = currency_symbol
+        self._period_min: pd.Period = max(
             self.inflation_start_period - 1,
             self._currency_symbol.start_period.asfreq(freq='M'),
         )
-        self._period_max = min(
+        self._period_max: pd.Period = min(
             self.inflation_end_period,
             self._currency_symbol.end_period.asfreq(freq='M'),
         )
