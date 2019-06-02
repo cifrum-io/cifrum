@@ -2,7 +2,7 @@ class FinancialSymbolId:
     __delimiter = '/'
 
     @classmethod
-    def parse(cls, fin_symbol_fullname):
+    def parse(cls, fin_symbol_fullname: str):
         namespace, name = fin_symbol_fullname.split(FinancialSymbolId.__delimiter)
         return FinancialSymbolId(namespace, name)
 
@@ -10,7 +10,7 @@ class FinancialSymbolId:
         self.namespace = namespace
         self.name = name
 
-    def format(self):
+    def format(self) -> str:
         return self.namespace + FinancialSymbolId.__delimiter + self.name
 
     def __repr__(self):

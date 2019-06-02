@@ -2,11 +2,11 @@ import pandas as pd
 from contracts import contract
 from serum import inject, singleton
 
-from ..common.financial_symbol import FinancialSymbol
-from .._sources.single_financial_symbol_source import CbrCurrenciesSource
-from .._sources.inflation_source import InflationSource
 from .._settings import _MONTHS_PER_YEAR
+from .._sources.inflation_source import InflationSource
+from .._sources.single_financial_symbol_source import CbrCurrenciesSource
 from ..common.enums import Currency
+from ..common.financial_symbol import FinancialSymbol
 from ..common.time_series import TimeSeries, TimeSeriesKind
 
 
@@ -37,23 +37,23 @@ class PortfolioCurrency:
         )
 
     @property
-    def period_min(self):
+    def period_min(self) -> pd.Period:
         return self._period_min
 
     @property
-    def period_max(self):
+    def period_max(self) -> pd.Period:
         return self._period_max
 
     @property
-    def inflation_start_period(self):
+    def inflation_start_period(self) -> pd.Period:
         return self._inflation_symbol.start_period.asfreq(freq='M')
 
     @property
-    def inflation_end_period(self):
+    def inflation_end_period(self) -> pd.Period:
         return self._inflation_symbol.end_period.asfreq(freq='M')
 
     @property
-    def value(self):
+    def value(self) -> Currency:
         return self._currency
 
     @contract(
@@ -63,7 +63,7 @@ class PortfolioCurrency:
     def inflation(self, kind,
                   end_period: pd.Period,
                   start_period: pd.Period = None,
-                  years_ago: int = None):
+                  years_ago: int = None) -> TimeSeries:
         """
         Computes the properly reduced inflation for the currency
 
@@ -122,7 +122,7 @@ class PortfolioCurrency:
         else:
             raise ValueError('inflation kind is not supported: {}'.format(kind))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         currency_repr = 'Currency({})'.format(self._currency.name)
         return currency_repr
 
@@ -131,5 +131,5 @@ class PortfolioCurrency:
 class PortfolioCurrencyFactory:
 
     @staticmethod
-    def create(currency: Currency):
+    def create(currency: Currency) -> PortfolioCurrency:
         return PortfolioCurrency(currency=currency)
