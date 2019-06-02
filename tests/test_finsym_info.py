@@ -136,6 +136,6 @@ def test__return_same_infos_count_as_provided():
 
 
 def test__be_invariant_in_respect_to_order():
-    infos1 = [y.identifier.format() for y in y.information(names=['infl/RUB', 'infl/EUR'])]
-    infos2 = [y.identifier.format() for y in y.information(names=['infl/EUR', 'infl/RUB'])]
+    infos1 = [info.identifier.format() for info in y.information(names=['infl/RUB', 'infl/EUR'])]
+    infos2 = [info.identifier.format() for info in y.information(names=['infl/EUR', 'infl/RUB'])]
     assert_that(infos1, contains_inanyorder(*infos2))
