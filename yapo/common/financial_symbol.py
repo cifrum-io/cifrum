@@ -1,9 +1,12 @@
-from collections import namedtuple
 import datetime as dtm
-import dateutil
+from collections import namedtuple
+from typing import Optional
 
 import pandas as pd
-from ..common.enums import Period
+from dateutil import relativedelta
+
+from ..common.enums import Period, Currency, SecurityType
+from ..common.financial_symbol_id import FinancialSymbolId
 
 
 class ValuesFetcher:
@@ -53,23 +56,24 @@ class ValuesFetcher:
 
 class FinancialSymbol:
     def __init__(self,
-                 identifier,
-                 values,
-                 start_period=None,
-                 end_period=None,
-                 isin=None,
-                 short_name=None,
-                 long_name=None,
-                 exchange=None,
-                 currency=None,
-                 security_type=None,
-                 period=None,
-                 adjusted_close=None):
+                 identifier: FinancialSymbolId,
+                 values: pd.DataFrame,
+                 start_period: pd.Period,
+                 end_period: pd.Period,
+                 adjusted_close: bool,
+                 currency: Currency,
+                 period: Period,
+                 security_type: SecurityType,
+                 isin: Optional[str] = None,
+                 short_name: Optional[str] = None,
+                 long_name: Optional[str] = None,
+                 exchange: Optional[str] = None):
         self.identifier = identifier
         self.__values_fetcher = ValuesFetcher(
             values_func=values,
             period_min=pd.Period(start_period, freq='M'),
-            period_max=pd.Period(end_period, freq='M'))
+            period_max=pd.Period(end_period, freq='M')
+        )
         self.isin = isin
         self.short_name = short_name
         self.long_name = long_name
@@ -81,9 +85,7 @@ class FinancialSymbol:
         self.period = period
         self.adjusted_close = adjusted_close
 
-    def values(self, start_period, end_period):
-        start_period = pd.Period(start_period, freq='M')
-        end_period = pd.Period(end_period, freq='M')
+    def values(self, start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
         vals = self.values_fetcher._fetch(start_period=start_period, end_period=end_period)
 
         if self.period == Period.DAY:
@@ -96,7 +98,7 @@ class FinancialSymbol:
             if 'period' not in vals.columns:
                 vals['period'] = vals['date'].dt.to_period('M')
 
-            month_ago = pd.Period(dtm.datetime.now() - dateutil.relativedelta.relativedelta(months=1), freq='D')
+            month_ago = pd.Period(dtm.datetime.now() - relativedelta.relativedelta(months=1), freq='D')
             if self.end_period < month_ago:
                 vals = vals[vals['period'] < pd.Period(self.end_period, freq='M')]
             indicator__not_current_period = vals['period'] != pd.Period.now(freq='M')
@@ -116,21 +118,21 @@ class FinancialSymbol:
         return vals
 
     @property
-    def values_fetcher(self):
+    def values_fetcher(self) -> ValuesFetcher:
         return self.__values_fetcher
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.identifier.name
 
     @property
-    def namespace(self):
+    def namespace(self) -> str:
         return self.identifier.namespace
 
     @property
-    def identifier_str(self):
+    def identifier_str(self) -> str:
         return self.identifier.format()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         from pprint import pformat
         return '{}\n{}'.format(self.identifier_str, pformat(vars(self)))

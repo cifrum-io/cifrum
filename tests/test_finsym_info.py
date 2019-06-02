@@ -80,8 +80,8 @@ def test__inflation_ru__should_have_correct_fields():
     assert_that(info, has_property('security_type', SecurityType.INFLATION))
     assert_that(info, has_property('period', Period.MONTH))
     assert_that(info, has_property('adjusted_close', False))
-    assert_that(info.values(start_period=str(pd.Period.now(freq='M') - 2),
-                            end_period=str(pd.Period.now(freq='M'))).columns,
+    assert_that(info.values(start_period=pd.Period.now(freq='M') - 2,
+                            end_period=pd.Period.now(freq='M')).columns,
                 contains_inanyorder('period', 'value'))
 
 
@@ -97,8 +97,8 @@ def test__top_rates__should_have_correct_fields():
     assert_that(info, has_property('security_type', SecurityType.RATES))
     assert_that(info, has_property('period', Period.DECADE))
     assert_that(info, has_property('adjusted_close', False))
-    assert_that(info.values(start_period=str(pd.Period.now(freq='M') - 2),
-                            end_period=str(pd.Period.now(freq='M'))).columns,
+    assert_that(info.values(start_period=pd.Period.now(freq='M') - 2,
+                            end_period=pd.Period.now(freq='M')).columns,
                 contains_inanyorder('period', 'rate'))
 
 
