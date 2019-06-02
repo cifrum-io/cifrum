@@ -1,6 +1,6 @@
 import datetime as dtm
 from collections import namedtuple
-from typing import Optional
+from typing import Optional, Callable
 
 import pandas as pd
 from dateutil import relativedelta
@@ -57,7 +57,7 @@ class ValuesFetcher:
 class FinancialSymbol:
     def __init__(self,
                  identifier: FinancialSymbolId,
-                 values: pd.DataFrame,
+                 values: Callable[[pd.Period, pd.Period], pd.DataFrame],
                  start_period: pd.Period,
                  end_period: pd.Period,
                  adjusted_close: bool,

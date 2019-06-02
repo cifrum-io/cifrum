@@ -1,6 +1,6 @@
 import os
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Callable
 
 import pandas as pd
 import quandl
@@ -39,16 +39,21 @@ class QuandlSource(FinancialSymbolsSource):
             })
 
     @lru_cache(maxsize=512)
-    def __extract_values(self, name, start_period, end_period):
+    def __extract_values(self, name: str) -> Callable[[pd.Period, pd.Period], pd.DataFrame]:
         name = name.replace('.', '_')
-        df = quandl.get('EOD/{}.11'.format(name),
-                        start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
-                        end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),
-                        collapse='monthly')
-        df_res = pd.DataFrame()
-        df_res['close'] = df['Adj_Close']
-        df_res['date'] = df_res.index
-        return df_res
+
+        def func(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
+            nonlocal name
+            df = quandl.get('EOD/{}.11'.format(name),
+                            start_date=start_period.to_timestamp().strftime('%Y-%m-%d'),
+                            end_date=end_period.to_timestamp('M').strftime('%Y-%m-%d'),
+                            collapse='monthly')
+            df_res = pd.DataFrame()
+            df_res['close'] = df['Adj_Close']
+            df_res['date'] = df_res.index
+            return df_res
+
+        return func
 
     def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         if not self._available:
@@ -57,8 +62,7 @@ class QuandlSource(FinancialSymbolsSource):
         if name in self.index.index:
             row = self.index.loc[name]
             symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                     values=lambda start_period, end_period:
-                                     self.__extract_values(name, start_period, end_period),
+                                     values=self.__extract_values(name),
                                      exchange=row['exchange'],
                                      short_name=row['short_name'],
                                      start_period=row['date_start'],

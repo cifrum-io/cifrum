@@ -27,7 +27,7 @@ class OkamaSource(FinancialSymbolsSource):
         if name != self.okid10_name:
             return None
 
-        def fetch_values(start_period, end_period):
+        def fetch_values(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
             vals = self.cbr_top10_sym.values(
                 start_period=self.cbr_top10_sym.start_period,
                 end_period=end_period,

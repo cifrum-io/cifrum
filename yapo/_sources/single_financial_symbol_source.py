@@ -1,6 +1,6 @@
 import datetime as dtm
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Callable
 
 import pandas as pd
 from serum import singleton
@@ -60,18 +60,21 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
         }
 
     @lru_cache(maxsize=512)
-    def __currency_values(self, name, start_period, end_period):
-        start_period = max(start_period,
-                           pd.Period(self._currency_min_date[name], freq='M'))
-        end_period = min(end_period, pd.Period.now(freq='M'))
-        date_range = pd.date_range(start=start_period.to_timestamp(),
-                                   end=(end_period + 1).to_timestamp(),
-                                   freq='D')
-        df = pd.DataFrame({'date': date_range, 'close': 1.0})
+    def __currency_values(self, name: str) -> Callable[[pd.Period, pd.Period], pd.DataFrame]:
+        def func(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
+            start_period = max(start_period,
+                               pd.Period(self._currency_min_date[name], freq='M'))
+            end_period = min(end_period, pd.Period.now(freq='M'))
+            date_range = pd.date_range(start=start_period.to_timestamp(),
+                                       end=(end_period + 1).to_timestamp(),
+                                       freq='D')
+            df = pd.DataFrame({'date': date_range, 'close': 1.0})
 
-        df['period'] = df['date'].dt.to_period('M')
-        df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
-        return df_new
+            df['period'] = df['date'].dt.to_period('M')
+            df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
+            return df_new
+
+        return func
 
     def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         name = name.upper()
@@ -82,7 +85,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
 
         fs = FinancialSymbol(
             identifier=FinancialSymbolId(namespace='cbr', name=name),
-            values=lambda start_period, end_period: self.__currency_values(name, start_period, end_period),
+            values=self.__currency_values(name),
             short_name=self.__short_names[currency],
             start_period=self._currency_min_date[currency.name],
             end_period=pd.Period(dtm.datetime.now(), freq='D'),

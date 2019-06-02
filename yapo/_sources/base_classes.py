@@ -3,9 +3,9 @@ from typing import Optional
 
 import pandas as pd
 
-from ..common.financial_symbol_info import FinancialSymbolInfo
-from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol import FinancialSymbol
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
 class FinancialSymbolsSource:
@@ -23,7 +23,7 @@ class FinancialSymbolsSource:
 
 
 class SingleFinancialSymbolSource(FinancialSymbolsSource):
-    def __extract_values(self, start_period, end_period):
+    def __extract_values(self, start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
         df = self.__values_fetcher()
         df['date'] = pd.to_datetime(df['date'])
         return df[(df['date'].dt.to_period('M') >= start_period) &

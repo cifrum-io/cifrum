@@ -1,8 +1,8 @@
 from functools import lru_cache
-from typing import Optional
+from typing import Optional, Callable
 
-from serum import singleton
 import pandas as pd
+from serum import singleton
 
 from .base_classes import FinancialSymbolsSource
 from .._settings import data_url
@@ -22,20 +22,22 @@ class InflationSource(FinancialSymbolsSource):
         self.index['date_end'] = self.index['date_end'].dt.to_period(freq='M')
 
     @lru_cache(maxsize=512)
-    def __extract_values(self, currency, start_period, end_period):
-        df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency), sep='\t', parse_dates=['date'])
-        df['period'] = df['date'].dt.to_period('M')
-        df.sort_values(by='period', inplace=True)
-        df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
-        return df_new
+    def __extract_values(self, currency: str) -> Callable[[pd.Period, pd.Period], pd.DataFrame]:
+        def func(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
+            df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency), sep='\t', parse_dates=['date'])
+            df['period'] = df['date'].dt.to_period('M')
+            df.sort_values(by='period', inplace=True)
+            df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
+            return df_new
+
+        return func
 
     def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         if name not in self.index.index:
             return None
         row = self.index.loc[name]
         symbol = FinancialSymbol(identifier=FinancialSymbolId(namespace=self.namespace, name=name),
-                                 values=lambda start_period, end_period:
-                                     self.__extract_values(name, start_period, end_period),
+                                 values=self.__extract_values(name),
                                  short_name=row['short_name'],
                                  start_period=row['date_start'],
                                  end_period=row['date_end'],
