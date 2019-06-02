@@ -203,3 +203,23 @@ class Yapo:
         currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
         pc = self.portfolio_currency_factory.new(currency=currency_enum)
         return pc
+
+    def optimal_portfolios(self, asset_names: List[str],
+                           start_period: str, end_period: str,
+                           currency: str,
+                           samples_count: int = 10):
+        from ._portfolio.optimal import markovitz
+
+        currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
+        start_period_pd = pd.Period(start_period, freq='M')
+        end_period_pd = pd.Period(end_period, freq='M')
+
+        assets = self.portfolio_asset(names=asset_names,
+                                      start_period=start_period, end_period=end_period,
+                                      currency=currency)
+        assert(isinstance(assets, list))
+
+        opt_port = markovitz.compute(assets=assets, samples_count=samples_count,
+                                     start_period=start_period_pd, end_period=end_period_pd,
+                                     currency=currency_enum)
+        return opt_port

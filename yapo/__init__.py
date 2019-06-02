@@ -52,3 +52,4 @@ available_names = yapo_instance.available_names
 search = yapo_instance.search
 inflation = yapo_instance.inflation
 currency = yapo_instance.currency
+optimal_portfolios = yapo_instance.optimal_portfolios
