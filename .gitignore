@@ -32,4 +32,5 @@ docs/_templates/
 .env
 .tox/
 .mypy_cache/
+.pytype/
 dist/
