@@ -14,6 +14,7 @@ class TimeSeriesKind(Enum):
     YTD = 4
     CUMULATIVE = 5
     CURRENCY_RATE = 6
+    VALUE = 7
 
     def __mul__(self, other):
         if isinstance(other, (int, float, complex)):
@@ -140,7 +141,7 @@ class TimeSeries:
 
     @property
     def value(self):
-        if self.kind == TimeSeriesKind.REDUCED_VALUE:
+        if self.kind in {TimeSeriesKind.REDUCED_VALUE, TimeSeriesKind.VALUE}:
             return self._values[0]
         raise ValueError('incorrect `kind` to get value')
 
@@ -271,7 +272,19 @@ class TimeSeries:
                             freq=self._freq,
                             kind=self._kind)
             return ts
-        return self._values[key]
+        elif isinstance(key, int):
+            if key > 0:
+                p = self._start_period + key
+            else:
+                p = self._end_period + key
+
+            ts = TimeSeries(values=np.array([self._values[key]]),
+                            start_period=p, end_period=p,
+                            freq=self._freq,
+                            kind=TimeSeriesKind.VALUE)
+            return ts
+        else:
+            raise ValueError('Type of `key` is not supported')
 
     def __pow__(self, power, modulo=None):
         return self.apply(lambda x: x ** power)
