@@ -225,8 +225,9 @@ class Portfolio:
     def compound_annual_growth_rate(self, years_ago=None, real=False):
         if years_ago is None:
             ror = self.rate_of_return()
-            years_total = (ror.end_period - ror.start_period).n / _MONTHS_PER_YEAR
-            cagr = (ror + 1.).prod() ** (1 / years_total) - 1.
+            years_total = ror.period_size / _MONTHS_PER_YEAR
+            ror_c = (ror + 1.).prod()
+            cagr = ror_c ** (1 / years_total) - 1.
             if real:
                 inflation_cumulative = self.inflation(kind='cumulative')
                 cagr = (cagr + 1.) / (inflation_cumulative + 1.) ** (1 / years_total) - 1.
@@ -237,11 +238,12 @@ class Portfolio:
         elif isinstance(years_ago, int):
             ror = self.rate_of_return()
             months_count = years_ago * _MONTHS_PER_YEAR
-            if (ror.end_period - ror.start_period).n < months_count:
+            if ror.period_size < months_count:
                 return self.compound_annual_growth_rate(years_ago=None, real=real)
 
-            ror_series = self.rate_of_return()[-months_count:]
-            cagr = (ror_series + 1.).prod() ** (1 / years_ago) - 1.
+            ror_slice = self.rate_of_return()[-months_count:]
+            ror_slice_c = (ror_slice + 1.).prod()
+            cagr = ror_slice_c ** (1 / years_ago) - 1.
             if real:
                 inflation_cumulative = self.inflation(kind='cumulative',
                                                       years_ago=years_ago)

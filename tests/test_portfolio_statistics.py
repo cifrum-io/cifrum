@@ -151,7 +151,7 @@ def test__handle_related_inflation():
 
 def test__compound_annual_growth_rate():
     cagr_default = _portfolio.compound_annual_growth_rate()
-    assert_that(cagr_default.value, close_to(.1293, delta))
+    assert_that(cagr_default.value, close_to(.1241, delta))
 
     cagr_long_time = _portfolio.compound_annual_growth_rate(years_ago=20)
     assert_that((cagr_default - cagr_long_time).value, close_to(0., delta))
@@ -168,7 +168,7 @@ def test__compound_annual_growth_rate():
 
 def test__compound_annual_growth_rate_real():
     cagr_default = _portfolio.compound_annual_growth_rate(real=True)
-    assert_that(cagr_default.value, close_to(.1101, delta))
+    assert_that(cagr_default.value, close_to(.1056, delta))
 
     cagr_long_time = _portfolio.compound_annual_growth_rate(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))

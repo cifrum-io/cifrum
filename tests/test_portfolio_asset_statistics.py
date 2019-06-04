@@ -4,6 +4,7 @@ from hamcrest import assert_that, close_to, calling, raises, equal_to
 
 import yapo as y
 from conftest import decimal_places, delta
+from yapo._settings import _MONTHS_PER_YEAR
 from yapo.common.time_series import TimeSeriesKind
 
 __asset_name = 'mut_ru/0890-94127385'
@@ -42,7 +43,7 @@ def test__ytd_rate_of_return():
 
 def test__compound_annual_growth_rate():
     cagr_default = __asset.compound_annual_growth_rate()
-    assert_that(cagr_default.value, close_to(-.0570, delta))
+    assert_that(cagr_default.value, close_to(-.0562, delta))
 
     cagr_long_time = __asset.compound_annual_growth_rate(years_ago=20)
     assert_that(cagr_long_time.value, close_to(cagr_default.value, delta))
@@ -76,7 +77,7 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
                               start_period=str(start_period),
                               end_period=str(end_period), currency='usd')
     cagr1 = asset.compound_annual_growth_rate()
-    assert_that(cagr1.value, close_to(-.1448, delta))
+    assert_that(cagr1.value, close_to(-.1426, delta))
 
     cagr2 = asset.compound_annual_growth_rate(years_ago=years_amount)
     assert_that(cagr2.value, close_to(cagr1.value, delta))
@@ -84,7 +85,7 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
 
 def test__compound_annual_growth_rate_real():
     cagr_default = __asset.compound_annual_growth_rate(real=True)
-    assert_that(cagr_default.value, close_to(-.0727, delta))
+    assert_that(cagr_default.value, close_to(-.0717, delta))
 
     cagr_long_time = __asset.compound_annual_growth_rate(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))
@@ -97,6 +98,28 @@ def test__compound_annual_growth_rate_real():
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
+
+
+def test__compound_annual_growth_rate_invariants():
+    start_period = pd.Period('2009-3', freq='M')
+    end_period = pd.Period('2019-3', freq='M')
+    asset = y.portfolio_asset(name=__asset_name,
+                              start_period=str(start_period), end_period=str(end_period),
+                              currency='rub')
+    years_ago = 10
+    months_ago = years_ago * _MONTHS_PER_YEAR
+    cagr = asset.cagr()
+    cagr10 = asset.cagr(years_ago=years_ago)
+
+    assert cagr.start_period == cagr10.start_period == start_period + 1
+    assert cagr.end_period == cagr10.end_period == end_period
+    assert cagr.period_size == months_ago
+
+    ror_c = asset.rate_of_return(kind='cumulative')
+    ror_from_cagr10 = (cagr10 + 1.) ** years_ago - 1.
+    ror_from_cagr = (cagr + 1.) ** years_ago - 1.
+    assert_that(ror_from_cagr.value, close_to(ror_c[-1].value, delta=delta))
+    assert_that(ror_from_cagr10.value, close_to(ror_c[-1].value, delta=delta))
 
 
 def test__risk():
