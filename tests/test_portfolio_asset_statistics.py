@@ -16,24 +16,24 @@ __asset = y.portfolio_asset(name=__asset_name,
                             currency='USD')
 
 
-def test__cumulative_rate_of_return():
-    arors = __asset.rate_of_return(kind='cumulative').values
+def test__cumulative_get_return():
+    arors = __asset.get_return(kind='cumulative').values
     assert_that(arors.max(), close_to(.0924, delta))
     assert_that(arors.min(), close_to(-.5464, delta))
 
-    arors_real = __asset.rate_of_return(kind='cumulative', real=True).values
+    arors_real = __asset.get_return(kind='cumulative', real=True).values
     assert_that(arors_real.max(), close_to(.0765, delta))
     assert_that(arors_real.min(), close_to(-.5725, delta))
 
 
-def test__ytd_rate_of_return():
-    ror_ytd = __asset.rate_of_return(kind='ytd')
+def test__ytd_get_return():
+    ror_ytd = __asset.get_return(kind='ytd')
     assert ror_ytd.start_period == pd.Period('2012-1', freq='M')
     assert ror_ytd.end_period == pd.Period('2016-1', freq='M')
     assert ror_ytd.kind == TimeSeriesKind.YTD
     np.testing.assert_almost_equal(ror_ytd.values, [.2041, -.0344, -.4531, .0046, .5695], decimal=decimal_places)
 
-    ror_ytd_real = __asset.rate_of_return(kind='ytd', real=True)
+    ror_ytd_real = __asset.get_return(kind='ytd', real=True)
     assert ror_ytd_real.start_period == pd.Period('2012-1', freq='M')
     assert ror_ytd_real.end_period == pd.Period('2016-1', freq='M')
     assert ror_ytd_real.kind == TimeSeriesKind.YTD
@@ -104,7 +104,7 @@ def test__get_cagr_invariants():
     assert cagr.end_period == cagr10.end_period == end_period
     assert cagr.period_size == months_ago
 
-    ror_c = asset.rate_of_return(kind='cumulative')
+    ror_c = asset.get_return(kind='cumulative')
     ror_from_cagr10 = (cagr10 + 1.) ** years_ago - 1.
     ror_from_cagr = (cagr + 1.) ** years_ago - 1.
     assert_that(ror_from_cagr.value, close_to(ror_c[-1].value, delta=delta))
@@ -130,7 +130,7 @@ def test__handle_related_inflation():
     assert_that(calling(__asset.inflation).with_args(kind='abracadabra'),
                 raises(ValueError, 'inflation kind is not supported: abracadabra'))
 
-    assert __asset.inflation(kind='values').size == __asset.rate_of_return().size
+    assert __asset.inflation(kind='values').size == __asset.get_return().size
 
     assert_that(__asset.inflation(kind='cumulative').value, close_to(.1062, delta))
     assert_that(__asset.inflation(kind='a_mean').value, close_to(0.0014, delta))
@@ -141,4 +141,4 @@ def test__handle_related_inflation():
     assert infl_yoy.end_period == pd.Period('2016-1')
     np.testing.assert_almost_equal(infl_yoy.values, [.0174, .015, .0076, .0073, .0207], decimal_places)
 
-    assert __asset.inflation(kind='values').size == __asset.rate_of_return().size
+    assert __asset.inflation(kind='values').size == __asset.get_return().size

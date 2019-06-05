@@ -100,12 +100,12 @@ class PortfolioAsset:
     def close(self):
         return copy.deepcopy(self.__values)
 
-    def rate_of_return(self, kind='values', real=False):
+    def get_return(self, kind='values', real=False):
         if kind not in ['values', 'cumulative', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
-            ror = self.rate_of_return(kind='values', real=real)
+            ror = self.get_return(kind='values', real=real)
             ror_ytd = ror.ytd()
             return ror_ytd
 
@@ -147,7 +147,7 @@ class PortfolioAsset:
         return p.get_cagr(years_ago=years_ago, real=real)
 
     def inflation(self, kind: str, years_ago: int = None):
-        ror = self.rate_of_return()
+        ror = self.get_return()
         start_period = None if years_ago else ror.start_period
         return self.currency.inflation(kind=kind,
                                        start_period=start_period, end_period=ror.end_period,
@@ -199,10 +199,10 @@ class Portfolio:
             year - returns risk approximated to yearly value
         """
         if period == 'month':
-            ror = self.rate_of_return()
+            ror = self.get_return()
             return ror.std()
         elif period == 'year':
-            ror = self.rate_of_return()
+            ror = self.get_return()
             if ror.period_size < 12:
                 raise Exception('year risk is requested for less than 12 months')
 
@@ -219,7 +219,7 @@ class Portfolio:
     )
     def get_cagr(self, years_ago=None, real=False):
         if years_ago is None:
-            ror = self.rate_of_return()
+            ror = self.get_return()
             years_total = ror.period_size / _MONTHS_PER_YEAR
             ror_c = (ror + 1.).prod()
             cagr = ror_c ** (1 / years_total) - 1.
@@ -231,12 +231,12 @@ class Portfolio:
             return np.array([self.get_cagr(years_ago=y, real=real)
                              for y in years_ago])
         elif isinstance(years_ago, int):
-            ror = self.rate_of_return()
+            ror = self.get_return()
             months_count = years_ago * _MONTHS_PER_YEAR
             if ror.period_size < months_count:
                 return self.get_cagr(years_ago=None, real=real)
 
-            ror_slice = self.rate_of_return()[-months_count:]
+            ror_slice = self.get_return()[-months_count:]
             ror_slice_c = (ror_slice + 1.).prod()
             cagr = ror_slice_c ** (1 / years_ago) - 1.
             if real:
@@ -247,16 +247,16 @@ class Portfolio:
         else:
             raise Exception('unexpected type of `years_ago`: {}'.format(years_ago))
 
-    def rate_of_return(self, kind='values', real=False) -> TimeSeries:
+    def get_return(self, kind='values', real=False) -> TimeSeries:
         if kind not in ['values', 'cumulative', 'ytd']:
             raise ValueError('`kind` is not in expected values')
 
         if kind == 'ytd':
-            ror_assets = np.array([a.rate_of_return(kind=kind, real=real) for a in self._assets])
+            ror_assets = np.array([a.get_return(kind=kind, real=real) for a in self._assets])
             ror = (ror_assets * self.weights).sum()
             return ror
 
-        ror_assets = np.array([a.rate_of_return() for a in self._assets])
+        ror_assets = np.array([a.get_return() for a in self._assets])
         ror = (ror_assets * self.weights).sum()
 
         if real:
@@ -269,7 +269,7 @@ class Portfolio:
         return ror
 
     def inflation(self, kind: str, years_ago: int = None):
-        ror = self.rate_of_return()
+        ror = self.get_return()
         start_period = None if years_ago else ror.start_period
         return self.currency.inflation(kind=kind,
                                        start_period=start_period,

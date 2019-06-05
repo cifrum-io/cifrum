@@ -46,13 +46,13 @@ def test__initial_data():
           1336.8, 1346.1]
     ))
 
-    assert_that(np.round(_portfolio.rate_of_return().values, 8).tolist(), contains(
+    assert_that(np.round(_portfolio.get_return().values, 8).tolist(), contains(
         *[0.12229691, -0.01582228, -0.02737772, -0.01702011, -0.06406856, -0.01160388, 0.04782469, 0.00100095,
           -0.06237734, -0.0103524, 0.01680251, 0.09387303, 0.06095007, -0.02852904, 0.02625182, -0.01216933,
           0.04138359, 0.02000188, 0.01177389, -0.00741344, 0.08587424, 0.00909396, -0.00811951, 0.01276804,
           0.00324936, -0.0100885]))
 
-    assert_that(np.round(_portfolio.rate_of_return(real=True).values, 8).tolist(), contains(
+    assert_that(np.round(_portfolio.get_return(real=True).values, 8).tolist(), contains(
         *[0.12001991, -0.0208132, -0.03077293, -0.01708596, -0.0627414, -0.01006255, 0.04829642, 0.00311853,
           -0.05916249, -0.01198559, 0.01596637, 0.08918301, 0.05594384, -0.03244377, 0.02289264, -0.01056843,
           0.04042848, 0.01755568, 0.01051378, -0.00586757, 0.08551928, 0.00324703, -0.01123018, 0.01194533,
@@ -74,8 +74,8 @@ class Test__compute_statistics_for_partially_incomplete_portfolio():
 
     @pytest.mark.parametrize('kind, real',
                              itertools.product(['values', 'cumulative', 'ytd'], [True, False]))
-    def test__rate_of_return(self, portfolio, kind, real):
-        assert_that(portfolio.rate_of_return(kind=kind, real=real), not_none())
+    def test__get_return(self, portfolio, kind, real):
+        assert_that(portfolio.get_return(kind=kind, real=real), not_none())
 
     @pytest.mark.parametrize('years_ago, real',
                              itertools.product([None, 1, 5, 20, 50], [True, False]))
@@ -104,30 +104,30 @@ def test__normalize_weights():
     assert_that(portfolio_misprint.assets['micex/FXMM'].weight, close_to(.6, delta))
 
 
-def test__rate_of_return():
-    rate_of_return_definition = \
-        sum(asset.rate_of_return() * asset.weight for asset in _portfolio.assets.values())
-    np.testing.assert_almost_equal(_portfolio.rate_of_return().values,
-                                   rate_of_return_definition.values, decimal_places)
+def test__get_return():
+    get_return_definition = \
+        sum(asset.get_return() * asset.weight for asset in _portfolio.assets.values())
+    np.testing.assert_almost_equal(_portfolio.get_return().values,
+                                   get_return_definition.values, decimal_places)
 
 
-def test__cumulative_rate_of_return():
-    arors = _portfolio.rate_of_return(kind='cumulative').values
+def test__cumulative_get_return():
+    arors = _portfolio.get_return(kind='cumulative').values
     assert_that(arors.min(), close_to(-.0492, delta))
     assert_that(arors.max(), close_to(.3017, delta))
 
-    arors_real = _portfolio.rate_of_return(kind='cumulative', real=True).values
+    arors_real = _portfolio.get_return(kind='cumulative', real=True).values
     assert_that(arors_real.min(), close_to(-.0524, delta))
     assert_that(arors_real.max(), close_to(.2569, delta))
 
 
-def test__ytd_rate_of_return():
-    ror_ytd = _portfolio.rate_of_return(kind='ytd')
+def test__ytd_get_return():
+    ror_ytd = _portfolio.get_return(kind='ytd')
     assert ror_ytd.start_period == pd.Period('2016-1', freq='M')
     assert ror_ytd.end_period == pd.Period('2016-1', freq='M')
     np.testing.assert_almost_equal(ror_ytd.values, [.3457], decimal_places)
 
-    ror_ytd_real = _portfolio.rate_of_return(kind='ytd', real=True)
+    ror_ytd_real = _portfolio.get_return(kind='ytd', real=True)
     assert ror_ytd_real.start_period == pd.Period('2016-1', freq='M')
     assert ror_ytd_real.end_period == pd.Period('2016-1', freq='M')
     np.testing.assert_almost_equal(ror_ytd_real.values, [.3184], decimal_places)
@@ -146,7 +146,7 @@ def test__handle_related_inflation():
     assert infl_yoy.end_period == pd.Period('2016-1')
     np.testing.assert_almost_equal(infl_yoy.values, [.0207], decimal_places)
 
-    assert _portfolio.inflation(kind='values').size == _portfolio.rate_of_return().size
+    assert _portfolio.inflation(kind='values').size == _portfolio.get_return().size
 
 
 def test__get_cagr():
@@ -205,7 +205,7 @@ def test__handle_portfolio_with_asset_with_dot_in_name(currency: Currency):
     p = y.portfolio(assets={'ny/BRK.B': 1}, currency=currency.name)
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
-    assert_that(p.rate_of_return(), is_not(empty()))
+    assert_that(p.get_return(), is_not(empty()))
 
 
 @pytest.mark.parametrize('currency', Currency)
@@ -213,4 +213,4 @@ def test__handle_assets_with_monthly_data_gaps(currency: Currency):
     p = y.portfolio(assets={'micex/KUBE': 1}, currency=currency.name)
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
-    assert_that(p.rate_of_return(), is_not(empty()))
+    assert_that(p.get_return(), is_not(empty()))

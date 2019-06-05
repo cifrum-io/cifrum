@@ -71,18 +71,18 @@ def test__default_periods():
     assert asset.currency.value == Currency.RUB
 
     portfolio = y.portfolio(assets={'micex/SBER': 1.}, currency='rub')
-    assert portfolio.rate_of_return().start_period >= pd.Period('1900-1', freq='M')
-    assert pd.Period.now(freq='M') >= portfolio.rate_of_return().end_period
+    assert portfolio.get_return().start_period >= pd.Period('1900-1', freq='M')
+    assert pd.Period.now(freq='M') >= portfolio.get_return().end_period
 
 
 @pytest.mark.quandl
 def test__usd_assets_that_is_older_than_rub():
     p_usd = y.portfolio(assets={'ny/T': 1}, currency='usd')
-    assert p_usd.rate_of_return().start_period == pd.Period('1984-08', freq='M')
+    assert p_usd.get_return().start_period == pd.Period('1984-08', freq='M')
 
     p_rub = y.portfolio(assets={'ny/T': 1}, currency='rub')
-    assert p_rub.rate_of_return().start_period == pd.Period('1992-08', freq='M')
-    assert p_usd.rate_of_return().end_period == p_rub.rate_of_return().end_period
+    assert p_rub.get_return().start_period == pd.Period('1992-08', freq='M')
+    assert p_usd.get_return().end_period == p_rub.get_return().end_period
 
 
 @pytest.mark.slow
@@ -130,20 +130,20 @@ def test__drop_last_month_data_if_no_activity_within_last_full_month(yapo_instan
     assert asset.close().period_range() == list(period_range_expected)
 
 
-def test__compute_cumulative_rate_of_return():
+def test__compute_cumulative_get_return():
     for asset in __portfolio.assets.values():
-        aror = asset.rate_of_return(kind='cumulative').values
+        aror = asset.get_return(kind='cumulative').values
         assert not np.any(np.isnan(aror))
 
-    aror = __portfolio.rate_of_return(kind='cumulative').values
+    aror = __portfolio.get_return(kind='cumulative').values
     assert not np.any(np.isnan(aror))
 
 
 def test__close_and_its_change_should_preserve_ratio():
     for asset in __portfolio.assets.values():
-        rate_of_return_given = asset.rate_of_return().values
-        rate_of_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
-        np.testing.assert_almost_equal(rate_of_return_given, rate_of_return_expected, decimal_places)
+        get_return_given = asset.get_return().values
+        get_return_expected = np.diff(asset.close().values) / asset.close().values[:-1]
+        np.testing.assert_almost_equal(get_return_given, get_return_expected, decimal_places)
 
 
 @freeze_time('2018-5-20 1:0:0')
