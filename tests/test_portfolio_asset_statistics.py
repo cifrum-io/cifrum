@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from hamcrest import assert_that, close_to, calling, raises, equal_to
+from hamcrest import assert_that, close_to, calling, raises
 
 import yapo as y
 from conftest import decimal_places, delta
@@ -41,32 +41,21 @@ def test__ytd_rate_of_return():
                                    [.1835, -.0486, -.4572, -.0026, .5376], decimal=decimal_places)
 
 
-def test__compound_annual_growth_rate():
-    cagr_default = __asset.compound_annual_growth_rate()
+def test__get_cagr():
+    cagr_default = __asset.get_cagr()
     assert_that(cagr_default.value, close_to(-.0562, delta))
 
-    cagr_long_time = __asset.compound_annual_growth_rate(years_ago=20)
+    cagr_long_time = __asset.get_cagr(years_ago=20)
     assert_that(cagr_long_time.value, close_to(cagr_default.value, delta))
 
-    cagr_one_year = __asset.compound_annual_growth_rate(years_ago=1)
+    cagr_one_year = __asset.get_cagr(years_ago=1)
     assert_that(cagr_one_year.value, close_to(.4738, delta))
 
     cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        __asset.compound_annual_growth_rate(years_ago=[None, 20, 1])
+        __asset.get_cagr(years_ago=[None, 20, 1])
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
-
-
-def test__compound_annual_growth_rate_synonym():
-    assert_that(__asset.compound_annual_growth_rate().value,
-                equal_to(__asset.cagr().value))
-    assert_that(__asset.compound_annual_growth_rate(real=True).value,
-                equal_to(__asset.cagr(real=True).value))
-    assert_that(__asset.compound_annual_growth_rate(years_ago=5).value,
-                equal_to(__asset.cagr(years_ago=5).value))
-    assert_that(__asset.compound_annual_growth_rate(years_ago=5, real=True).value,
-                equal_to(__asset.cagr(years_ago=5, real=True).value))
 
 
 def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
@@ -76,31 +65,31 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
     asset = y.portfolio_asset(name=__asset_name,
                               start_period=str(start_period),
                               end_period=str(end_period), currency='usd')
-    cagr1 = asset.compound_annual_growth_rate()
+    cagr1 = asset.get_cagr()
     assert_that(cagr1.value, close_to(-.1426, delta))
 
-    cagr2 = asset.compound_annual_growth_rate(years_ago=years_amount)
+    cagr2 = asset.get_cagr(years_ago=years_amount)
     assert_that(cagr2.value, close_to(cagr1.value, delta))
 
 
-def test__compound_annual_growth_rate_real():
-    cagr_default = __asset.compound_annual_growth_rate(real=True)
+def test__get_cagr_real():
+    cagr_default = __asset.get_cagr(real=True)
     assert_that(cagr_default.value, close_to(-.0717, delta))
 
-    cagr_long_time = __asset.compound_annual_growth_rate(years_ago=20, real=True)
+    cagr_long_time = __asset.get_cagr(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))
 
-    cagr_one_year = __asset.compound_annual_growth_rate(years_ago=1, real=True)
+    cagr_one_year = __asset.get_cagr(years_ago=1, real=True)
     assert_that(cagr_one_year.value, close_to(.4345, delta))
 
     cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        __asset.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
+        __asset.get_cagr(years_ago=[None, 20, 1], real=True)
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
 
 
-def test__compound_annual_growth_rate_invariants():
+def test__get_cagr_invariants():
     start_period = pd.Period('2009-3', freq='M')
     end_period = pd.Period('2019-3', freq='M')
     asset = y.portfolio_asset(name=__asset_name,
@@ -108,8 +97,8 @@ def test__compound_annual_growth_rate_invariants():
                               currency='rub')
     years_ago = 10
     months_ago = years_ago * _MONTHS_PER_YEAR
-    cagr = asset.cagr()
-    cagr10 = asset.cagr(years_ago=years_ago)
+    cagr = asset.get_cagr()
+    cagr10 = asset.get_cagr(years_ago=years_ago)
 
     assert cagr.start_period == cagr10.start_period == start_period + 1
     assert cagr.end_period == cagr10.end_period == end_period

@@ -1,19 +1,20 @@
+import copy
+import datetime as dtm
+from textwrap import dedent
 from typing import List, Dict
+
 import dateutil.relativedelta
-from serum import inject
 import numpy as np
 import pandas as pd
 from contracts import contract
-import datetime as dtm
-from textwrap import dedent
-import copy
+from serum import inject
 
 from .currency import PortfolioCurrencyFactory
+from .._settings import _MONTHS_PER_YEAR
+from .._sources.registries import CurrencySymbolsRegistry
 from ..common.enums import Currency, Period
 from ..common.financial_symbol import FinancialSymbol
 from ..common.time_series import TimeSeries, TimeSeriesKind
-from .._settings import _MONTHS_PER_YEAR
-from .._sources.registries import CurrencySymbolsRegistry
 
 
 @inject
@@ -134,19 +135,16 @@ class PortfolioAsset:
                       currency=self.currency.value)
         return p.risk(period=period)
 
-    def cagr(self, years_ago=None, real=False):
-        return self.compound_annual_growth_rate(years_ago=years_ago, real=real)
-
     @contract(
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
     )
-    def compound_annual_growth_rate(self, years_ago=None, real=False):
+    def get_cagr(self, years_ago=None, real=False):
         p = Portfolio(assets=[self], weights=np.array([1.0]),
                       start_period=self._period_min,
                       end_period=self._period_max,
                       currency=self.currency.value)
-        return p.compound_annual_growth_rate(years_ago=years_ago, real=real)
+        return p.get_cagr(years_ago=years_ago, real=real)
 
     def inflation(self, kind: str, years_ago: int = None):
         ror = self.rate_of_return()
@@ -215,14 +213,11 @@ class Portfolio:
         else:
             raise Exception('unexpected value of `period` {}'.format(period))
 
-    def cagr(self, years_ago=None, real=False):
-        return self.compound_annual_growth_rate(years_ago=years_ago, real=real)
-
     @contract(
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
     )
-    def compound_annual_growth_rate(self, years_ago=None, real=False):
+    def get_cagr(self, years_ago=None, real=False):
         if years_ago is None:
             ror = self.rate_of_return()
             years_total = ror.period_size / _MONTHS_PER_YEAR
@@ -233,13 +228,13 @@ class Portfolio:
                 cagr = (cagr + 1.) / (inflation_cumulative + 1.) ** (1 / years_total) - 1.
             return cagr
         elif isinstance(years_ago, list):
-            return np.array([self.compound_annual_growth_rate(years_ago=y, real=real)
+            return np.array([self.get_cagr(years_ago=y, real=real)
                              for y in years_ago])
         elif isinstance(years_ago, int):
             ror = self.rate_of_return()
             months_count = years_ago * _MONTHS_PER_YEAR
             if ror.period_size < months_count:
-                return self.compound_annual_growth_rate(years_ago=None, real=real)
+                return self.get_cagr(years_ago=None, real=real)
 
             ror_slice = self.rate_of_return()[-months_count:]
             ror_slice_c = (ror_slice + 1.).prod()

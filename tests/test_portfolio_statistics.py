@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from hamcrest import assert_that, has_length, contains, not_none, close_to, calling, raises, is_not, empty, equal_to
+from hamcrest import assert_that, has_length, contains, not_none, close_to, calling, raises, is_not, empty
 
 import yapo as y
 from conftest import delta, decimal_places
@@ -79,8 +79,8 @@ class Test__compute_statistics_for_partially_incomplete_portfolio():
 
     @pytest.mark.parametrize('years_ago, real',
                              itertools.product([None, 1, 5, 20, 50], [True, False]))
-    def test__compound_annual_growth_rate(self, portfolio, years_ago, real):
-        assert_that(portfolio.compound_annual_growth_rate(years_ago=years_ago, real=real), not_none())
+    def test__get_cagr(self, portfolio, years_ago, real):
+        assert_that(portfolio.get_cagr(years_ago=years_ago, real=real), not_none())
 
     @pytest.mark.parametrize('period', ['year', 'month'])
     def test__risk(self, portfolio, period):
@@ -149,49 +149,38 @@ def test__handle_related_inflation():
     assert _portfolio.inflation(kind='values').size == _portfolio.rate_of_return().size
 
 
-def test__compound_annual_growth_rate():
-    cagr_default = _portfolio.compound_annual_growth_rate()
+def test__get_cagr():
+    cagr_default = _portfolio.get_cagr()
     assert_that(cagr_default.value, close_to(.1241, delta))
 
-    cagr_long_time = _portfolio.compound_annual_growth_rate(years_ago=20)
+    cagr_long_time = _portfolio.get_cagr(years_ago=20)
     assert_that((cagr_default - cagr_long_time).value, close_to(0., delta))
 
-    cagr_one_year = _portfolio.compound_annual_growth_rate(years_ago=1)
+    cagr_one_year = _portfolio.get_cagr(years_ago=1)
     assert_that(cagr_one_year.value, close_to(.1821, delta))
 
     cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        _portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1])
+        _portfolio.get_cagr(years_ago=[None, 20, 1])
     assert_that((cagr_default1 - cagr_default).value, close_to(0., delta))
     assert_that((cagr_long_time1 - cagr_long_time).value, close_to(0., delta))
     assert_that((cagr_one_year1 - cagr_one_year).value, close_to(0., delta))
 
 
-def test__compound_annual_growth_rate_real():
-    cagr_default = _portfolio.compound_annual_growth_rate(real=True)
+def test__get_cagr_real():
+    cagr_default = _portfolio.get_cagr(real=True)
     assert_that(cagr_default.value, close_to(.1056, delta))
 
-    cagr_long_time = _portfolio.compound_annual_growth_rate(years_ago=20, real=True)
+    cagr_long_time = _portfolio.get_cagr(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))
 
-    cagr_one_year = _portfolio.compound_annual_growth_rate(years_ago=1, real=True)
+    cagr_one_year = _portfolio.get_cagr(years_ago=1, real=True)
     assert_that(cagr_one_year.value, close_to(.1604, delta))
 
     cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        _portfolio.compound_annual_growth_rate(years_ago=[None, 20, 1], real=True)
+        _portfolio.get_cagr(years_ago=[None, 20, 1], real=True)
     assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
     assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
     assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
-
-
-def test__compound_annual_growth_rate_synonym():
-    assert_that(_portfolio.compound_annual_growth_rate().value,
-                equal_to(_portfolio.cagr().value))
-    assert_that(_portfolio.compound_annual_growth_rate(real=True).value,
-                equal_to(_portfolio.cagr(real=True).value))
-    assert_that(_portfolio.compound_annual_growth_rate(years_ago=5).value,
-                equal_to(_portfolio.cagr(years_ago=5).value))
-    assert_that(_portfolio.compound_annual_growth_rate(years_ago=5, real=True).value,
-                equal_to(_portfolio.cagr(years_ago=5, real=True).value))
 
 
 def test__risk():
