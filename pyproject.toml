@@ -11,6 +11,36 @@ readme = "README.rst"
 homepage = "https://github.com/okama-io/yapo"
 repository = "https://github.com/okama-io/yapo"
 
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Framework :: IPython",
+    "Framework :: Jupyter",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.6",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Topic :: Office/Business :: Financial",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development :: Libraries",
+    "Typing :: Typed",
+]
+
+keywords = [
+    "Modern portfolio theory",
+    "Financial library",
+    "Asset allocation",
+    "Portfolio investments",
+    "Financial operations",
+    "Financial analysys",
+    "Quantitative finance",
+]
+
 [tool.poetry.dependencies]
 python = "^3.6"
 numpy = "^1.16"
