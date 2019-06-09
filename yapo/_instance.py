@@ -3,10 +3,9 @@ from typing import List, Dict, Union, Optional
 import numpy as np
 import pandas as pd
 from contracts import contract
-from serum import inject, singleton
 
 from ._portfolio.currency import PortfolioCurrencyFactory
-from ._portfolio.portfolio import Portfolio, PortfolioAsset
+from ._portfolio.portfolio import Portfolio, PortfolioAsset, PortfolioItemsFactory
 from ._search import _Search
 from ._sources.registries import FinancialSymbolsRegistry
 from .common.enums import Currency, SecurityType
@@ -14,16 +13,17 @@ from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
 
 
-@singleton
 class Yapo:
 
-    @inject
     def __init__(self,
-                 fin_syms_registry: FinancialSymbolsRegistry,
-                 portfolio_currency_factory: PortfolioCurrencyFactory):
-        self.__search = _Search()
-        self.fin_syms_registry = fin_syms_registry
+                 financial_symbols_registry: FinancialSymbolsRegistry,
+                 portfolio_currency_factory: PortfolioCurrencyFactory,
+                 portfolio_items_factory: PortfolioItemsFactory,
+                 search: _Search):
         self.portfolio_currency_factory = portfolio_currency_factory
+        self.portfolio_items_factory = portfolio_items_factory
+        self.financial_symbols_registry = financial_symbols_registry
+        self.__search = search
         self.__period_lowest = '1900-1'
         self.__period_highest = lambda: str(pd.Period.now(freq='M'))
 
@@ -45,7 +45,7 @@ class Yapo:
         if 'name' in kwargs:
             name = kwargs['name']
             financial_symbol_id = FinancialSymbolId.parse(name)
-            finsym_info = self.fin_syms_registry.get(financial_symbol_id)
+            finsym_info = self.financial_symbols_registry.get(financial_symbol_id)
             return finsym_info
         elif 'names' in kwargs:
             names = kwargs['names']
@@ -88,8 +88,9 @@ class Yapo:
             allowed_security_types = {SecurityType.STOCK_ETF, SecurityType.MUT,
                                       SecurityType.CURRENCY, SecurityType.INDEX}
             assert finsym_info.security_type in allowed_security_types
-            a = PortfolioAsset(symbol=finsym_info,
-                               start_period=start_period, end_period=end_period, currency=currency_enum)
+            a = self.portfolio_items_factory.new_asset(symbol=finsym_info,
+                                                       start_period=start_period, end_period=end_period,
+                                                       currency=currency_enum)
             return a
         elif 'names' in kwargs:
             names: List[str] = kwargs['names']
@@ -147,10 +148,10 @@ class Yapo:
         end_period = pd.Period(end_period, freq='M')
         currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
 
-        portfolio_instance = Portfolio(assets=list(asset2weight_dict.keys()),
-                                       weights=list(asset2weight_dict.values()),
-                                       start_period=start_period, end_period=end_period,
-                                       currency=currency_enum)
+        portfolio_instance = \
+            self.portfolio_items_factory.new_portfolio(assets_to_weight=asset2weight_dict,
+                                                       start_period=start_period, end_period=end_period,
+                                                       currency=currency_enum)
         return portfolio_instance
 
     def available_names(self, **kwargs):
@@ -170,7 +171,7 @@ class Yapo:
         """
         if 'namespace' in kwargs:
             namespace = kwargs['namespace']
-            return self.fin_syms_registry.get_all_infos(namespace)
+            return self.financial_symbols_registry.get_all_infos(namespace)
         elif 'namespaces' in kwargs:
             namespaces = kwargs['namespaces']
             assert isinstance(namespaces, list)
@@ -178,7 +179,7 @@ class Yapo:
                     for namespace in namespaces
                     for name in self.available_names(namespace=namespace)]
         else:
-            return self.fin_syms_registry.namespaces()
+            return self.financial_symbols_registry.namespaces()
 
     def search(self, query: str, top=10):
         return self.__search.perform(query, top)
@@ -187,7 +188,7 @@ class Yapo:
                   end_period: str = None,
                   start_period: str = None, years_ago: int = None):
         currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
-        pc = self.portfolio_currency_factory.create(currency=currency_enum)
+        pc = self.portfolio_currency_factory.new(currency=currency_enum)
         if start_period:
             start_period = pd.Period(start_period, freq='M')
         elif years_ago is None:

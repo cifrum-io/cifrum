@@ -4,7 +4,6 @@ from typing import Optional, Callable
 
 import pandas as pd
 import quandl
-from serum import singleton
 
 from .base_classes import FinancialSymbolsSource
 from .._settings import data_url
@@ -14,7 +13,6 @@ from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
-@singleton
 class QuandlSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='ny')

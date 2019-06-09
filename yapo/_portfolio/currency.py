@@ -1,6 +1,5 @@
 import pandas as pd
 from contracts import contract
-from serum import inject, singleton
 
 from .._settings import _MONTHS_PER_YEAR
 from .._sources.inflation_source import InflationSource
@@ -10,20 +9,24 @@ from ..common.financial_symbol import FinancialSymbol
 from ..common.time_series import TimeSeries, TimeSeriesKind
 
 
-@inject
 class PortfolioCurrency:
-    __inflation_source: InflationSource
-    __cbr_currencies_source: CbrCurrenciesSource
 
-    def __init__(self, currency: Currency):
+    def __init__(self,
+                 inflation_source: InflationSource,
+                 cbr_currencies_source: CbrCurrenciesSource,
+
+                 currency: Currency):
+        self.cbr_currencies_source = cbr_currencies_source
+        self.inflation_source = inflation_source
+
         self._currency = currency
 
-        inflation_symbol = self.__inflation_source.fetch_financial_symbol(currency.name)
+        inflation_symbol = self.inflation_source.fetch_financial_symbol(currency.name)
         if inflation_symbol is None:
             raise ValueError('Inflation symbol for the `name`={} is not found'.format(currency.name))
         self._inflation_symbol: FinancialSymbol = inflation_symbol
 
-        currency_symbol = self.__cbr_currencies_source.fetch_financial_symbol(currency.name)
+        currency_symbol = self.cbr_currencies_source.fetch_financial_symbol(currency.name)
         if currency_symbol is None:
             raise ValueError('Currency symbol for the `name`={} is not found'.format(currency.name))
         self._currency_symbol: FinancialSymbol = currency_symbol
@@ -127,9 +130,15 @@ class PortfolioCurrency:
         return currency_repr
 
 
-@singleton
 class PortfolioCurrencyFactory:
 
-    @staticmethod
-    def create(currency: Currency) -> PortfolioCurrency:
-        return PortfolioCurrency(currency=currency)
+    def __init__(self,
+                 inflation_source: InflationSource,
+                 cbr_currencies_source: CbrCurrenciesSource):
+        self.inflation_source = inflation_source
+        self.cbr_currencies_source = cbr_currencies_source
+
+    def new(self, currency: Currency) -> PortfolioCurrency:
+        return PortfolioCurrency(inflation_source=self.inflation_source,
+                                 cbr_currencies_source=self.cbr_currencies_source,
+                                 currency=currency)

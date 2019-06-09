@@ -1,23 +1,27 @@
 import re
 from concurrent import futures
 from concurrent.futures import ThreadPoolExecutor
-from typing import List, Optional, Tuple, Iterator
+from typing import List, Optional, Tuple, Iterator, Dict
 
-from serum import inject
+from typing_extensions import Protocol
 
-from ._sources.all_sources import AllSymbolSources
 from ._sources.base_classes import FinancialSymbolsSource
+from ._sources.micex_stocks_source import MicexStocksSource
+from ._sources.mutru_funds_source import MutualFundsRuSource
+from ._sources.quandl_source import QuandlSource
 from ._sources.registries import FinancialSymbolsRegistry
 from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
 from .common.financial_symbol_info import FinancialSymbolInfo
 
 
-@inject
-class _Search:
-    sources: AllSymbolSources
-    fin_syms_registry: FinancialSymbolsRegistry
+class SymbolSourcesSearchable(Protocol):
+    quandl_source: QuandlSource
+    micex_stocks_source: MicexStocksSource
+    mutual_funds_ru_source: MutualFundsRuSource
 
+
+class _Search:
     def __handle_quandl_info(self) -> List[str]:
         def func(x: FinancialSymbolInfo, src: FinancialSymbolsSource) -> str:
             fin_sym = src.fetch_financial_symbol(x.fin_sym_id.name)
@@ -32,8 +36,8 @@ class _Search:
 
             return line
 
-        lines = [func(x, self.sources.quandl_source)
-                 for x in self.sources.quandl_source.get_all_infos()]
+        lines = [func(x, self.symbol_sources.quandl_source)
+                 for x in self.symbol_sources.quandl_source.get_all_infos()]
         return lines
 
     def __handle_micex_stocks(self) -> List[str]:
@@ -50,8 +54,8 @@ class _Search:
 
             return line
 
-        lines = [func(x, self.sources.micex_stocks_source)
-                 for x in self.sources.micex_stocks_source.get_all_infos()]
+        lines = [func(x, self.symbol_sources.micex_stocks_source)
+                 for x in self.symbol_sources.micex_stocks_source.get_all_infos()]
         return lines
 
     def __handle_mutru(self) -> List[str]:
@@ -68,12 +72,17 @@ class _Search:
 
             return line
 
-        lines = [func(x, self.sources.mut_ru_source)
-                 for x in self.sources.mut_ru_source.get_all_infos()]
+        lines = [func(x, self.symbol_sources.mutual_funds_ru_source)
+                 for x in self.symbol_sources.mutual_funds_ru_source.get_all_infos()]
         return lines
 
-    def __init__(self):
-        self.id2sym = {}
+    def __init__(self,
+                 symbol_sources: SymbolSourcesSearchable,
+                 financial_symbols_registry: FinancialSymbolsRegistry):
+        self.symbol_sources = symbol_sources
+        self.financial_symbols_registry = financial_symbols_registry
+
+        self.id2sym: Dict[str, FinancialSymbol] = {}
 
         pool = ThreadPoolExecutor(3)
 
@@ -88,7 +97,7 @@ class _Search:
         self.lines_future: futures.Future[List[str]] = pool.submit(handle_all_lines)
 
     def _check_finsym_access(self, query: str) -> Optional[FinancialSymbol]:
-        namespaces = self.fin_syms_registry.namespaces()
+        namespaces = self.financial_symbols_registry.namespaces()
 
         starts_with_namespace = False
         for ns in namespaces:
@@ -99,9 +108,8 @@ class _Search:
             return None
 
         fsid = FinancialSymbolId.parse(query)
-        return self.fin_syms_registry.get(fsid)
+        return self.financial_symbols_registry.get(fsid)
 
-    @inject
     def perform(self, query: str, top: int) -> List[FinancialSymbol]:
         try:
             fs = self._check_finsym_access(query=query)

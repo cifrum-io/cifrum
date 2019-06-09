@@ -1,26 +1,25 @@
 from typing import Optional
 
-from serum import singleton, inject
 import pandas as pd
 
 from .base_classes import FinancialSymbolsSource
 from .single_financial_symbol_source import CbrTopRatesSource
-from ..common.financial_symbol_info import FinancialSymbolInfo
-from ..common.enums import Currency, SecurityType, Period
-from ..common.financial_symbol_id import FinancialSymbolId
-from ..common.financial_symbol import FinancialSymbol
 from .._index.okid10 import compute as compute_top10
+from ..common.enums import Currency, SecurityType, Period
+from ..common.financial_symbol import FinancialSymbol
+from ..common.financial_symbol_id import FinancialSymbolId
+from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
-@singleton
-@inject
 class OkamaSource(FinancialSymbolsSource):
-    cbr_top_rates_source: CbrTopRatesSource
-
-    def __init__(self):
+    def __init__(self, cbr_top_rates_source: CbrTopRatesSource):
         super().__init__(namespace='index')
 
-        self.cbr_top10_sym = self.cbr_top_rates_source.fetch_financial_symbol('TOP_rates')
+        cbr_top10_sym = cbr_top_rates_source.fetch_financial_symbol('TOP_rates')
+        if cbr_top10_sym is None:
+            raise ValueError('TOP_rates financial symbol is not found')
+        self.cbr_top10_sym: FinancialSymbol = cbr_top10_sym
+
         self.okid10_name = 'OKID10'
 
     def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:

@@ -1,15 +1,14 @@
 import copy
 import datetime as dtm
 from textwrap import dedent
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 import dateutil.relativedelta
 import numpy as np
 import pandas as pd
 from contracts import contract
-from serum import inject
 
-from .currency import PortfolioCurrencyFactory
+from .._portfolio.currency import PortfolioCurrency, PortfolioCurrencyFactory
 from .._settings import _MONTHS_PER_YEAR
 from .._sources.registries import CurrencySymbolsRegistry
 from ..common.enums import Currency, Period
@@ -17,20 +16,22 @@ from ..common.financial_symbol import FinancialSymbol
 from ..common.time_series import TimeSeries, TimeSeriesKind
 
 
-@inject
 class PortfolioAsset:
-    currency_symbols_registry: CurrencySymbolsRegistry
-    portfolio_currency_factory: PortfolioCurrencyFactory
 
-    def __init__(self, symbol: FinancialSymbol,
-                 start_period: pd.Period, end_period: pd.Period, currency: Currency,
-                 portfolio: 'Portfolio' = None,
-                 weight: int = None):
+    def __init__(self,
+                 currency_symbols_registry: CurrencySymbolsRegistry,
+                 portfolio_items_factory: 'PortfolioItemsFactory',
+                 symbol: FinancialSymbol,
+                 start_period: pd.Period, end_period: pd.Period, currency: PortfolioCurrency,
+                 portfolio: Optional['Portfolio'],
+                 weight: Optional[int]):
         if (end_period - start_period).n < 2:
             raise ValueError('period range should be at least 2 months')
 
+        self.portfolio_items_factory = portfolio_items_factory
         self.symbol = symbol
-        self.currency = self.portfolio_currency_factory.create(currency=currency)
+        self.currency = currency
+        self.currency_symbols_registry = currency_symbols_registry
         self._portfolio = portfolio
         self._weight = weight
 
@@ -52,7 +53,8 @@ class PortfolioAsset:
         if self._period_min >= self._period_max:
             raise ValueError('`self._period_min` must not be >= `self._period_max`')
 
-        currency_conversion_rate = self.__currency_conversion_rate(currency_to=self.currency.value)
+        currency_conversion_rate = \
+            self.__currency_conversion_rate(currency_to=self.currency.value)
         self._period_min = max(self._period_min, currency_conversion_rate.start_period)
         self._period_max = min(self._period_max, currency_conversion_rate.end_period)
 
@@ -129,10 +131,10 @@ class PortfolioAsset:
 
             year - returns risk approximated to yearly value
         """
-        p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min,
-                      end_period=self._period_max,
-                      currency=self.currency.value)
+        p = self.portfolio_items_factory.new_portfolio(assets_to_weight={self: 1.},
+                                                       start_period=self._period_min,
+                                                       end_period=self._period_max,
+                                                       currency=self.currency.value)
         return p.risk(period=period)
 
     @contract(
@@ -140,10 +142,10 @@ class PortfolioAsset:
         real='bool',
     )
     def get_cagr(self, years_ago=None, real=False):
-        p = Portfolio(assets=[self], weights=np.array([1.0]),
-                      start_period=self._period_min,
-                      end_period=self._period_max,
-                      currency=self.currency.value)
+        p = self.portfolio_items_factory.new_portfolio(assets_to_weight={self: 1.},
+                                                       start_period=self._period_min,
+                                                       end_period=self._period_max,
+                                                       currency=self.currency.value)
         return p.get_cagr(years_ago=years_ago, real=real)
 
     def inflation(self, kind: str, years_ago: int = None):
@@ -165,24 +167,23 @@ class PortfolioAsset:
         return dedent(asset_repr)
 
 
-@inject
 class Portfolio:
-    portfolio_currency_factory: PortfolioCurrencyFactory
 
     def __init__(self,
+                 portfolio_items_factory: 'PortfolioItemsFactory',
+
                  assets: List[PortfolioAsset],
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
-                 currency: Currency):
+                 currency: PortfolioCurrency):
         self.weights = weights
-        self.currency = self.portfolio_currency_factory.create(currency=currency)
+        self.currency = currency
 
-        self._assets = [PortfolioAsset(symbol=a.symbol,
-                                       start_period=start_period,
-                                       end_period=end_period,
-                                       currency=currency,
-                                       portfolio=self,
-                                       weight=w) for a, w in zip(assets, weights)]
+        self._assets = [portfolio_items_factory.new_asset(symbol=a.symbol,
+                                                          start_period=start_period, end_period=end_period,
+                                                          currency=currency.value,
+                                                          portfolio=self,
+                                                          weight=w) for a, w in zip(assets, weights)]
 
     @property
     def assets(self) -> Dict[str, PortfolioAsset]:
@@ -284,3 +285,37 @@ class Portfolio:
                  currency: {},
             )""".format(assets_repr, self.currency)
         return dedent(portfolio_repr)
+
+
+class PortfolioItemsFactory:
+
+    def __init__(self, portfolio_currency_factory: PortfolioCurrencyFactory,
+                 currency_symbols_registry: CurrencySymbolsRegistry):
+        self.portfolio_currency_factory = portfolio_currency_factory
+        self.currency_symbols_registry = currency_symbols_registry
+
+    def new_asset(self, symbol: FinancialSymbol,
+                  start_period: pd.Period, end_period: pd.Period, currency: Currency,
+                  portfolio: Optional[Portfolio] = None,
+                  weight: Optional[int] = None):
+        pc = self.portfolio_currency_factory.new(currency=currency)
+        pa = PortfolioAsset(self.currency_symbols_registry,
+                            symbol=symbol,
+                            start_period=start_period, end_period=end_period,
+                            currency=pc,
+                            portfolio=portfolio,
+                            weight=weight,
+                            portfolio_items_factory=self)
+        return pa
+
+    def new_portfolio(self,
+                      assets_to_weight: Dict[PortfolioAsset, float],
+                      start_period: pd.Period, end_period: pd.Period,
+                      currency: Currency):
+        pc = self.portfolio_currency_factory.new(currency=currency)
+        p = Portfolio(portfolio_items_factory=self,
+                      assets=list(assets_to_weight.keys()),
+                      weights=list(assets_to_weight.values()),
+                      start_period=start_period, end_period=end_period,
+                      currency=pc)
+        return p

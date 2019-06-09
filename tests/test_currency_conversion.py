@@ -3,7 +3,6 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from serum import inject
 
 import yapo as y
 from yapo._sources.registries import CurrencySymbolsRegistry
@@ -12,11 +11,7 @@ from yapo.common.enums import Currency
 
 @pytest.fixture
 def csr():
-    @inject
-    def csr_instance(csr: CurrencySymbolsRegistry):
-        return csr
-
-    return csr_instance()
+    return y.obj_graph.provide(CurrencySymbolsRegistry)
 
 
 @pytest.mark.parametrize('currency', Currency)
@@ -39,7 +34,6 @@ def test__currency_should_not_be_converted_to_itself_inside_datatable(currency: 
                          [(Currency.RUB, pd.Period('1990-1', freq='M')),
                           (Currency.USD, pd.Period('1913-1', freq='M')),
                           (Currency.EUR, pd.Period('1996-1', freq='M'))])
-@inject
 def test__identity_currency_conversion_should_be_of_max_period(csr: CurrencySymbolsRegistry,
                                                                currency: Currency,
                                                                expected_start_period: pd.Period):

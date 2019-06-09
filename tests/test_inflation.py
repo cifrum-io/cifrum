@@ -4,8 +4,8 @@ import numpy as np
 import pandas as pd
 import pytest
 from hamcrest import assert_that, not_none, calling, raises, close_to
-from serum import inject
 
+import yapo as y
 from conftest import decimal_places, delta
 from yapo._portfolio.currency import PortfolioCurrencyFactory
 from yapo.common.enums import Currency
@@ -15,17 +15,13 @@ __end_period = pd.Period('2018-12', freq='M')
 
 @pytest.fixture
 def pcf():
-    @inject
-    def pcf_instance(pcf: PortfolioCurrencyFactory):
-        return pcf
-
-    return pcf_instance()
+    return y.obj_graph.provide(PortfolioCurrencyFactory)
 
 
 @pytest.mark.parametrize('currency, inflation_kind',
                          itertools.product(Currency, ['values', 'cumulative', 'a_mean', 'g_mean']))
 def test__exists_for_all_currencies(pcf: PortfolioCurrencyFactory, currency: Currency, inflation_kind: str):
-    pc = pcf.create(currency=currency)
+    pc = pcf.new(currency=currency)
     infl = pc.inflation(kind=inflation_kind, end_period=__end_period, years_ago=4)
     assert_that(infl, not_none())
 
@@ -34,7 +30,7 @@ def test__exists_for_all_currencies(pcf: PortfolioCurrencyFactory, currency: Cur
                          itertools.product(Currency, ['values', 'cumulative', 'a_mean', 'g_mean']))
 def test__should_not_handle_both_start_date_and_years_ago(pcf: PortfolioCurrencyFactory,
                                                           currency: Currency, inflation_kind: str):
-    pc = pcf.create(currency=currency)
+    pc = pcf.new(currency=currency)
     foo = calling(pc.inflation).with_args(kind=inflation_kind,
                                           start_period=pd.Period('2011-1', freq='M'),
                                           end_period=__end_period,
@@ -44,7 +40,7 @@ def test__should_not_handle_both_start_date_and_years_ago(pcf: PortfolioCurrency
 
 
 def test__inflation_values(pcf: PortfolioCurrencyFactory):
-    pc = pcf.create(currency=Currency.USD)
+    pc = pcf.new(currency=Currency.USD)
 
     assert_that(pc.inflation(kind='cumulative', end_period=__end_period, years_ago=5).value,
                 close_to(.0780, delta))

@@ -1,23 +1,19 @@
-from typing import Optional, List, Dict
-
-from serum import singleton, inject
-import pandas as pd
 from itertools import groupby
+from typing import Optional, List, Dict, Tuple
 
+import pandas as pd
+
+from .._settings import data_url
 from .._sources.base_classes import FinancialSymbolsSource
 from .._sources.single_financial_symbol_source import CbrCurrenciesSource
-from .all_sources import SymbolSources
-from .._settings import data_url
+from ..common.enums import Currency
 from ..common.financial_symbol import FinancialSymbol
 from ..common.financial_symbol_id import FinancialSymbolId
-from ..common.enums import Currency
 
 
-@singleton
 class FinancialSymbolsRegistry:
 
-    @inject
-    def __init__(self, symbol_sources: SymbolSources):
+    def __init__(self, symbol_sources):
         def symbol_source_key(x: FinancialSymbolsSource) -> str:
             return x.namespace
 
@@ -60,16 +56,14 @@ class FinancialSymbolsRegistry:
                             .format(result_count, financial_symbol_id.format()))
 
 
-@singleton
-@inject
 class CurrencySymbolsRegistry:
-    cbr_currencies_source: CbrCurrenciesSource
+    def __init__(self, cbr_currencies_source: CbrCurrenciesSource):
+        self.cbr_currencies_source = cbr_currencies_source
 
-    def __init__(self):
         self.url_base = data_url + 'currency/'
         currency_index = pd.read_csv('{}__index.csv'.format(self.url_base),
                                      sep='\t', parse_dates=['date_start', 'date_end'])
-        self.__f_currency_data = {}
+        self.__f_currency_data: Dict[Tuple[str, str], pd.DataFrame] = {}
         for supported_currency_pair in currency_index['name']:
             url = '{}{}.csv'.format(self.url_base, supported_currency_pair)
             df = pd.read_csv(url, sep='\t', parse_dates=['date'])

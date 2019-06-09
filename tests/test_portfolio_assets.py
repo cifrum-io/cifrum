@@ -2,10 +2,10 @@ import datetime as dtm
 
 import numpy as np
 import pandas as pd
+import pinject
 import pytest
 from freezegun import freeze_time
 from hamcrest import assert_that, calling, raises, is_, is_not, not_none, empty
-from serum import Context
 
 import yapo as y
 from conftest import sorted_asc, decimal_places
@@ -35,9 +35,13 @@ def yapo_instance_factory():
                         period=Period.DAY,
                         currency=Currency.RUB)]
 
-            with Context(TestSymbolSources):
-                yapo_instance = y._instance.Yapo()
-                return yapo_instance
+            class BindingSpec(pinject.BindingSpec):
+                def configure(self, bind):
+                    bind('symbol_sources', to_class=TestSymbolSources)
+
+            obj_graph = pinject.new_object_graph(binding_specs=[BindingSpec()])
+            yapo_instance = obj_graph.provide(y.Yapo)
+            return yapo_instance
 
     return YapoInstanceFactory()
 

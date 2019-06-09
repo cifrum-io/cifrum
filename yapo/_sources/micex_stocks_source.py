@@ -2,7 +2,6 @@ from functools import lru_cache
 from typing import Optional, Callable
 
 import pandas as pd
-from serum import singleton
 
 from .base_classes import FinancialSymbolsSource
 from .._settings import data_url
@@ -12,7 +11,6 @@ from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
-@singleton
 class MicexStocksSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='micex')

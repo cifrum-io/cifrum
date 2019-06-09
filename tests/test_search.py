@@ -1,11 +1,10 @@
+import pinject
 import pytest
 from hamcrest import assert_that, calling, raises, empty, has_item, starts_with, matches_regexp, has_length, \
     not_none, is_in
-from serum import Context
 
 import yapo as y
 from yapo._search import _Search
-from yapo._sources.all_sources import AllSymbolSources
 from yapo.common.enums import SecurityType
 
 
@@ -58,8 +57,8 @@ def test__search_custom_query():
 def test__search_exact_finsym():
     qry = 'micex/SBER'
 
-    with Context(AllSymbolSources):
-        search_instance = _Search()
+    obj_graph = pinject.new_object_graph(binding_specs=[y.BindingSpec()])
+    search_instance = obj_graph.provide(_Search)
 
     r = search_instance._check_finsym_access(query=qry)
     assert_that(r, not_none())

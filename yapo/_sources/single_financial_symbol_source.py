@@ -3,7 +3,6 @@ from functools import lru_cache
 from typing import Optional, Callable
 
 import pandas as pd
-from serum import singleton
 
 from .base_classes import SingleFinancialSymbolSource, FinancialSymbolsSource
 from .._settings import data_url, change_column_name
@@ -13,7 +12,6 @@ from ..common.financial_symbol_id import FinancialSymbolId
 from ..common.financial_symbol_info import FinancialSymbolInfo
 
 
-@singleton
 class CbrTopRatesSource(SingleFinancialSymbolSource):
     def _load_rates(self):
         df = pd.read_csv('{}cbr_deposit_rate/data.csv'.format(data_url), sep='\t')
@@ -42,7 +40,6 @@ class CbrTopRatesSource(SingleFinancialSymbolSource):
         )
 
 
-@singleton
 class CbrCurrenciesSource(FinancialSymbolsSource):
     def __init__(self):
         super().__init__(namespace='cbr')
