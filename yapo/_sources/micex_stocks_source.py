@@ -26,7 +26,7 @@ class MicexStocksSource(FinancialSymbolsSource):
             df = pd.read_csv(self.url_base + secid + '.csv', sep='\t', usecols=['date', 'adjusted_close'])
             df.rename(columns={'adjusted_close': 'close'}, inplace=True)
             df['date'] = pd.to_datetime(df['date'])
-            df['period'] = df['date'].dt.to_period('M')
+            df['period'] = df['date'].dt.to_period(freq='M')
             df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
             return df_new
 

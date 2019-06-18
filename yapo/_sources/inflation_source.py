@@ -23,7 +23,7 @@ class InflationSource(FinancialSymbolsSource):
     def __extract_values(self, currency: str) -> Callable[[pd.Period, pd.Period], pd.DataFrame]:
         def func(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
             df = pd.read_csv('{}inflation/{}.csv'.format(data_url, currency), sep='\t', parse_dates=['date'])
-            df['period'] = df['date'].dt.to_period('M')
+            df['period'] = df['date'].dt.to_period(freq='M')
             df.sort_values(by='period', inplace=True)
             df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
             return df_new

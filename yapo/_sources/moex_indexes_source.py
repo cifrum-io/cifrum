@@ -26,7 +26,7 @@ class MoexIndexesSource(FinancialSymbolsSource):
         def func(start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
             url = '{}{}.csv'.format(self.url_base, row_id)
             df = pd.read_csv(url, sep='\t', parse_dates=['date'])
-            df['period'] = df['date'].dt.to_period('M')
+            df['period'] = df['date'].dt.to_period(freq='M')
             df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
             return df_new
 

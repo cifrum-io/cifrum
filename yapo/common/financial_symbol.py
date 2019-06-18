@@ -96,7 +96,7 @@ class FinancialSymbol:
             # - for every period we take the value that is last in each month
 
             if 'period' not in vals.columns:
-                vals['period'] = vals['date'].dt.to_period('M')
+                vals['period'] = vals['date'].dt.to_period(freq='M')
 
             month_ago = pd.Period(dtm.datetime.now() - relativedelta.relativedelta(months=1), freq='D')
             if self.end_period < month_ago:

@@ -67,7 +67,7 @@ class CurrencySymbolsRegistry:
         for supported_currency_pair in currency_index['name']:
             url = '{}{}.csv'.format(self.url_base, supported_currency_pair)
             df = pd.read_csv(url, sep='\t', parse_dates=['date'])
-            df['period'] = df['date'].dt.to_period('M')
+            df['period'] = df['date'].dt.to_period(freq='M')
             vals_lastdate_indices = df.groupby(['period'])['date'].transform(max) == df['date']
             df = df[vals_lastdate_indices].copy()
             df['close'] = df['close'] * df['nominal']

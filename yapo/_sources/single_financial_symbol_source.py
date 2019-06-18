@@ -67,7 +67,7 @@ class CbrCurrenciesSource(FinancialSymbolsSource):
                                        freq='D')
             df = pd.DataFrame({'date': date_range, 'close': 1.0})
 
-            df['period'] = df['date'].dt.to_period('M')
+            df['period'] = df['date'].dt.to_period(freq='M')
             df_new = df[(start_period <= df['period']) & (df['period'] <= end_period)].copy()
             return df_new
 

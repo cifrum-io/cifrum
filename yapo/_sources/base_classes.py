@@ -26,8 +26,8 @@ class SingleFinancialSymbolSource(FinancialSymbolsSource):
     def __extract_values(self, start_period: pd.Period, end_period: pd.Period) -> pd.DataFrame:
         df = self.__values_fetcher()
         df['date'] = pd.to_datetime(df['date'])
-        return df[(df['date'].dt.to_period('M') >= start_period) &
-                  (df['date'].dt.to_period('M') <= end_period)].copy()
+        return df[(df['date'].dt.to_period(freq='M') >= start_period) &
+                  (df['date'].dt.to_period(freq='M') <= end_period)].copy()
 
     def __init__(self, values_fetcher, namespace, name, start_period, end_period,
                  isin=None,
