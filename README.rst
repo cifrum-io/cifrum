@@ -74,7 +74,21 @@ Financial and Economic data freely available
 Installation
 ============
 
-TODO
+The library is published to `pypi.org <https://pypi.org/project/yapo/>`_.
+
+Install stable version:
+
+.. code :: bash
+
+    pip install -U
+
+
+Install development version:
+
+.. code :: bash
+
+    pip install -U git+https://github.com/okama-io/yapo.git
+
 
 Jupyter Notebooks
 =================
