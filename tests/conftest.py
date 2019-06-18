@@ -25,7 +25,6 @@ def sorted_asc():
 
 def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true", default=False, help="run slow tests")
-    parser.addoption("--runquandl", action="store_true", default=False, help="run Quandl tests")
 
 
 def pytest_collection_modifyitems(config, items):
@@ -34,9 +33,3 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if 'slow' in item.keywords:
                 item.add_marker(skip_slow)
-
-    if not config.getoption("--runquandl", default=False):
-        skip_quandl = pytest.mark.skip(reason="need --quandl option to run")
-        for item in items:
-            if 'quandl' in item.keywords:
-                item.add_marker(skip_quandl)

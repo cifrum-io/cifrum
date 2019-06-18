@@ -1,4 +1,3 @@
-import pytest
 from hamcrest import assert_that, none, empty, has_length, contains_inanyorder, has_items
 
 import yapo as y
@@ -39,7 +38,6 @@ def test__return_empty_list_or_none_if_symbol_doesnt_exist():
     assert_that(portfolio.assets, has_length(1))
 
 
-@pytest.mark.quandl
 def test__get_names_for_individual_namespace():
     def fin_sym_ids_by_namespace(namespace):
         return [available_name.fin_sym_id.format()

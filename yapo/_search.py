@@ -8,7 +8,7 @@ from typing_extensions import Protocol
 from ._sources.base_classes import FinancialSymbolsSource
 from ._sources.micex_stocks_source import MicexStocksSource
 from ._sources.mutru_funds_source import MutualFundsRuSource
-from ._sources.quandl_source import QuandlSource
+from ._sources.us_data_source import UsDataSource
 from ._sources.registries import FinancialSymbolsRegistry
 from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
@@ -16,13 +16,13 @@ from .common.financial_symbol_info import FinancialSymbolInfo
 
 
 class SymbolSourcesSearchable(Protocol):
-    quandl_source: QuandlSource
+    us_data_source: UsDataSource
     micex_stocks_source: MicexStocksSource
     mutual_funds_ru_source: MutualFundsRuSource
 
 
 class _Search:
-    def __handle_quandl_info(self) -> List[str]:
+    def __handle_us_data_info(self) -> List[str]:
         def func(x: FinancialSymbolInfo, src: FinancialSymbolsSource) -> str:
             fin_sym = src.fetch_financial_symbol(x.fin_sym_id.name)
 
@@ -36,8 +36,8 @@ class _Search:
 
             return line
 
-        lines = [func(x, self.symbol_sources.quandl_source)
-                 for x in self.symbol_sources.quandl_source.get_all_infos()]
+        lines = [func(x, self.symbol_sources.us_data_source)
+                 for x in self.symbol_sources.us_data_source.get_all_infos()]
         return lines
 
     def __handle_micex_stocks(self) -> List[str]:
@@ -86,12 +86,12 @@ class _Search:
 
         pool = ThreadPoolExecutor(3)
 
-        quandl_lines_fut = pool.submit(self.__handle_quandl_info)
+        us_data_source_lines_fut = pool.submit(self.__handle_us_data_info)
         micex_stocks_lines_fut = pool.submit(self.__handle_micex_stocks)
         mutru_lines_fut = pool.submit(self.__handle_mutru)
 
         def handle_all_lines() -> List[str]:
-            result = quandl_lines_fut.result() + micex_stocks_lines_fut.result() + mutru_lines_fut.result()
+            result = us_data_source_lines_fut.result() + micex_stocks_lines_fut.result() + mutru_lines_fut.result()
             return result
 
         self.lines_future: futures.Future[List[str]] = pool.submit(handle_all_lines)

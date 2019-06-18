@@ -7,7 +7,7 @@ from .._sources.micex_stocks_source import MicexStocksSource
 from .._sources.moex_indexes_source import MoexIndexesSource
 from .._sources.mutru_funds_source import MutualFundsRuSource
 from .._sources.okama_source import OkamaSource
-from .._sources.quandl_source import QuandlSource
+from .._sources.us_data_source import UsDataSource
 from .._sources.single_financial_symbol_source import CbrCurrenciesSource, CbrTopRatesSource
 from .._sources.yahoo_indexes_source import YahooIndexesSource
 
@@ -28,7 +28,7 @@ class AllSymbolSources(SymbolSources):
                  micex_stocks_source: MicexStocksSource,
                  moex_indexes_source: MoexIndexesSource,
                  mutual_funds_ru_source: MutualFundsRuSource,
-                 quandl_source: QuandlSource,
+                 us_data_source: UsDataSource,
                  okama_source: OkamaSource,
                  yahoo_indexes_source: YahooIndexesSource):
         self.cbr_currencies_source = cbr_currencies_source
@@ -37,7 +37,7 @@ class AllSymbolSources(SymbolSources):
         self.micex_stocks_source = micex_stocks_source
         self.moex_indexes_source = moex_indexes_source
         self.mutual_funds_ru_source = mutual_funds_ru_source
-        self.quandl_source = quandl_source
+        self.us_data_source = us_data_source
         self.okama_source = okama_source
         self.yahoo_indexes_source = yahoo_indexes_source
 
@@ -50,7 +50,7 @@ class AllSymbolSources(SymbolSources):
             self.micex_stocks_source,
             self.moex_indexes_source,
             self.mutual_funds_ru_source,
-            self.quandl_source,
+            self.us_data_source,
             self.okama_source,
             self.yahoo_indexes_source,
         ]

@@ -21,7 +21,6 @@ def test__handle_the_incorrect_query_string():
     assert_that(y.search(query='microsoft', top=-10), empty())
 
 
-@pytest.mark.quandl
 @pytest.mark.parametrize('query, expect_item', [('spy', 'ny/SPY'),
                                                 ('sber', 'micex/SBER'),
                                                 ('0890-94127385', 'mut_ru/0890-94127385')])

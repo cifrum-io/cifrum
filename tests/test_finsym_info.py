@@ -1,5 +1,4 @@
 import pandas as pd
-import pytest
 from hamcrest import assert_that, instance_of, empty, not_none, has_length, has_property, starts_with, \
     contains_inanyorder, none
 
@@ -39,18 +38,17 @@ def test__micex_stocks_should_have_correct_fields():
     assert_that(info, has_property('adjusted_close', True))
 
 
-@pytest.mark.quandl
-def test__quandl_stocks_should_have_correct_fields():
+def test__us_data_source_should_have_correct_fields():
     info = y.information(name='ny/VNQ')
     assert_that(info, has_property('namespace', 'ny'))
     assert_that(info, has_property('name', 'VNQ'))
     assert_that(info, has_property('isin', None))
-    assert_that(info, has_property('short_name', 'Vanguard Real Estate'))
+    assert_that(info, has_property('short_name', 'Vanguard Real Estate Index Fund ETF Shares'))
     assert_that(info, has_property('long_name', None))
-    assert_that(info, has_property('exchange', 'NYSE Arca'))
+    assert_that(info, has_property('exchange', 'NYSE MKT'))
     assert_that(info, has_property('currency', Currency.USD))
     assert_that(info, has_property('security_type', SecurityType.STOCK_ETF))
-    assert_that(info, has_property('period', Period.DAY))
+    assert_that(info, has_property('period', Period.MONTH))
     assert_that(info, has_property('adjusted_close', True))
 
 
@@ -102,7 +100,6 @@ def test__top_rates__should_have_correct_fields():
                 contains_inanyorder('period', 'rate'))
 
 
-@pytest.mark.quandl
 def test__all_data_should_be_available():
     assert_that(y.information(name='ny/MSFT'), not_none())
     assert_that(y.information(name='micex/FXRU'), not_none())

@@ -45,7 +45,6 @@ keywords = [
 python = "^3.6"
 numpy = "^1.16"
 PyContracts = "^1.8"
-quandl = "^3.4"
 pandas = "^0.24"
 pinject = "^0.14.1"
 typing_extensions = "^3.7"
