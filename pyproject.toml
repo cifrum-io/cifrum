@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "yapo"
-version = "0.2.0"
+version = "0.2.1"
 description = "Flexible and easy-to-use Python library for analysis & manipulation with financial & economic data"
 authors = [
     "Alexander Myltsev",
