@@ -1,5 +1,7 @@
 |Travis|_ |Gitter|_ |Pepy|_ |Codecov|_
 
+|Binder|_
+
 .. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
 .. _Travis: https://travis-ci.org/okama-io/yapo
 
@@ -11,6 +13,9 @@
 
 .. |Codecov| image:: https://codecov.io/gh/okama-io/yapo/branch/master/graph/badge.svg
 .. _Codecov: https://codecov.io/gh/okama-io/yapo
+
+.. |Binder| image:: https://mybinder.org/badge_logo.svg
+.. _Binder: https://mybinder.org/v2/gh/okama-io/yapo/master?filepath=examples
 
 **YAPO** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
@@ -93,7 +98,11 @@ Install development version:
 Jupyter Notebooks
 =================
 
-TODO
+The `examples <https://github.com/okama-io/yapo/tree/master/examples>`_ folder contains Jupyter notebooks
+that show how to use the library parts in depth.
+
+`examples <https://github.com/okama-io/yapo/tree/master/examples>`_ are also compatible with
+binder. You can try it by pressing the |Binder|_ button.
 
 Dependencies
 ============
