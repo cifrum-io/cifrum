@@ -58,12 +58,12 @@ class FinancialSymbol:
     def __init__(self,
                  identifier: FinancialSymbolId,
                  values: Callable[[pd.Period, pd.Period], pd.DataFrame],
-                 start_period: pd.Period,
-                 end_period: pd.Period,
                  adjusted_close: bool,
                  currency: Currency,
                  period: Period,
                  security_type: SecurityType,
+                 start_period: Optional[pd.Period] = None,
+                 end_period: Optional[pd.Period] = None,
                  isin: Optional[str] = None,
                  short_name: Optional[str] = None,
                  long_name: Optional[str] = None,
@@ -80,8 +80,8 @@ class FinancialSymbol:
         self.exchange = exchange
         self.currency = currency
         self.security_type = security_type
-        self.start_period = start_period
-        self.end_period = end_period
+        self._start_period = start_period
+        self._end_period = end_period
         self.period = period
         self.adjusted_close = adjusted_close
 
@@ -116,6 +116,22 @@ class FinancialSymbol:
 
         vals.sort_values(by='period', ascending=True, inplace=True)
         return vals
+
+    @property
+    def start_period(self) -> pd.Period:
+        if self._start_period is None:
+            vals = self.values_fetcher._fetch(start_period=pd.Period('1900-1', freq='M'),
+                                              end_period=pd.Period.now(freq='M'))
+            self._start_period = vals['period'].min()
+        return self._start_period
+
+    @property
+    def end_period(self) -> pd.Period:
+        if self._end_period is None:
+            vals = self.values_fetcher._fetch(start_period=pd.Period('1900-1', freq='M'),
+                                              end_period=pd.Period.now(freq='M'))
+            self._end_period = vals['period'].max()
+        return self._end_period
 
     @property
     def values_fetcher(self) -> ValuesFetcher:
