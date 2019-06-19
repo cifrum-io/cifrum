@@ -5,7 +5,7 @@ import pandas as pd
 import pinject
 import pytest
 from freezegun import freeze_time
-from hamcrest import assert_that, calling, raises, is_, is_not, not_none, empty
+from hamcrest import assert_that, calling, raises, is_, is_not, not_none, empty, has_length
 
 import yapo as y
 from conftest import sorted_asc, decimal_places
@@ -174,3 +174,34 @@ def test__handle_asset_with_dash_in_name():
     asset = y.portfolio_asset(name='ny/BRK-B')
     assert_that(asset, not_none())
     assert_that(asset.close(), is_not(empty()))
+
+
+@freeze_time('2019-2-15 15:0:0')
+def test__create_portfolio_with_default_values():
+    assets = {
+        'micex/FXRU': 1.,
+        'mut_ru/0890-94127385': 1.
+    }
+    period_start = pd.Period('2014-1', freq='M')
+    period_now = pd.Period.now(freq='M')
+    assert period_now == pd.Period('2019-2', freq='M')
+
+    p1 = y.portfolio(assets=assets, currency='rub')
+    assert_that(p1, not_none())
+    assert_that(p1.assets, has_length(2))
+    assert p1.get_return().start_period == period_start
+    assert p1.get_return().end_period == period_now - 1
+
+    sp2 = pd.Period('2017-1', freq='M')
+    p2 = y.portfolio(assets=assets, start_period=str(sp2), currency='rub')
+    assert_that(p2, not_none())
+    assert_that(p2.assets, has_length(2))
+    assert p2.get_return().start_period == sp2 + 1
+    assert p2.get_return().end_period == period_now - 1
+
+    ep3 = pd.Period('2018-3', freq='M')
+    p3 = y.portfolio(assets=assets, end_period=str(ep3), currency='rub')
+    assert_that(p3, not_none())
+    assert_that(p3.assets, has_length(2))
+    assert p3.get_return().start_period == period_start
+    assert p3.get_return().end_period == ep3

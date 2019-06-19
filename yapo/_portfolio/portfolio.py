@@ -176,11 +176,29 @@ class Portfolio:
                  weights: np.array,
                  start_period: pd.Period, end_period: pd.Period,
                  currency: PortfolioCurrency):
+        """
+        :param start_period: start period of first order diff
+        :param end_period: end period of first order diff
+        """
+        if (end_period - start_period).n < 2:
+            raise ValueError('period range should be at least 2 months')
+
         self.weights = weights
         self.currency = currency
+        self._period_min = max(
+            self.currency.period_min,
+            *[a._period_min for a in assets],
+            start_period,
+        )
+        self._period_max = min(
+            self.currency.period_max,
+            *[a._period_max for a in assets],
+            end_period,
+        )
 
         self._assets = [portfolio_items_factory.new_asset(symbol=a.symbol,
-                                                          start_period=start_period, end_period=end_period,
+                                                          start_period=self._period_min,
+                                                          end_period=self._period_max,
                                                           currency=currency.value,
                                                           portfolio=self,
                                                           weight=w) for a, w in zip(assets, weights)]
