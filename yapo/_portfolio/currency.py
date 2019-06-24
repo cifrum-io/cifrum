@@ -1,3 +1,5 @@
+from typing import Optional
+
 import pandas as pd
 from contracts import contract
 
@@ -63,10 +65,10 @@ class PortfolioCurrency:
         kind='str',
         years_ago='int,>0|None',
     )
-    def inflation(self, kind,
+    def inflation(self, kind: str,
                   end_period: pd.Period,
                   start_period: pd.Period = None,
-                  years_ago: int = None) -> TimeSeries:
+                  years_ago: Optional[int] = None) -> TimeSeries:
         """
         Computes the properly reduced inflation for the currency
 
