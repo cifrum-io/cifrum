@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from contracts import contract
 
-from ._portfolio.currency import PortfolioCurrencyFactory
+from ._portfolio.currency import PortfolioCurrencyFactory, PortfolioCurrency
 from ._portfolio.portfolio import Portfolio, PortfolioAsset, PortfolioItemsFactory
 from ._search import _Search
 from ._sources.registries import FinancialSymbolsRegistry
@@ -198,3 +198,8 @@ class Yapo:
                                     start_period=start_period, end_period=end_period,
                                     years_ago=years_ago)
         return inflation_ts
+
+    def currency(self, currency: str) -> PortfolioCurrency:
+        currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
+        pc = self.portfolio_currency_factory.new(currency=currency_enum)
+        return pc

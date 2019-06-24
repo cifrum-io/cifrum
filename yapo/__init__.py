@@ -51,3 +51,4 @@ portfolio_asset = yapo_instance.portfolio_asset
 available_names = yapo_instance.available_names
 search = yapo_instance.search
 inflation = yapo_instance.inflation
+currency = yapo_instance.currency
