@@ -85,7 +85,7 @@ Install stable version:
 
 .. code :: bash
 
-    pip install -U
+    pip install -U yapo
 
 
 Install development version:
