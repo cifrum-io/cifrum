@@ -1,4 +1,3 @@
-from pprint import pformat
 from typing import Optional
 
 import pandas as pd
@@ -14,9 +13,6 @@ class FinancialSymbolsSource:
 
     def fetch_financial_symbol(self, name: str) -> Optional[FinancialSymbol]:
         raise Exception('should not be called')
-
-    def __repr__(self):
-        return pformat(vars(self))
 
     def get_all_infos(self):
         raise Exception('should not be called')

@@ -150,5 +150,11 @@ class FinancialSymbol:
         return self.identifier.format()
 
     def __repr__(self) -> str:
-        from pprint import pformat
-        return '{}\n{}'.format(self.identifier_str, pformat(vars(self)))
+        repr = f'''
+FinancialSymbol(identifier={self.identifier_str},
+                start_period={self.start_period}, end_period={self.end_period}, period={self.period},
+                currency={self.currency}, exchange={self.exchange},
+                short_name={self.short_name}, long_name={self.long_name},
+                isin={self.isin},
+                security_type={self.security_type}, adjusted_close={self.adjusted_close})'''
+        return repr
