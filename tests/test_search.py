@@ -21,7 +21,7 @@ def test__handle_the_incorrect_query_string():
     assert_that(y.search(query='microsoft', top=-10), empty())
 
 
-@pytest.mark.parametrize('query, expect_item', [('spy', 'ny/SPY'),
+@pytest.mark.parametrize('query, expect_item', [('spy', 'us/SPY'),
                                                 ('sber', 'micex/SBER'),
                                                 ('0890-94127385', 'mut_ru/0890-94127385')])
 def test__search_exact_ticker(query, expect_item):

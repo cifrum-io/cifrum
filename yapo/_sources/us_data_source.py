@@ -13,7 +13,7 @@ from ..common.financial_symbol_info import FinancialSymbolInfo
 
 class UsDataSource(FinancialSymbolsSource):
     def __init__(self):
-        super().__init__(namespace='ny')
+        super().__init__(namespace='us')
 
         self.url_base = data_url + 'v2/us'
         self.index = pd.read_csv(self.url_base, sep=',', index_col='Code')

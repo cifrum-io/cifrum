@@ -5,7 +5,7 @@ import yapo as y
 
 def test__return_namespaces_list_by_default():
     names = y.available_names()
-    assert_that(names, contains_inanyorder('infl', 'cbr', 'micex', 'mut_ru', 'ny', 'index'))
+    assert_that(names, contains_inanyorder('infl', 'cbr', 'micex', 'mut_ru', 'us', 'index'))
 
 
 def test__return_empty_list_or_none_if_symbol_doesnt_exist():
@@ -55,8 +55,8 @@ def test__get_names_for_individual_namespace():
     assert_that(fin_sym_ids_by_namespace(namespace='mut_ru'),
                 has_items('mut_ru/2277', 'mut_ru/0164-70287842', 'mut_ru/0890-94127385', 'mut_ru/2569'))
 
-    assert_that(fin_sym_ids_by_namespace(namespace='ny'),
-                has_items('ny/T', 'ny/MSFT', 'ny/GOOG', 'ny/AAPL'))
+    assert_that(fin_sym_ids_by_namespace(namespace='us'),
+                has_items('us/T', 'us/MSFT', 'us/GOOG', 'us/AAPL'))
 
 
 def test__return_several_namespaces():

@@ -201,7 +201,7 @@ def test__risk():
 
 @pytest.mark.parametrize('currency', Currency)
 def test__handle_portfolio_with_asset_with_dash_in_name(currency: Currency):
-    p = y.portfolio(assets={'ny/BRK-B': 1}, currency=currency.name)
+    p = y.portfolio(assets={'us/BRK-B': 1}, currency=currency.name)
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
     assert_that(p.get_return(), is_not(empty()))

@@ -80,10 +80,10 @@ def test__default_periods():
 
 
 def test__usd_assets_that_is_older_than_rub():
-    p_usd = y.portfolio(assets={'ny/T': 1}, currency='usd')
+    p_usd = y.portfolio(assets={'us/T': 1}, currency='usd')
     assert p_usd.get_return().start_period == pd.Period('1983-12', freq='M')
 
-    p_rub = y.portfolio(assets={'ny/T': 1}, currency='rub')
+    p_rub = y.portfolio(assets={'us/T': 1}, currency='rub')
     assert p_rub.get_return().start_period == pd.Period('1992-08', freq='M')
     assert p_usd.get_return().end_period == p_rub.get_return().end_period
 
@@ -108,7 +108,7 @@ def test__data_for_last_month_period_should_be_dropped(yapo_instance_factory):
 @pytest.mark.slow
 @freeze_time('2018-1-30 1:0:0')
 def test__us_data_source_values():
-    asset = y.portfolio_asset(name='ny/MSFT',
+    asset = y.portfolio_asset(name='us/MSFT',
                               start_period='2017-11', end_period='2018-2', currency='usd')
     period_range_expected = pd.period_range(start='2017-11', end='2017-12', freq='M')
     assert asset.close().period_range() == list(period_range_expected)
@@ -171,7 +171,7 @@ def test__fail_if_awkwardly_current_time_is_less_than_asset_start_date():
 
 
 def test__handle_asset_with_dash_in_name():
-    asset = y.portfolio_asset(name='ny/BRK-B')
+    asset = y.portfolio_asset(name='us/BRK-B')
     assert_that(asset, not_none())
     assert_that(asset.close(), is_not(empty()))
 
