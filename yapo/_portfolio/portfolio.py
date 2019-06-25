@@ -141,12 +141,12 @@ class PortfolioAsset:
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
     )
-    def get_cagr(self, years_ago=None, real=False):
+    def cagr(self, years_ago=None, real=False):
         p = self.portfolio_items_factory.new_portfolio(assets_to_weight={self: 1.},
                                                        start_period=self._period_min,
                                                        end_period=self._period_max,
                                                        currency=self.currency.value)
-        return p.get_cagr(years_ago=years_ago, real=real)
+        return p.cagr(years_ago=years_ago, real=real)
 
     def inflation(self, kind: str, years_ago: int = None):
         ror = self.get_return()
@@ -236,7 +236,7 @@ class Portfolio:
         years_ago='int,>0|None|list[int,>0]',
         real='bool',
     )
-    def get_cagr(self, years_ago=None, real=False):
+    def cagr(self, years_ago=None, real=False):
         if years_ago is None:
             ror = self.get_return()
             years_total = ror.period_size / _MONTHS_PER_YEAR
@@ -246,14 +246,11 @@ class Portfolio:
                 inflation_cumulative = self.inflation(kind='cumulative')
                 cagr = (cagr + 1.) / (inflation_cumulative + 1.) ** (1 / years_total) - 1.
             return cagr
-        elif isinstance(years_ago, list):
-            return np.array([self.get_cagr(years_ago=y, real=real)
-                             for y in years_ago])
         elif isinstance(years_ago, int):
             ror = self.get_return()
             months_count = years_ago * _MONTHS_PER_YEAR
             if ror.period_size < months_count:
-                return self.get_cagr(years_ago=None, real=real)
+                return self.cagr(years_ago=None, real=real)
 
             ror_slice = self.get_return()[-months_count:]
             ror_slice_c = (ror_slice + 1.).prod()

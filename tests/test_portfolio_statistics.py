@@ -80,7 +80,7 @@ class Test__compute_statistics_for_partially_incomplete_portfolio():
     @pytest.mark.parametrize('years_ago, real',
                              itertools.product([None, 1, 5, 20, 50], [True, False]))
     def test__get_cagr(self, portfolio, years_ago, real):
-        assert_that(portfolio.get_cagr(years_ago=years_ago, real=real), not_none())
+        assert_that(portfolio.cagr(years_ago=years_ago, real=real), not_none())
 
     @pytest.mark.parametrize('period', ['year', 'month'])
     def test__risk(self, portfolio, period):
@@ -149,38 +149,26 @@ def test__handle_related_inflation():
     assert _portfolio.inflation(kind='values').size == _portfolio.get_return().size
 
 
-def test__get_cagr():
-    cagr_default = _portfolio.get_cagr()
+def test__cagr():
+    cagr_default = _portfolio.cagr()
     assert_that(cagr_default.value, close_to(.1241, delta))
 
-    cagr_long_time = _portfolio.get_cagr(years_ago=20)
+    cagr_long_time = _portfolio.cagr(years_ago=20)
     assert_that((cagr_default - cagr_long_time).value, close_to(0., delta))
 
-    cagr_one_year = _portfolio.get_cagr(years_ago=1)
+    cagr_one_year = _portfolio.cagr(years_ago=1)
     assert_that(cagr_one_year.value, close_to(.1821, delta))
 
-    cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        _portfolio.get_cagr(years_ago=[None, 20, 1])
-    assert_that((cagr_default1 - cagr_default).value, close_to(0., delta))
-    assert_that((cagr_long_time1 - cagr_long_time).value, close_to(0., delta))
-    assert_that((cagr_one_year1 - cagr_one_year).value, close_to(0., delta))
 
-
-def test__get_cagr_real():
-    cagr_default = _portfolio.get_cagr(real=True)
+def test__cagr_real():
+    cagr_default = _portfolio.cagr(real=True)
     assert_that(cagr_default.value, close_to(.1056, delta))
 
-    cagr_long_time = _portfolio.get_cagr(years_ago=20, real=True)
+    cagr_long_time = _portfolio.cagr(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))
 
-    cagr_one_year = _portfolio.get_cagr(years_ago=1, real=True)
+    cagr_one_year = _portfolio.cagr(years_ago=1, real=True)
     assert_that(cagr_one_year.value, close_to(.1604, delta))
-
-    cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        _portfolio.get_cagr(years_ago=[None, 20, 1], real=True)
-    assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
-    assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
-    assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
 
 
 def test__risk():

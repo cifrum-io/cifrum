@@ -41,21 +41,15 @@ def test__ytd_get_return():
                                    [.1835, -.0486, -.4572, -.0026, .5376], decimal=decimal_places)
 
 
-def test__get_cagr():
-    cagr_default = __asset.get_cagr()
+def test__cagr():
+    cagr_default = __asset.cagr()
     assert_that(cagr_default.value, close_to(-.0562, delta))
 
-    cagr_long_time = __asset.get_cagr(years_ago=20)
+    cagr_long_time = __asset.cagr(years_ago=20)
     assert_that(cagr_long_time.value, close_to(cagr_default.value, delta))
 
-    cagr_one_year = __asset.get_cagr(years_ago=1)
+    cagr_one_year = __asset.cagr(years_ago=1)
     assert_that(cagr_one_year.value, close_to(.4738, delta))
-
-    cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        __asset.get_cagr(years_ago=[None, 20, 1])
-    assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
-    assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
-    assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
 
 
 def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
@@ -65,28 +59,22 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
     asset = y.portfolio_asset(name=__asset_name,
                               start_period=str(start_period),
                               end_period=str(end_period), currency='usd')
-    cagr1 = asset.get_cagr()
+    cagr1 = asset.cagr()
     assert_that(cagr1.value, close_to(-.1426, delta))
 
-    cagr2 = asset.get_cagr(years_ago=years_amount)
+    cagr2 = asset.cagr(years_ago=years_amount)
     assert_that(cagr2.value, close_to(cagr1.value, delta))
 
 
-def test__get_cagr_real():
-    cagr_default = __asset.get_cagr(real=True)
+def test__cagr_real():
+    cagr_default = __asset.cagr(real=True)
     assert_that(cagr_default.value, close_to(-.0717, delta))
 
-    cagr_long_time = __asset.get_cagr(years_ago=20, real=True)
+    cagr_long_time = __asset.cagr(years_ago=20, real=True)
     assert_that(cagr_default.value, close_to(cagr_long_time.value, delta))
 
-    cagr_one_year = __asset.get_cagr(years_ago=1, real=True)
+    cagr_one_year = __asset.cagr(years_ago=1, real=True)
     assert_that(cagr_one_year.value, close_to(.4345, delta))
-
-    cagr_default1, cagr_long_time1, cagr_one_year1 = \
-        __asset.get_cagr(years_ago=[None, 20, 1], real=True)
-    assert_that(cagr_default1.value, close_to(cagr_default.value, delta))
-    assert_that(cagr_long_time1.value, close_to(cagr_long_time.value, delta))
-    assert_that(cagr_one_year1.value, close_to(cagr_one_year.value, delta))
 
 
 def test__get_cagr_invariants():
@@ -97,8 +85,8 @@ def test__get_cagr_invariants():
                               currency='rub')
     years_ago = 10
     months_ago = years_ago * _MONTHS_PER_YEAR
-    cagr = asset.get_cagr()
-    cagr10 = asset.get_cagr(years_ago=years_ago)
+    cagr = asset.cagr()
+    cagr10 = asset.cagr(years_ago=years_ago)
 
     assert cagr.start_period == cagr10.start_period == start_period + 1
     assert cagr.end_period == cagr10.end_period == end_period
