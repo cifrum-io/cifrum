@@ -1,6 +1,10 @@
-|Travis|_ |Gitter|_ |Pepy|_ |Codecov|_
-
-|Binder|_
++----------+----------------------------------------+
+| Status   | |Travis|_ |Gitter|_ |Pepy|_ |Codecov|_ |
++----------+----------------------------------------+
+| Examples | |Binder|_                              |
++----------+----------------------------------------+
+| Support  | |Donate|_                              |
++----------+----------------------------------------+
 
 .. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
 .. _Travis: https://travis-ci.org/okama-io/yapo
@@ -17,8 +21,27 @@
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
 .. _Binder: https://mybinder.org/v2/gh/okama-io/yapo/master?filepath=examples
 
-**YAPO** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
+.. |Donate| image:: https://img.shields.io/badge/Donate-PayPal-green.svg
+.. _Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SC8RT7A7FT5HC&currency_code=USD&source=url
+
+**yapo** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
+
+**yapo** is 100% open source project, free for all to use and released under
+the most liberal terms of MIT license. We appreciate all kinds of
+contributions, financial resources to maintain the project and accelerate its
+development.
+
+If you find **yapo** useful in your financial research, private investments or
+company, please consider making a donation to the project commensurate with
+your resources. Any amount helps!
+
+All donations will be used strictly to fund yapo development supporting
+activities: the Python library development, `frontend solutions <okama.io_>`_,
+documentation and maintenance work, and paying for hosting costs of servers.
+
+If you are interested in donating to the project, please, use the Paypal
+button: |Donate|_
 
 .. contents:: Contents of this Document
 
