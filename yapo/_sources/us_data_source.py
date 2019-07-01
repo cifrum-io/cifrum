@@ -48,6 +48,6 @@ class UsDataSource(FinancialSymbolsSource):
         infos = []
         for idx, row in self.index.iterrows():
             fsi = FinancialSymbolId(self.namespace, str(idx))
-            fs_info = FinancialSymbolInfo(fin_sym_id=fsi, short_name=idx)
+            fs_info = FinancialSymbolInfo(fin_sym_id=fsi, short_name=row['Name'])
             infos.append(fs_info)
         return infos
