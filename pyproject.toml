@@ -34,11 +34,11 @@ classifiers = [
 keywords = [
     "Modern portfolio theory",
     "Financial library",
-    "Asset allocation",
-    "Portfolio investments",
-    "Financial operations",
-    "Financial analysys",
-    "Quantitative finance",
+    "Asset allocation",
+    "Portfolio investments",
+    "Financial operations",
+    "Financial analysys",
+    "Quantitative finance",
 ]
 
 [tool.poetry.dependencies]
@@ -65,3 +65,4 @@ pytype = "^2019.5"
 requires = ["poetry >= 0.12, <1"]
 python = ">=3.6, <4"
 build-backend = "poetry.masonry.api"
+
