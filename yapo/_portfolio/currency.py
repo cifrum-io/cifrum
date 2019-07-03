@@ -68,7 +68,7 @@ class PortfolioCurrency:
     def inflation(self, kind: str,
                   end_period: pd.Period,
                   start_period: pd.Period = None,
-                  years_ago: Optional[int] = None) -> TimeSeries:
+                  years_ago: Optional[int] = None) -> Optional[TimeSeries]:
         """
         Computes the properly reduced inflation for the currency
 
@@ -119,7 +119,9 @@ class PortfolioCurrency:
             inflation_amean = inflation_ts.mean()
             return inflation_amean
         elif kind == 'g_mean':
-            years_total = ((end_period - start_period).n + 1) / _MONTHS_PER_YEAR
+            years_total = inflation_values.period_size() / _MONTHS_PER_YEAR
+            if years_total < 1.:
+                return None
             inflation_gmean = (__cumulative() + 1.) ** (1 / years_total) - 1.
             return inflation_gmean
         elif kind == 'values':
