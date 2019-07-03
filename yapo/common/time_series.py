@@ -1,8 +1,9 @@
-import pandas as pd
-import numpy as np
-from enum import Enum
 import copy
 from collections.abc import Iterable
+from enum import Enum
+
+import numpy as np
+import pandas as pd
 
 from .._settings import _MONTHS_PER_YEAR
 
@@ -314,15 +315,23 @@ class TimeSeries:
             raise ValueError('incorrect frequency')
 
         drop_first_count = None if self.start_period.month == 1 else _MONTHS_PER_YEAR - self.start_period.month + 1
-        drop_last_count = None if self.end_period.month == _MONTHS_PER_YEAR else -self.end_period.month
-        if drop_first_count and drop_last_count and drop_first_count + (-drop_last_count) == self.size:
+        if drop_first_count and drop_first_count == self.size:
             msg = "YTD for the current dates range ({} - {}) is empty".format(self.start_period, self.end_period)
             raise ValueError(msg)
-        values_full_yearly = self[drop_first_count:drop_last_count]
-        values_full_yearly_splits = \
-            np.split(values_full_yearly.values,
-                     values_full_yearly.end_period.year - values_full_yearly.start_period.year + 1)
-        values_ytd_ts = [((splt + 1.).prod() - 1.) for splt in values_full_yearly_splits]
+        values_full_yearly = self[drop_first_count:]
+
+        values_ytd_ts = []
+        years_count = len(pd.period_range(start=values_full_yearly.start_period,
+                                          end=values_full_yearly.end_period,
+                                          freq='Y'))
+        for year in range(years_count):
+            values_full_yearly_split = values_full_yearly[year * _MONTHS_PER_YEAR:(year + 1) * _MONTHS_PER_YEAR]
+            assert values_full_yearly_split.start_period.month == 1
+            if year < years_count - 1:
+                assert values_full_yearly_split.end_period.month == 12
+            values_ytd = (values_full_yearly_split + 1.).prod() - 1.
+            values_ytd_ts.append(values_ytd.value)
+
         values_ytd = TimeSeries(values=np.array(values_ytd_ts),
                                 start_period=values_full_yearly.start_period,
                                 end_period=values_full_yearly.end_period,

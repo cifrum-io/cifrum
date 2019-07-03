@@ -124,13 +124,13 @@ def test__cumulative_get_return():
 def test__ytd_get_return():
     ror_ytd = _portfolio.get_return(kind='ytd')
     assert ror_ytd.start_period == pd.Period('2016-1', freq='M')
-    assert ror_ytd.end_period == pd.Period('2016-1', freq='M')
-    np.testing.assert_almost_equal(ror_ytd.values, [.3457], decimal_places)
+    assert ror_ytd.end_period == pd.Period('2017-1', freq='M')
+    np.testing.assert_almost_equal(ror_ytd.values, [.3457, .0088], decimal_places)
 
     ror_ytd_real = _portfolio.get_return(kind='ytd', real=True)
     assert ror_ytd_real.start_period == pd.Period('2016-1', freq='M')
-    assert ror_ytd_real.end_period == pd.Period('2016-1', freq='M')
-    np.testing.assert_almost_equal(ror_ytd_real.values, [.3184], decimal_places)
+    assert ror_ytd_real.end_period == pd.Period('2017-1', freq='M')
+    np.testing.assert_almost_equal(ror_ytd_real.values, [.3184, -.0049], decimal_places)
 
 
 def test__handle_related_inflation():
@@ -143,8 +143,8 @@ def test__handle_related_inflation():
 
     infl_yoy = _portfolio.inflation(kind='yoy')
     assert infl_yoy.start_period == pd.Period('2016-1')
-    assert infl_yoy.end_period == pd.Period('2016-1')
-    np.testing.assert_almost_equal(infl_yoy.values, [.0207], decimal_places)
+    assert infl_yoy.end_period == pd.Period('2017-1')
+    np.testing.assert_almost_equal(infl_yoy.values, [.0207, .0137], decimal_places)
 
     assert _portfolio.inflation(kind='values').size == _portfolio.get_return().size
 

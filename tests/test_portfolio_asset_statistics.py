@@ -29,16 +29,17 @@ def test__cumulative_get_return():
 def test__ytd_get_return():
     ror_ytd = __asset.get_return(kind='ytd')
     assert ror_ytd.start_period == pd.Period('2012-1', freq='M')
-    assert ror_ytd.end_period == pd.Period('2016-1', freq='M')
+    assert ror_ytd.end_period == pd.Period('2017-1', freq='M')
     assert ror_ytd.kind == TimeSeriesKind.YTD
-    np.testing.assert_almost_equal(ror_ytd.values, [.2041, -.0344, -.4531, .0046, .5695], decimal=decimal_places)
+    np.testing.assert_almost_equal(ror_ytd.values,
+                                   [.2041, -.0344, -.4531, .0046, .5695, -.0434], decimal=decimal_places)
 
     ror_ytd_real = __asset.get_return(kind='ytd', real=True)
     assert ror_ytd_real.start_period == pd.Period('2012-1', freq='M')
-    assert ror_ytd_real.end_period == pd.Period('2016-1', freq='M')
+    assert ror_ytd_real.end_period == pd.Period('2017-1', freq='M')
     assert ror_ytd_real.kind == TimeSeriesKind.YTD
     np.testing.assert_almost_equal(ror_ytd_real.values,
-                                   [.1835, -.0486, -.4572, -.0026, .5376], decimal=decimal_places)
+                                   [.1835, -.0486, -.4572, -.0026, .5376, -.0519], decimal=decimal_places)
 
 
 def test__cagr():
@@ -126,7 +127,7 @@ def test__handle_related_inflation():
 
     infl_yoy = __asset.inflation(kind='yoy')
     assert infl_yoy.start_period == pd.Period('2012-1')
-    assert infl_yoy.end_period == pd.Period('2016-1')
-    np.testing.assert_almost_equal(infl_yoy.values, [.0174, .015, .0076, .0073, .0207], decimal_places)
+    assert infl_yoy.end_period == pd.Period('2017-1')
+    np.testing.assert_almost_equal(infl_yoy.values, [.0174, .015, .0076, .0073, .0207, .009], decimal_places)
 
     assert __asset.inflation(kind='values').size == __asset.get_return().size
