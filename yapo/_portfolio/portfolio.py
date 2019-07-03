@@ -202,6 +202,7 @@ class Portfolio:
                                                           currency=currency.value,
                                                           portfolio=self,
                                                           weight=w) for a, w in zip(assets, weights)]
+        assert(len(self._assets) > 0)
 
     @property
     def assets(self) -> Dict[str, PortfolioAsset]:
