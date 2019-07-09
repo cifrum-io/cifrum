@@ -3,7 +3,7 @@ import itertools
 import numpy as np
 import pandas as pd
 import pytest
-from hamcrest import assert_that, not_none, calling, raises, close_to
+from hamcrest import assert_that, none, not_none, calling, raises, close_to
 
 import yapo as y
 from conftest import decimal_places, delta
@@ -53,3 +53,16 @@ def test__inflation_values(pcf: PortfolioCurrencyFactory):
     assert infl_yoy.start_period == pd.Period('2014-1')
     assert infl_yoy.end_period == pd.Period('2018-1')
     np.testing.assert_almost_equal(infl_yoy.values, [.0076, .0073, .0207, .0211, .0191], decimal_places)
+
+
+def test__gmean_inflation_for_less_than_year(pcf: PortfolioCurrencyFactory):
+    pc = pcf.new(currency=Currency.USD)
+
+    assert_that(pc.inflation(kind='g_mean',
+                             start_period=pd.Period('2017-1', freq='M'),
+                             end_period=pd.Period('2018-1', freq='M')),
+                not_none())
+    assert_that(pc.inflation(kind='g_mean',
+                             start_period=pd.Period('2017-5', freq='M'),
+                             end_period=pd.Period('2018-1', freq='M')),
+                none())
