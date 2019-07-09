@@ -17,8 +17,8 @@ class YahooIndexesSource(FinancialSymbolsSource):
         self.url_base = data_url + 'index/yahoo/'
 
         self.index = pd.read_csv(self.url_base + '__index.csv', sep='\t', index_col='name')
-        self.index['date_start'] = pd.to_datetime(self.index['date_start'])
-        self.index['date_end'] = pd.to_datetime(self.index['date_end'])
+        self.index['date_start'] = pd.to_datetime(self.index['date_start']).dt.to_period(freq='D')
+        self.index['date_end'] = pd.to_datetime(self.index['date_end']).dt.to_period(freq='D')
 
     @lru_cache(maxsize=512)
     def __extract_values(self, row_id: str) -> Callable[[pd.Period, pd.Period], pd.DataFrame]:
