@@ -39,7 +39,7 @@ class YahooIndexesSource(FinancialSymbolsSource):
                                  values=self.__extract_values(name),
                                  start_period=row['date_start'],
                                  end_period=row['date_end'],
-                                 currency=Currency.RUB,
+                                 currency=Currency.USD,
                                  security_type=SecurityType.INDEX,
                                  period=Period.DAY,
                                  adjusted_close=True)
