@@ -27,8 +27,7 @@
 **yapo** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
 
-**yapo** is 100% open source project, free for all to use and released under
-the most liberal terms of MIT license. We appreciate all kinds of
+**yapo** is released under the terms of GPL license. We appreciate all kinds of
 contributions, financial resources to maintain the project and accelerate its
 development.
 
@@ -173,7 +172,7 @@ Feel free to ask questions at `the community <okama-discourse_>`_.
 License
 =======
 
-`MIT <license_>`_
+`GPL <license_>`_
 
 .. |--| unicode:: U+2013
 .. _okama.io: https://okama.io/
