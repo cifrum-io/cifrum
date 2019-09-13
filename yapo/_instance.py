@@ -6,6 +6,7 @@ from contracts import contract
 
 from ._portfolio.currency import PortfolioCurrencyFactory, PortfolioCurrency
 from ._portfolio.portfolio import Portfolio, PortfolioAsset, PortfolioItemsFactory
+from ._portfolio.optimal import markovitz
 from ._search import _Search
 from ._sources.registries import FinancialSymbolsRegistry
 from .common.enums import Currency, SecurityType
@@ -208,8 +209,6 @@ class Yapo:
                            start_period: str, end_period: str,
                            currency: str,
                            samples_count: int = 10):
-        from ._portfolio.optimal import markovitz
-
         currency_enum: Currency = Currency.__dict__[currency.upper()]  # type: ignore
         start_period_pd = pd.Period(start_period, freq='M')
         end_period_pd = pd.Period(end_period, freq='M')
