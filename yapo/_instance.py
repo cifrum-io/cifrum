@@ -5,8 +5,8 @@ import pandas as pd
 from contracts import contract
 
 from ._portfolio.currency import PortfolioCurrencyFactory, PortfolioCurrency
+from ._portfolio.optimal import basic as optimal_basic
 from ._portfolio.portfolio import Portfolio, PortfolioAsset, PortfolioItemsFactory
-from ._portfolio.optimal import markovitz
 from ._search import _Search
 from ._sources.registries import FinancialSymbolsRegistry
 from .common.enums import Currency, SecurityType
@@ -218,7 +218,7 @@ class Yapo:
                                       currency=currency)
         assert(isinstance(assets, list))
 
-        opt_port = markovitz.compute(assets=assets, samples_count=samples_count,
-                                     start_period=start_period_pd, end_period=end_period_pd,
-                                     currency=currency_enum)
+        opt_port = optimal_basic.compute(assets=assets, samples_count=samples_count,
+                                         start_period=start_period_pd, end_period=end_period_pd,
+                                         currency=currency_enum)
         return opt_port
