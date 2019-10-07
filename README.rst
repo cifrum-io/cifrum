@@ -6,36 +6,36 @@
 | Support  | |Donate|_                              |
 +----------+----------------------------------------+
 
-.. |Travis| image:: https://travis-ci.org/okama-io/yapo.svg?branch=master
-.. _Travis: https://travis-ci.org/okama-io/yapo
+.. |Travis| image:: https://travis-ci.org/okama-io/cifrum.svg?branch=master
+.. _Travis: https://travis-ci.org/okama-io/cifrum
 
 .. |Gitter| image:: https://badges.gitter.im/okama-io/community.svg
 .. _Gitter: https://gitter.im/okama-io/community
 
-.. |Pepy| image:: https://pepy.tech/badge/yapo
-.. _Pepy: https://pepy.tech/badge/yapo
+.. |Pepy| image:: https://pepy.tech/badge/cifrum
+.. _Pepy: https://pepy.tech/badge/cifrum
 
-.. |Codecov| image:: https://codecov.io/gh/okama-io/yapo/branch/master/graph/badge.svg
-.. _Codecov: https://codecov.io/gh/okama-io/yapo
+.. |Codecov| image:: https://codecov.io/gh/okama-io/cifrum/branch/master/graph/badge.svg
+.. _Codecov: https://codecov.io/gh/okama-io/cifrum
 
 .. |Binder| image:: https://mybinder.org/badge_logo.svg
-.. _Binder: https://mybinder.org/v2/gh/okama-io/yapo/master?filepath=examples
+.. _Binder: https://mybinder.org/v2/gh/okama-io/cifrum/master?filepath=examples
 
 .. |Donate| image:: https://img.shields.io/badge/Donate-PayPal-green.svg
 .. _Donate: https://www.paypal.com/cgi-bin/webscr?cmd=_donations&business=SC8RT7A7FT5HC&currency_code=USD&source=url
 
-**yapo** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
+**cifrum** |--| a flexible and easy-to-use Python 3.6+ library for analysis &
 manipulation with financial & economic data
 
-**yapo** is released under the terms of GPL license. We appreciate all kinds of
+**cifrum** is released under the terms of GPL license. We appreciate all kinds of
 contributions, financial resources to maintain the project and accelerate its
 development.
 
-If you find **yapo** useful in your financial research, private investments or
+If you find **cifrum** useful in your financial research, private investments or
 company, please consider making a donation to the project commensurate with
 your resources. Any amount helps!
 
-All donations will be used strictly to fund yapo development supporting
+All donations will be used strictly to fund cifrum development supporting
 activities: the Python library development, `frontend solutions <okama.io_>`_,
 documentation and maintenance work, and paying for hosting costs of servers.
 
@@ -47,7 +47,7 @@ button: |Donate|_
 Introduction
 ============
 
-``yapo`` is a Python library developed to solve quantitative finance and
+``cifrum`` is a Python library developed to solve quantitative finance and
 investments tasks. Additionally, it has the broader goal to become the most
 useful and flexible open sourced tool for financial data analysis available in
 popular programming languages.
@@ -55,7 +55,7 @@ popular programming languages.
 Applications
 ============
 
-Useful applications of ``yapo`` in the community developed are as follows:
+Useful applications of ``cifrum`` in the community developed are as follows:
 
 * Fully-functional ``Angular2+``-based web-application `okama.io`_
 * `tell us more <okama-discourse_>`_ if you know any
@@ -101,44 +101,44 @@ Financial and Economic data freely available
 Installation
 ============
 
-The library is published to `pypi.org <https://pypi.org/project/yapo/>`_.
+The library is published to `pypi.org <https://pypi.org/project/cifrum/>`_.
 
 Install stable version:
 
 .. code :: bash
 
-    pip install -U yapo
+    pip install -U cifrum
 
 
 Install development version:
 
 .. code :: bash
 
-    pip install -U git+https://github.com/okama-io/yapo.git
+    pip install -U git+https://github.com/okama-io/cifrum.git
 
 
 Jupyter Notebooks
 =================
 
-The `examples <https://github.com/okama-io/yapo/tree/master/examples>`_ folder contains Jupyter notebooks
+The `examples <https://github.com/okama-io/cifrum/tree/master/examples>`_ folder contains Jupyter notebooks
 that show how to use the library parts in depth.
 
-`examples <https://github.com/okama-io/yapo/tree/master/examples>`_ are also compatible with
+`examples <https://github.com/okama-io/cifrum/tree/master/examples>`_ are also compatible with
 binder. You can try it by pressing the |Binder|_ button.
 
 Dependencies
 ============
 
 The library dependencies are listed at
-`pyproject.toml <https://github.com/okama-io/yapo/blob/master/pyproject.toml>`_ under
+`pyproject.toml <https://github.com/okama-io/cifrum/blob/master/pyproject.toml>`_ under
 ``[tool.poetry.dependencies]`` section.
 
 Discussion, Development, and Getting Help
 =========================================
 
 - The development discussion takes place at `the GitHub repo
-  <yapo-github-issues_>`_. We encourage you to report issues using `the Github
-  tracker <yapo-github-issues_>`_. We welcome all kinds of issues related to
+  <cifrum-github-issues_>`_. We encourage you to report issues using `the Github
+  tracker <cifrum-github-issues_>`_. We welcome all kinds of issues related to
   correctness, documentation, performance, and feature requests.
 - `The community forum <okama-discourse_>`_ can also be used for general
   questions and discussions.
@@ -159,7 +159,7 @@ to discuss. Simple ways to start contributing immediately:
 - Run the library through `the okama.io frontend <okama.io_>`_ and suggest
   improvements in design, UI, and functionality
 
-The code is hosted at `GitHub <yapo-github_>`_. You need an GitHub account
+The code is hosted at `GitHub <cifrum-github_>`_. You need an GitHub account
 which is free to contribute to the project. We use git for the version control
 to enable distributed work on the project.
 
@@ -178,6 +178,6 @@ License
 .. _okama.io: https://okama.io/
 .. _okama-glossary: https://okama.io/#/glossary
 .. _okama-discourse: http://community.okama.io
-.. _yapo-github: https://github.com/okama-io/yapo
-.. _yapo-github-issues: https://github.com/okama-io/yapo/issues
-.. _license: https://github.com/okama-io/yapo/blob/master/LICENSE
+.. _cifrum-github: https://github.com/okama-io/cifrum
+.. _cifrum-github-issues: https://github.com/okama-io/cifrum/issues
+.. _license: https://github.com/okama-io/cifrum/blob/master/LICENSE

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="yapo",
+    name="cifrum",
     packages=find_packages(),
 )

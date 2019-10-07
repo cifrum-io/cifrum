@@ -5,27 +5,27 @@ import pandas as pd
 import pytest
 from hamcrest import assert_that, has_length, contains, not_none, close_to, calling, raises, is_not, empty
 
-import yapo as y
+import cifrum as lib
 from conftest import delta, decimal_places
-from yapo.common.enums import Currency
-from yapo.common.time_series import TimeSeriesKind
+from cifrum.common.enums import Currency
+from cifrum.common.time_series import TimeSeriesKind
 
 _portfolio_period_start = pd.Period('2015-3', freq='M')
 _portfolio_period_end = pd.Period('2017-5', freq='M')
 _asset_names = {'mut_ru/0890-94127385': 4, 'micex/FXRU': 3, 'micex/FXMM': 2}
-_portfolio = y.portfolio(assets=_asset_names,
-                         start_period=str(_portfolio_period_start),
-                         end_period=str(_portfolio_period_end),
-                         currency='USD')
+_portfolio = lib.portfolio(assets=_asset_names,
+                           start_period=str(_portfolio_period_start),
+                           end_period=str(_portfolio_period_end),
+                           currency='USD')
 
 
 def test__initial_data():
     assert_that(_portfolio.assets, has_length(3))
 
-    p = y.portfolio(assets=_asset_names,
-                    start_period=str(_portfolio_period_start),
-                    end_period=str(_portfolio_period_end),
-                    currency='RUB')
+    p = lib.portfolio(assets=_asset_names,
+                      start_period=str(_portfolio_period_start),
+                      end_period=str(_portfolio_period_end),
+                      currency='RUB')
     assert_that(p.assets, has_length(3))
 
     assert_that(p.assets['mut_ru/0890-94127385'].close().values, contains(
@@ -65,10 +65,10 @@ class Test__compute_statistics_for_partially_incomplete_portfolio():
     @pytest.fixture
     def portfolio():
         asset_names = {'nlu/xxxx': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
-        portfolio = y.portfolio(assets=asset_names,
-                                start_period=str(_portfolio_period_start),
-                                end_period=str(_portfolio_period_end),
-                                currency='USD')
+        portfolio = lib.portfolio(assets=asset_names,
+                                  start_period=str(_portfolio_period_start),
+                                  end_period=str(_portfolio_period_end),
+                                  currency='USD')
         assert_that(portfolio.assets, has_length(2))
         return portfolio
 
@@ -95,10 +95,10 @@ def test__normalize_weights():
     assert_that(_portfolio.assets['micex/FXMM'].weight, close_to(.2222, delta))
 
     asset_names = {'mut_ru/xxxx-xxxxxxxx': 1, 'micex/FXRU': 2, 'micex/FXMM': 3}
-    portfolio_misprint = y.portfolio(assets=asset_names,
-                                     start_period=str(_portfolio_period_start),
-                                     end_period=str(_portfolio_period_end),
-                                     currency='USD')
+    portfolio_misprint = lib.portfolio(assets=asset_names,
+                                       start_period=str(_portfolio_period_start),
+                                       end_period=str(_portfolio_period_end),
+                                       currency='USD')
     assert_that(np.sum(portfolio_misprint.weights), close_to(1., delta))
     assert_that(portfolio_misprint.assets['micex/FXRU'].weight, close_to(.4, delta))
     assert_that(portfolio_misprint.assets['micex/FXMM'].weight, close_to(.6, delta))
@@ -172,8 +172,8 @@ def test__cagr_real():
 
 
 def test__risk():
-    short_portfolio = y.portfolio(assets=_asset_names,
-                                  start_period='2016-8', end_period='2016-12', currency='USD')
+    short_portfolio = lib.portfolio(assets=_asset_names,
+                                    start_period='2016-8', end_period='2016-12', currency='USD')
 
     assert_that(calling(short_portfolio.risk).with_args(period='year'),
                 raises(Exception))
@@ -189,7 +189,7 @@ def test__risk():
 
 @pytest.mark.parametrize('currency', Currency)
 def test__handle_portfolio_with_asset_with_dash_in_name(currency: Currency):
-    p = y.portfolio(assets={'us/BRK-B': 1}, currency=currency.name)
+    p = lib.portfolio(assets={'us/BRK-B': 1}, currency=currency.name)
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
     assert_that(p.get_return(), is_not(empty()))
@@ -197,7 +197,7 @@ def test__handle_portfolio_with_asset_with_dash_in_name(currency: Currency):
 
 @pytest.mark.parametrize('currency', Currency)
 def test__handle_assets_with_monthly_data_gaps(currency: Currency):
-    p = y.portfolio(assets={'micex/KUBE': 1}, currency=currency.name)
+    p = lib.portfolio(assets={'micex/KUBE': 1}, currency=currency.name)
     assert_that(p, not_none())
     assert_that(p.assets, has_length(1))
     assert_that(p.get_return(), is_not(empty()))

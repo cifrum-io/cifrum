@@ -13,7 +13,7 @@ from .common.financial_symbol import FinancialSymbol
 from .common.financial_symbol_id import FinancialSymbolId
 
 
-class Yapo:
+class Cifrum:
 
     def __init__(self,
                  financial_symbols_registry: FinancialSymbolsRegistry,

@@ -5,17 +5,17 @@ import pandas as pd
 import pytest
 from hamcrest import assert_that, none, not_none, calling, raises, close_to
 
-import yapo as y
+import cifrum as lib
 from conftest import decimal_places, delta
-from yapo._portfolio.currency import PortfolioCurrencyFactory
-from yapo.common.enums import Currency
+from cifrum._portfolio.currency import PortfolioCurrencyFactory
+from cifrum.common.enums import Currency
 
 __end_period = pd.Period('2018-12', freq='M')
 
 
 @pytest.fixture
 def pcf():
-    return y.obj_graph.provide(PortfolioCurrencyFactory)
+    return lib.obj_graph.provide(PortfolioCurrencyFactory)
 
 
 @pytest.mark.parametrize('currency, inflation_kind',

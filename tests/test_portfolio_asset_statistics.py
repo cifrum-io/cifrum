@@ -2,18 +2,18 @@ import numpy as np
 import pandas as pd
 from hamcrest import assert_that, close_to, calling, raises
 
-import yapo as y
+import cifrum as lib
 from conftest import decimal_places, delta
-from yapo._settings import _MONTHS_PER_YEAR
-from yapo.common.time_series import TimeSeriesKind
+from cifrum._settings import _MONTHS_PER_YEAR
+from cifrum.common.time_series import TimeSeriesKind
 
 __asset_name = 'mut_ru/0890-94127385'
 __portfolio_period_start = pd.Period('2011-1', freq='M')
 __portfolio_period_end = pd.Period('2017-2', freq='M')
-__asset = y.portfolio_asset(name=__asset_name,
-                            start_period=str(__portfolio_period_start),
-                            end_period=str(__portfolio_period_end),
-                            currency='USD')
+__asset = lib.portfolio_asset(name=__asset_name,
+                              start_period=str(__portfolio_period_start),
+                              end_period=str(__portfolio_period_end),
+                              currency='USD')
 
 
 def test__cumulative_get_return():
@@ -57,9 +57,9 @@ def test__cagr_should_be_full_when_it_has_period_equal_to_ror():
     start_period = pd.Period('2011-01', freq='M')
     years_amount = 5
     end_period = start_period + years_amount * 12
-    asset = y.portfolio_asset(name=__asset_name,
-                              start_period=str(start_period),
-                              end_period=str(end_period), currency='usd')
+    asset = lib.portfolio_asset(name=__asset_name,
+                                start_period=str(start_period),
+                                end_period=str(end_period), currency='usd')
     cagr1 = asset.cagr()
     assert_that(cagr1.value, close_to(-.1426, delta))
 
@@ -81,9 +81,9 @@ def test__cagr_real():
 def test__get_cagr_invariants():
     start_period = pd.Period('2009-3', freq='M')
     end_period = pd.Period('2019-3', freq='M')
-    asset = y.portfolio_asset(name=__asset_name,
-                              start_period=str(start_period), end_period=str(end_period),
-                              currency='rub')
+    asset = lib.portfolio_asset(name=__asset_name,
+                                start_period=str(start_period), end_period=str(end_period),
+                                currency='rub')
     years_ago = 10
     months_ago = years_ago * _MONTHS_PER_YEAR
     cagr = asset.cagr()
@@ -101,8 +101,8 @@ def test__get_cagr_invariants():
 
 
 def test__risk():
-    short_asset = y.portfolio_asset(name=__asset_name,
-                                    start_period='2016-8', end_period='2016-12', currency='USD')
+    short_asset = lib.portfolio_asset(name=__asset_name,
+                                      start_period='2016-8', end_period='2016-12', currency='USD')
 
     assert_that(calling(short_asset.risk).with_args(period='year'), raises(Exception))
 

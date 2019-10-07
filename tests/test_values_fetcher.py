@@ -3,7 +3,7 @@ import pandas as pd
 import pytest
 from hamcrest import assert_that, has_length, none
 
-from yapo.common.financial_symbol import ValuesFetcher
+from cifrum.common.financial_symbol import ValuesFetcher
 
 
 @pytest.fixture

@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from yapo.common.time_series import TimeSeries, TimeSeriesKind
+from cifrum.common.time_series import TimeSeries, TimeSeriesKind
 
 _start_period = pd.Period('2011-1', freq='M')
 _end_period = pd.Period('2011-4', freq='M')

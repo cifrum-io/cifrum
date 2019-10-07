@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "yapo"
+name = "cifrum"
 version = "0.2.5"
 description = "Flexible and easy-to-use Python library for analysis & manipulation with financial & economic data"
 authors = [
@@ -8,8 +8,8 @@ authors = [
 ]
 licence = "MIT"
 readme = "README.rst"
-homepage = "https://github.com/okama-io/yapo"
-repository = "https://github.com/okama-io/yapo"
+homepage = "https://github.com/okama-io/cifrum"
+repository = "https://github.com/okama-io/cifrum"
 
 classifiers = [
     "Development Status :: 3 - Alpha",
