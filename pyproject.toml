@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "cifrum"
-version = "0.2.5"
+version = "0.2.6"
 description = "Flexible and easy-to-use Python library for analysis & manipulation with financial & economic data"
 authors = [
     "Alexander Myltsev",
