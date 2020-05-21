@@ -6,7 +6,7 @@ authors = [
     "Alexander Myltsev",
     "Sergey Kikevich",
 ]
-licence = "MIT"
+license = "GPL"
 readme = "README.rst"
 homepage = "https://github.com/okama-io/cifrum"
 repository = "https://github.com/okama-io/cifrum"
