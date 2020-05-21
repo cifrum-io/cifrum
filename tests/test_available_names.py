@@ -9,7 +9,7 @@ def test__return_namespaces_list_by_default():
 
 
 def test__return_empty_list_or_none_if_symbol_doesnt_exist():
-    nonexisting_id = 'nlu/xxx'
+    nonexisting_id = 'mut_ru/xxx'
 
     asset = lib.portfolio_asset(name=nonexisting_id)
     assert_that(asset, none())
