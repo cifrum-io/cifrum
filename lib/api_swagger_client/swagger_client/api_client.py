@@ -263,9 +263,9 @@ class ApiClient(object):
             return self.__deserialize_primitive(data, klass)
         elif klass == object:
             return self.__deserialize_object(data)
-        elif klass == datetime.date:
+        elif issubclass(klass, datetime.date):
             return self.__deserialize_date(data)
-        elif klass == datetime.datetime:
+        elif issubclass(klass, datetime.datetime):
             return self.__deserialize_datatime(data)
         else:
             return self.__deserialize_model(data, klass)

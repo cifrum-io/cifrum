@@ -48,6 +48,7 @@ PyContracts = "^1.8"
 pandas = "^0.24"
 pinject = "^0.14.1"
 typing_extensions = "^3.7"
+swagger-client = {path = "lib/api_swagger_client"}
 
 [tool.poetry.dev-dependencies]
 freezegun = "^0.3.11"
