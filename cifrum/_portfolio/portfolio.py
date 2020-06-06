@@ -24,7 +24,7 @@ class PortfolioAsset:
                  symbol: FinancialSymbol,
                  start_period: pd.Period, end_period: pd.Period, currency: PortfolioCurrency,
                  portfolio: Optional['Portfolio'],
-                 weight: Optional[int]):
+                 weight: Optional[float]):
         if (end_period - start_period).n < 2:
             raise ValueError('period range should be at least 2 months')
 
@@ -173,7 +173,7 @@ class Portfolio:
                  portfolio_items_factory: 'PortfolioItemsFactory',
 
                  assets: List[PortfolioAsset],
-                 weights: np.array,
+                 weights: List[float],
                  start_period: pd.Period, end_period: pd.Period,
                  currency: PortfolioCurrency):
         """
@@ -313,7 +313,7 @@ class PortfolioItemsFactory:
     def new_asset(self, symbol: FinancialSymbol,
                   start_period: pd.Period, end_period: pd.Period, currency: Currency,
                   portfolio: Optional[Portfolio] = None,
-                  weight: Optional[int] = None):
+                  weight: Optional[float] = None):
         pc = self.portfolio_currency_factory.new(currency=currency)
         pa = PortfolioAsset(self.currency_symbols_registry,
                             symbol=symbol,

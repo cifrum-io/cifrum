@@ -3,8 +3,8 @@ from functools import lru_cache
 from typing import Optional, Callable
 
 import pandas as pd
-import swagger_client
 
+import swagger_client
 from .base_classes import FinancialSymbolsSource
 from ..common.enums import Currency, SecurityType, Period
 from ..common.financial_symbol import FinancialSymbol
